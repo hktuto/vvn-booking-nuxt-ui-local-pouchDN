@@ -15,57 +15,52 @@
     </template>
 
     <template #body>
-      <form @submit.prevent="saveLocation" class="space-y-4">
-        <UFormGroup :label="$t('classes.name')" required>
+      <UForm :state="form" :schema="locationSchema" class="space-y-4" @submit="saveLocation" ref="formRef">
+        <UFormField name="name" :label="$t('classes.name')" required>
           <UInput
             v-model="form.name"
             :placeholder="$t('classes.enterLocationName')"
-            :error="errors.name"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup :label="$t('classes.address')" required>
+        <UFormField name="address" :label="$t('classes.address')" required>
           <UTextarea
             v-model="form.address"
             :placeholder="$t('classes.enterAddress')"
             rows="2"
-            :error="errors.address"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup :label="$t('classes.phone')" required>
+        <UFormField name="phone" :label="$t('classes.phone')" required>
           <UInput
             v-model="form.phone"
             :placeholder="$t('classes.enterPhone')"
-            :error="errors.phone"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup :label="$t('classes.email')">
+        <UFormField name="email" :label="$t('classes.email')">
           <UInput
             v-model="form.email"
             type="email"
             :placeholder="$t('classes.enterEmail')"
-            :error="errors.email"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup :label="$t('classes.website')">
+        <UFormField name="website" :label="$t('classes.website')">
           <UInput
             v-model="form.website"
             type="url"
             :placeholder="$t('classes.enterWebsite')"
-            :error="errors.website"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup>
+        <UFormField name="active">
           <UCheckbox
             v-model="form.active"
             :label="$t('common.active')"
           />
-        </UFormGroup>
-      </form>
+        </UFormField>
+      </UForm>
     </template>
 
     <template #footer>
@@ -77,9 +72,8 @@
           {{ $t('common.cancel') }}
         </UButton>
         <UButton
-          @click="saveLocation"
+          @click="() => formRef?.submit()"
           :loading="saving"
-          :disabled="!isFormValid"
         >
           {{ $t('common.save') }}
         </UButton>
@@ -89,6 +83,9 @@
 </template>
 
 <script setup lang="ts">
+import type { LocationForm } from '~/composables/useLocationValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
 const { t } = useI18n()
 
 interface Props {
@@ -109,10 +106,12 @@ const isOpen = computed({
   set: (value) => emit('update:open', value)
 })
 
-const saving = ref(false)
-const errors = ref<Record<string, string>>({})
+const formRef = ref()
+const { locationSchema } = useLocationValidation()
 
-const form = ref({
+const saving = ref(false)
+
+const form = reactive<LocationForm>({
   name: '',
   address: '',
   phone: '',
@@ -121,94 +120,36 @@ const form = ref({
   active: true
 })
 
-const isFormValid = computed(() => {
-  return form.value.name.trim() && 
-         form.value.address.trim() && 
-         form.value.phone.trim()
-})
-
 // Initialize form when modal opens
 watch(() => props.open, (open) => {
   if (open) {
     if (props.location) {
       // Edit mode
-      form.value = {
-        name: props.location.name,
-        address: props.location.address,
-        phone: props.location.phone,
-        email: props.location.email || '',
-        website: props.location.website || '',
-        active: props.location.active
-      }
+      form.name = props.location.name
+      form.address = props.location.address
+      form.phone = props.location.phone
+      form.email = props.location.email || ''
+      form.website = props.location.website || ''
+      form.active = props.location.active
     } else {
       // Add mode
-      form.value = {
-        name: '',
-        address: '',
-        phone: '',
-        email: '',
-        website: '',
-        active: true
-      }
+      form.name = ''
+      form.address = ''
+      form.phone = ''
+      form.email = ''
+      form.website = ''
+      form.active = true
     }
-    errors.value = {}
   }
 })
 
-const validateForm = () => {
-  errors.value = {}
-  
-  if (!form.value.name.trim()) {
-    errors.value.name = t('validation.required', { field: t('classes.name') })
-  }
-  
-  if (!form.value.address.trim()) {
-    errors.value.address = t('validation.required', { field: t('classes.address') })
-  }
-  
-  if (!form.value.phone.trim()) {
-    errors.value.phone = t('validation.required', { field: t('classes.phone') })
-  }
-  
-  if (form.value.email && !isValidEmail(form.value.email)) {
-    errors.value.email = t('validation.invalidEmail')
-  }
-  
-  if (form.value.website && !isValidUrl(form.value.website)) {
-    errors.value.website = t('validation.invalidUrl')
-  }
-  
-  return Object.keys(errors.value).length === 0
-}
-
-const isValidEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-const isValidUrl = (url: string) => {
-  try {
-    new URL(url)
-    return true
-  } catch {
-    return false
-  }
-}
-
-const saveLocation = async () => {
-  if (!validateForm()) return
-  
+const saveLocation = async (event: FormSubmitEvent<LocationForm>) => {
   saving.value = true
   
   try {
     const locationData = {
       id: props.location?.id || crypto.randomUUID(),
-      name: form.value.name.trim(),
-      address: form.value.address.trim(),
-      phone: form.value.phone.trim(),
-      email: form.value.email.trim() || null,
-      website: form.value.website.trim() || null,
-      active: form.value.active,
+      ...event.data,
       created_at: props.location?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString()
     }

@@ -15,7 +15,6 @@
           <UFormField
             name="username"
             :label="$t('auth.username')"
-            
             required
           >
             <UInput
@@ -60,46 +59,48 @@
         </UForm>
       </UCard>
 
-                   <!-- Language and Dark Mode Toggles -->
-             <div class="text-center space-x-4">
-               <UButton
-                 @click="toggleLanguage"
-                 variant="ghost"
-                 size="sm"
-                 icon="i-heroicons-language"
-               >
-                 {{ $t('common.language') }}
-               </UButton>
-               <UButton
-                 @click="toggleDarkMode"
-                 variant="ghost"
-                 size="sm"
-                 :icon="isDark ? 'i-heroicons-sun' : 'i-heroicons-moon'"
-               >
-                 {{ isDark ? $t('common.lightMode') : $t('common.darkMode') }}
-               </UButton>
-             </div>
+      <!-- Language and Dark Mode Toggles -->
+      <div class="text-center space-x-4">
+        <UButton
+          @click="toggleLanguage"
+          variant="ghost"
+          size="sm"
+          icon="i-heroicons-language"
+        >
+          {{ $t('common.language') }}
+        </UButton>
+        <UButton
+          @click="toggleDarkMode"
+          variant="ghost"
+          size="sm"
+          :icon="isDark ? 'i-heroicons-sun' : 'i-heroicons-moon'"
+        >
+          {{ isDark ? $t('common.lightMode') : $t('common.darkMode') }}
+        </UButton>
+      </div>
 
-             <!-- Development Tools -->
-             <div  class="text-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-               <UButton
-                 @click="handleRemoveAllData"
-                 variant="outline"
-                 color="error"
-                 size="sm"
-                 icon="i-heroicons-trash"
-                 :loading="removingData"
-               >
-                 {{ $t('common.removeAllData') }}
-               </UButton>
-             </div>
+      <!-- Development Tools -->
+      <div class="text-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <UButton
+          @click="handleRemoveAllData"
+          variant="outline"
+          color="error"
+          size="sm"
+          icon="i-heroicons-trash"
+          :loading="removingData"
+        >
+          {{ $t('common.removeAllData') }}
+        </UButton>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { LoginForm } from '~/composables/useAuthValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
 import { clearAllData } from '~/utils/dbHelper'
+
 // Use blank layout for login page
 definePageMeta({
   layout: 'blank'
@@ -135,23 +136,15 @@ const toggleLanguage = () => {
   locale.value = newLocale
 }
 
-const handleLogin = async () => {
+const handleLogin = async (event: FormSubmitEvent<LoginForm>) => {
   loading.value = true
   error.value = ''
   
   try {
-    // Validate form data
-    const validatedData = loginSchema.parse(form)
-    
-    await login(validatedData.username, validatedData.password)
+    await login(event.data.username, event.data.password)
     // Redirect to dashboard (handled by composable)
   } catch (err: any) {
-    if (err.name === 'ZodError') {
-      // Handle validation errors
-      error.value = err.errors[0]?.message || t('auth.loginError')
-    } else {
-      error.value = err.message || t('auth.loginError')
-    }
+    error.value = err.message || t('auth.loginError')
     console.error('Login error:', err)
   } finally {
     loading.value = false
@@ -165,7 +158,6 @@ const handleRemoveAllData = async () => {
   
   removingData.value = true
   try {
-    
     await clearAllData()
   } catch (err) {
     console.error('Error removing data:', err)

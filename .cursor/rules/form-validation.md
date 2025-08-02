@@ -1,356 +1,218 @@
-# Form Validation Rule
+# Form Validation Rules
 
 ## Overview
-All forms in this project must follow a standardized validation pattern that displays field-specific errors directly on input components for better user experience.
+All forms in the system must use Nuxt UI's `UForm` component with Zod schema validation. This provides consistent error handling, type safety, and a better developer experience.
 
 ## Required Validation Structure
 
-### 1. Field-Specific Error Display
-Every form input must include an `:error` prop that displays validation errors directly on the field:
+### 1. Schema Definition
+- Create validation schemas in dedicated composables under `composables/use*Validation.ts`
+- Use Zod for schema definition with comprehensive validation rules
+- Export both the schema and the inferred TypeScript type
 
+### 2. Form Component Setup
 ```vue
-<UInput
-  v-model="form.fieldName"
-  :placeholder="$t('form.fieldPlaceholder')"
-  :error="errors.fieldName"
-/>
+<UForm :state="form" :schema="validationSchema" @submit="handleSubmit" ref="formRef">
+  <UFormField name="fieldName" label="Field Label" required>
+    <UInput v-model="form.fieldName" />
+  </UFormField>
+</UForm>
 ```
 
-### 2. Error State Management
-Use a reactive `errors` object to store field-specific validation errors:
-
-```vue
-<script setup lang="ts">
-const errors = ref<Record<string, string>>({})
-</script>
-```
-
-### 3. Validation Error Handling
-Map validation errors to specific fields using the error path:
-
-```vue
-const handleSubmit = async () => {
-  errors.value = {} // Clear previous errors
-  
-  try {
-    const validatedData = schema.parse(form)
-    // Handle successful validation
-  } catch (err: any) {
-    if (err.name === 'ZodError') {
-      // Map validation errors to specific fields
-      err.errors.forEach((error: any) => {
-        errors.value[error.path[0]] = error.message
-      })
-    } else {
-      console.error('Form error:', err)
-    }
-  }
+### 3. Form Submission Handler
+```typescript
+const handleSubmit = async (event: FormSubmitEvent<FormType>) => {
+  // event.data contains validated form data
+  const validatedData = event.data
+  // Process the validated data
 }
 ```
 
 ## Required Components
 
-### 1. Input Fields with Error Display
-```vue
-<UFormField name="fieldName" :label="$t('form.fieldLabel')" required>
-  <UInput
-    v-model="form.fieldName"
-    class="w-full"
-    :placeholder="$t('form.fieldPlaceholder')"
-    :error="errors.fieldName"
-  />
-</UFormField>
-```
+### Form Container
+- Use `UForm` with `:state`, `:schema`, and `@submit` props
+- Add `ref="formRef"` for programmatic submission
 
-### 2. Textarea Fields with Error Display
-```vue
-<UFormField name="fieldName" :label="$t('form.fieldLabel')">
-  <UTextarea
-    v-model="form.fieldName"
-    class="w-full"
-    :placeholder="$t('form.fieldPlaceholder')"
-    :rows="3"
-    :error="errors.fieldName"
-  />
-</UFormField>
-```
+### Form Fields
+- Use `UFormField` with `name` prop matching schema field names
+- Remove `:error` props - Nuxt UI handles error display automatically
 
-### 3. Select Fields with Error Display
-```vue
-<UFormField name="fieldName" :label="$t('form.fieldLabel')" required>
-  <USelect
-    v-model="form.fieldName"
-    class="w-full"
-    :items="options"
-    :placeholder="$t('form.fieldPlaceholder')"
-    :error="errors.fieldName"
-  />
-</UFormField>
-```
-
-### 4. Number Input Fields with Error Display
-```vue
-<UFormField name="fieldName" :label="$t('form.fieldLabel')">
-  <UInput
-    v-model.number="form.fieldName"
-    type="number"
-    min="0"
-    class="w-full"
-    :placeholder="'0'"
-    :error="errors.fieldName"
-  />
-</UFormField>
-```
-
-## Form Reset Function
-Always include a reset function that clears both form data and errors:
-
-```vue
-const resetForm = () => {
-  form.field1 = ''
-  form.field2 = ''
-  // ... reset all form fields
-  errors.value = {} // Clear all errors
-}
-```
+### Input Components
+- `UInput` for text, email, number, url inputs
+- `USelect` for dropdown selections
+- `UTextarea` for multi-line text
+- `UCheckbox` for boolean values
 
 ## Validation Schema Requirements
 
-### 1. Use Zod for Validation
+### Basic Field Types
 ```typescript
 import { z } from 'zod'
 
-export const formSchema = z.object({
-  fieldName: z.string()
-    .min(1, 'Field is required')
-    .max(32, 'Field must be less than 32 characters'),
-  // ... other fields
+export const exampleSchema = z.object({
+  // Required string with length constraints
+  name: z.string()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters'),
+  
+  // Optional string with transformation
+  description: z.string()
+    .max(500, 'Description must be less than 500 characters')
+    .optional()
+    .or(z.literal(''))
+    .transform(val => val || ''),
+  
+  // Email validation
+  email: z.string()
+    .email('Please enter a valid email address')
+    .optional()
+    .or(z.literal(''))
+    .transform(val => val || ''),
+  
+  // Number with range validation
+  price: z.number()
+    .min(0, 'Price cannot be negative')
+    .max(99999.99, 'Price cannot exceed $99,999.99'),
+  
+  // Enum with custom error message
+  status: z.enum(['active', 'inactive'], {
+    errorMap: () => ({ message: 'Please select a valid status' })
+  }),
+  
+  // Boolean
+  active: z.boolean()
 })
 ```
 
-### 2. Proper Error Messages
-- Use clear, user-friendly error messages
-- Include field names in error messages when appropriate
-- Use consistent message formatting
-
-### 3. Field-Specific Validation Rules
+### Advanced Validation
 ```typescript
-// Text fields
-name: z.string()
-  .min(1, 'Name is required')
-  .max(32, 'Name must be less than 32 characters'),
+// Cross-field validation
+.refine((data) => data.endTime > data.startTime, {
+  message: "End time must be after start time",
+  path: ["endTime"]
+})
 
-// Email fields
-email: z.string()
-  .email('Please enter a valid email address')
-  .optional()
-  .or(z.literal(''))
-  .transform(val => val || ''),
+// Conditional validation
+.refine((data) => {
+  if (data.packageType === 'custom') {
+    return data.customPrice && data.customPrice > 0
+  }
+  return true
+}, {
+  message: "Price is required for custom packages",
+  path: ["customPrice"]
+})
 
-// Number fields
-credits: z.number()
-  .min(0, 'Credits cannot be negative')
-  .max(9999, 'Credits cannot exceed 9999'),
-
-// Optional text fields
-notes: z.string()
-  .max(500, 'Notes must be less than 500 characters')
-  .optional()
-  .or(z.literal(''))
-  .transform(val => val || '')
+// Regex validation
+phone: z.string()
+  .regex(/^[0-9+\-\s()]+$/, 'Please enter a valid phone number')
 ```
 
 ## Complete Form Example
 
 ```vue
 <template>
-  <UModal v-model:open="modelValue">
-    <template #header>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        {{ isEditing ? $t('item.editItem') : $t('item.addItem') }}
-      </h3>
-    </template>
-
-    <template #body>
-      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
-        <UFormField name="name" :label="$t('item.name')" required>
-          <UInput
-            v-model="form.name"
-            class="w-full"
-            :placeholder="$t('item.namePlaceholder')"
-            :error="errors.name"
-          />
-        </UFormField>
-
-        <UFormField name="email" :label="$t('item.email')">
-          <UInput
-            v-model="form.email"
-            type="email"
-            class="w-full"
-            :placeholder="$t('item.emailPlaceholder')"
-            :error="errors.email"
-          />
-        </UFormField>
-
-        <UFormField name="description" :label="$t('item.description')">
-          <UTextarea
-            v-model="form.description"
-            class="w-full"
-            :placeholder="$t('item.descriptionPlaceholder')"
-            :rows="3"
-            :error="errors.description"
-          />
-        </UFormField>
-
-        <UFormField name="credits" :label="$t('item.credits')">
-          <UInput
-            v-model.number="form.credits"
-            type="number"
-            min="0"
-            class="w-full"
-            :placeholder="'0'"
-            :error="errors.credits"
-          />
-        </UFormField>
-      </UForm>
-    </template>
-
-    <template #footer>
-      <div class="flex justify-end gap-3">
-        <UButton @click="handleCancel" variant="ghost">
-          {{ $t('common.cancel') }}
-        </UButton>
-        <UButton @click="() => formRef?.submit()" :loading="submitting" color="primary">
-          {{ isEditing ? $t('common.save') : $t('common.add') }}
-        </UButton>
-      </div>
-    </template>
-  </UModal>
+  <UForm :state="form" :schema="validationSchema" @submit="handleSubmit" ref="formRef">
+    <UFormField name="name" label="Name" required>
+      <UInput v-model="form.name" placeholder="Enter name" />
+    </UFormField>
+    
+    <UFormField name="email" label="Email">
+      <UInput v-model="form.email" type="email" placeholder="Enter email" />
+    </UFormField>
+    
+    <UFormField name="active">
+      <UCheckbox v-model="form.active" label="Active" />
+    </UFormField>
+  </UForm>
 </template>
 
 <script setup lang="ts">
-import type { FormData } from '~/composables/useFormValidation'
-
-interface Props {
-  item?: any
-}
-
-interface Emits {
-  (e: 'saved', item: any): void
-}
-
-const modelValue = defineModel<boolean>()
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+import type { FormType } from '~/composables/useValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 const formRef = ref()
-const { formSchema } = useFormValidation()
+const { validationSchema } = useValidation()
 
-const submitting = ref(false)
-const errors = ref<Record<string, string>>({})
-
-const form = reactive<FormData>({
+const form = reactive<FormType>({
   name: '',
   email: '',
-  description: '',
-  credits: 0
+  active: true
 })
 
-const isEditing = computed(() => !!props.item)
-
-// Reset form when modal opens/closes or item changes
-watch(() => modelValue.value, (newValue) => {
-  if (newValue) {
-    resetForm()
-    if (props.item) {
-      // Populate form with existing item data
-      form.name = props.item.name || ''
-      form.email = props.item.email || ''
-      form.description = props.item.description || ''
-      form.credits = props.item.credits || 0
-    }
-  }
-})
-
-const resetForm = () => {
-  form.name = ''
-  form.email = ''
-  form.description = ''
-  form.credits = 0
-  errors.value = {}
-}
-
-const handleSubmit = async () => {
-  submitting.value = true
-  errors.value = {}
-  
+const handleSubmit = async (event: FormSubmitEvent<FormType>) => {
   try {
-    // Validate form data
-    const validatedData = formSchema.parse(form)
-    
-    // Emit the validated data to parent
-    emit('saved', validatedData)
-    
-    // Close modal
-    modelValue.value = false
-  } catch (err: any) {
-    if (err.name === 'ZodError') {
-      // Map validation errors to specific fields
-      err.errors.forEach((error: any) => {
-        errors.value[error.path[0]] = error.message
-      })
-    } else {
-      console.error('Form error:', err)
-    }
-  } finally {
-    submitting.value = false
+    // event.data contains validated form data
+    await saveData(event.data)
+  } catch (error) {
+    console.error('Form submission error:', error)
   }
-}
-
-const handleCancel = () => {
-  modelValue.value = false
 }
 </script>
 ```
 
 ## Migration Checklist
 
-When updating existing forms to follow this validation pattern:
+### ✅ Completed Migrations
+- `pages/login.vue` - Login form with schema validation
+- `pages/register.vue` - Registration form with enhanced validation
+- `components/StudentForm.vue` - Student creation/editing modal
+- `components/ScheduleModal.vue` - Class schedule modal
+- `components/PackageForm.vue` - Package creation/editing modal
+- `components/AddPackageToStudent.vue` - Add package to student modal
+- `components/ClassTypeModal.vue` - Class type creation/editing modal
+- `components/LocationModal.vue` - Location creation/editing modal
 
-1. **Add `:error` props** to all input components
-2. **Replace single error state** with `errors` object
-3. **Update validation logic** to map errors to specific fields
-4. **Remove general error alerts** (errors now show on fields)
-5. **Update reset functions** to clear errors object
-6. **Test all validation scenarios** to ensure proper error display
+### ✅ Created Validation Composables
+- `composables/useAuthValidation.ts` - Authentication forms
+- `composables/useStudentValidation.ts` - Student forms
+- `composables/useScheduleValidation.ts` - Schedule forms
+- `composables/usePackageValidation.ts` - Package forms
+- `composables/useStudentPackageValidation.ts` - Student package forms
+- `composables/useClassTypeValidation.ts` - Class type forms
+- `composables/useLocationValidation.ts` - Location forms
 
 ## Common Mistakes to Avoid
 
-1. **Don't** use general error alerts for field-specific validation
-2. **Don't** forget to clear errors when resetting forms
-3. **Don't** forget to add `:error` props to all input components
-4. **Don't** use inconsistent error message formatting
-5. **Don't** forget to handle both Zod validation errors and other errors
-6. **Don't** forget to clear errors before each validation attempt
+1. **Don't use `:error` props** - Nuxt UI handles error display automatically
+2. **Don't manually validate** - Let the schema handle validation
+3. **Don't use `errors` reactive object** - Remove manual error state management
+4. **Don't use `UFormGroup`** - Use `UFormField` instead
+5. **Don't forget `name` prop** - Each `UFormField` needs a `name` matching the schema
+6. **Don't use `form.value`** - Use `reactive` instead of `ref` for form state
 
 ## Testing Checklist
 
-- [ ] Field-specific errors display correctly
-- [ ] Errors clear when form is reset
-- [ ] Errors clear when validation passes
-- [ ] Multiple field errors display simultaneously
-- [ ] Error messages are user-friendly and clear
-- [ ] Form submission works correctly with valid data
-- [ ] Form submission fails gracefully with invalid data
-- [ ] Error display works on all input types (text, textarea, select, number)
+- [ ] Form validation works with invalid data
+- [ ] Error messages display correctly
+- [ ] Form submission only occurs with valid data
+- [ ] Cross-field validation works
+- [ ] Optional fields handle empty values correctly
+- [ ] Form resets properly when modal closes
+- [ ] TypeScript types are correct
 
 ## Related Files
 
-This rule applies to all forms in the project:
+### Core Form Components
+- `pages/login.vue`
+- `pages/register.vue`
 - `components/StudentForm.vue`
+- `components/ScheduleModal.vue`
 - `components/PackageForm.vue`
 - `components/AddPackageToStudent.vue`
-- `components/ScheduleModal.vue`
 - `components/ClassTypeModal.vue`
 - `components/LocationModal.vue`
-- Any future form components
+
+### Validation Composables
+- `composables/useAuthValidation.ts`
+- `composables/useStudentValidation.ts`
+- `composables/useScheduleValidation.ts`
+- `composables/usePackageValidation.ts`
+- `composables/useStudentPackageValidation.ts`
+- `composables/useClassTypeValidation.ts`
+- `composables/useLocationValidation.ts`
+
+### Documentation
+- `.cursor/rules/modal-forms.md`
+- `.cursor/rules/form-validation.md`

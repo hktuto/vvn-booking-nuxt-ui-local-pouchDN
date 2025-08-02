@@ -15,42 +15,39 @@
     </template>
 
     <template #body>
-      <form @submit.prevent="saveClassType" class="space-y-4">
-        <UFormGroup :label="$t('classes.name')" required>
+      <UForm :state="form" :schema="classTypeSchema" class="space-y-4" @submit="saveClassType" ref="formRef">
+        <UFormField name="name" :label="$t('classes.name')" required>
           <UInput
             v-model="form.name"
             :placeholder="$t('classes.enterClassName')"
-            :error="errors.name"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup :label="$t('classes.description')">
+        <UFormField name="description" :label="$t('classes.description')">
           <UTextarea
             v-model="form.description"
             :placeholder="$t('classes.enterDescription')"
             rows="3"
-            :error="errors.description"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup :label="$t('classes.defaultCreditCost')" required>
+        <UFormField name="default_credit_cost" :label="$t('classes.defaultCreditCost')" required>
           <UInput
             v-model.number="form.default_credit_cost"
             type="number"
             min="0"
             step="0.5"
             :placeholder="$t('classes.enterCreditCost')"
-            :error="errors.default_credit_cost"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup>
+        <UFormField name="active">
           <UCheckbox
             v-model="form.active"
             :label="$t('common.active')"
           />
-        </UFormGroup>
-      </form>
+        </UFormField>
+      </UForm>
     </template>
 
     <template #footer>
@@ -62,9 +59,8 @@
           {{ $t('common.cancel') }}
         </UButton>
         <UButton
-          @click="saveClassType"
+          @click="() => formRef?.submit()"
           :loading="saving"
-          :disabled="!isFormValid"
         >
           {{ $t('common.save') }}
         </UButton>
@@ -74,6 +70,9 @@
 </template>
 
 <script setup lang="ts">
+import type { ClassTypeForm } from '~/composables/useClassTypeValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
 const { t } = useI18n()
 
 interface Props {
@@ -94,18 +93,16 @@ const isOpen = computed({
   set: (value) => emit('update:open', value)
 })
 
-const saving = ref(false)
-const errors = ref<Record<string, string>>({})
+const formRef = ref()
+const { classTypeSchema } = useClassTypeValidation()
 
-const form = ref({
+const saving = ref(false)
+
+const form = reactive<ClassTypeForm>({
   name: '',
   description: '',
   default_credit_cost: 1,
   active: true
-})
-
-const isFormValid = computed(() => {
-  return form.value.name.trim() && form.value.default_credit_cost > 0
 })
 
 // Initialize form when modal opens
@@ -113,51 +110,27 @@ watch(() => props.open, (open) => {
   if (open) {
     if (props.classType) {
       // Edit mode
-      form.value = {
-        name: props.classType.name,
-        description: props.classType.description || '',
-        default_credit_cost: props.classType.default_credit_cost,
-        active: props.classType.active
-      }
+      form.name = props.classType.name
+      form.description = props.classType.description || ''
+      form.default_credit_cost = props.classType.default_credit_cost
+      form.active = props.classType.active
     } else {
       // Add mode
-      form.value = {
-        name: '',
-        description: '',
-        default_credit_cost: 1,
-        active: true
-      }
+      form.name = ''
+      form.description = ''
+      form.default_credit_cost = 1
+      form.active = true
     }
-    errors.value = {}
   }
 })
 
-const validateForm = () => {
-  errors.value = {}
-  
-  if (!form.value.name.trim()) {
-    errors.value.name = t('validation.required', { field: t('classes.name') })
-  }
-  
-  if (!form.value.default_credit_cost || form.value.default_credit_cost <= 0) {
-    errors.value.default_credit_cost = t('validation.positiveNumber', { field: t('classes.defaultCreditCost') })
-  }
-  
-  return Object.keys(errors.value).length === 0
-}
-
-const saveClassType = async () => {
-  if (!validateForm()) return
-  
+const saveClassType = async (event: FormSubmitEvent<ClassTypeForm>) => {
   saving.value = true
   
   try {
     const classTypeData = {
       id: props.classType?.id || crypto.randomUUID(),
-      name: form.value.name.trim(),
-      description: form.value.description.trim(),
-      default_credit_cost: form.value.default_credit_cost,
-      active: form.value.active,
+      ...event.data,
       created_at: props.classType?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString()
     }

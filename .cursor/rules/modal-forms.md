@@ -1,128 +1,149 @@
-# Modal Forms Setup Rule
+# Modal Forms Rules
 
 ## Overview
-When creating modals with forms in this project, always use Nuxt UI's modal slot structure to ensure proper responsive behavior and prevent content cropping on small screens.
+Modal forms must use Nuxt UI's `UModal` component with `UForm` and Zod schema validation for consistent user experience and proper error handling.
 
 ## Required Structure
 
-### 1. Modal Container with Proper Slots
+### 1. Modal Container
 ```vue
-<UModal v-model:open="modelValue">
+<UModal v-model="isOpen" :ui="{ width: 'sm:max-w-md' }">
   <template #header>
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-      {{ modalTitle }}
-    </h3>
+    <!-- Modal header content -->
   </template>
-
+  
   <template #body>
-    <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
-      <!-- Form fields go here -->
-    </UForm>
+    <!-- Form content -->
   </template>
-
+  
   <template #footer>
-    <div class="flex justify-end gap-3">
-      <UButton @click="handleCancel" variant="ghost">
-        {{ $t('common.cancel') }}
-      </UButton>
-      <UButton @click="() => formRef?.submit()" :loading="submitting" color="primary">
-        {{ $t('common.save') }}
-      </UButton>
-    </div>
+    <!-- Action buttons -->
   </template>
 </UModal>
 ```
 
+### 2. Form Integration
+```vue
+<UForm :state="form" :schema="validationSchema" @submit="handleSubmit" ref="formRef">
+  <UFormField name="fieldName" label="Field Label" required>
+    <UInput v-model="form.fieldName" />
+  </UFormField>
+</UForm>
+```
+
 ## Key Principles
 
-### 1. Use Modal Slots, Not Card Slots
-- **Header slot**: For modal title
-- **Body slot**: For form content (automatically scrollable)
-- **Footer slot**: For action buttons (always visible)
-
-### 2. Responsive Design
-- Modal automatically handles height constraints
-- Body content scrolls when needed
-- Footer buttons remain accessible
-- No manual height calculations required
-
-### 3. Form Structure
-- Use `UForm` component with proper state management
-- Include error handling with `UAlert` components
-- Use consistent spacing with `space-y-4`
+1. **Schema-Based Validation**: Use Zod schemas for all form validation
+2. **Automatic Error Handling**: Let Nuxt UI handle error display automatically
+3. **Type Safety**: Use proper TypeScript types for form data
+4. **Consistent UX**: Follow the same patterns across all modal forms
+5. **No Manual Validation**: Remove manual validation logic and error state management
 
 ## Script Setup Requirements
 
-### 1. Form Reference
-```vue
-<script setup lang="ts">
-const formRef = ref()
-// ... other code
-</script>
-```
+```typescript
+import type { FormType } from '~/composables/useValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
-### 2. Form Submission Handling
-```vue
-// Use formRef to submit the form from footer buttons
-<UButton @click="() => formRef?.submit()" :loading="submitting" color="primary">
-  {{ $t('common.save') }}
-</UButton>
+interface Props {
+  open: boolean
+  item?: any
+}
+
+interface Emits {
+  (e: 'update:open', value: boolean): void
+  (e: 'saved', item: any): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+const formRef = ref()
+const { validationSchema } = useValidation()
+
+const isOpen = computed({
+  get: () => props.open,
+  set: (value) => emit('update:open', value)
+})
+
+const form = reactive<FormType>({
+  // Initialize form fields
+})
+
+const handleSubmit = async (event: FormSubmitEvent<FormType>) => {
+  try {
+    emit('saved', event.data)
+    isOpen.value = false
+  } catch (error) {
+    console.error('Form submission error:', error)
+  }
+}
 ```
 
 ## Best Practices
 
-### 1. Always Use Modal Slots
-- Never use card inside modal with custom slots
-- Let Nuxt UI handle the responsive behavior
-- Use the built-in header, body, and footer slots
+1. **Form State Management**
+   - Use `reactive` instead of `ref` for form state
+   - Initialize all fields with proper default values
+   - Use proper TypeScript typing
 
-### 2. Form Validation
-- Use `UForm` component with proper state management
-- Include error handling with `UAlert` components
-- Validate form data before submission
+2. **Modal State Management**
+   - Use computed property for `v-model` binding
+   - Handle both add and edit modes in the same component
+   - Reset form when modal opens/closes
 
-### 3. Responsive Design
-- Use `space-y-4` for consistent spacing between form fields
-- Use `grid` layouts for responsive field arrangements
-- Test on different screen sizes
+3. **Form Submission**
+   - Use `FormSubmitEvent` for type-safe data access
+   - Access validated data via `event.data`
+   - Handle errors gracefully
 
-### 4. Accessibility
-- Include proper labels for all form fields
-- Use semantic HTML structure
-- Ensure keyboard navigation works properly
+4. **User Experience**
+   - Show loading state during submission
+   - Provide clear success/error feedback
+   - Allow easy cancellation
 
 ## Example Implementation
 
 ```vue
 <template>
-  <UModal v-model:open="modelValue">
+  <UModal v-model="isOpen" :ui="{ width: 'sm:max-w-md' }">
     <template #header>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        {{ isEditing ? $t('item.editItem') : $t('item.addItem') }}
-      </h3>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          {{ item ? $t('item.editItem') : $t('item.addItem') }}
+        </h3>
+        <UButton
+          @click="closeModal"
+          variant="ghost"
+          icon="i-heroicons-x-mark"
+          size="sm"
+        />
+      </div>
     </template>
 
     <template #body>
-      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+      <UForm :state="form" :schema="validationSchema" @submit="handleSubmit" ref="formRef">
         <UFormField name="name" :label="$t('item.name')" required>
-          <UInput v-model="form.name" class="w-full" :placeholder="$t('item.namePlaceholder')" />
+          <UInput v-model="form.name" :placeholder="$t('item.namePlaceholder')" />
         </UFormField>
-
+        
         <UFormField name="description" :label="$t('item.description')">
-          <UTextarea v-model="form.description" class="w-full" :placeholder="$t('item.descriptionPlaceholder')" :rows="3" />
+          <UTextarea v-model="form.description" :placeholder="$t('item.descriptionPlaceholder')" rows="3" />
         </UFormField>
-
-        <UAlert v-if="error" color="error" variant="soft" :title="$t('common.error')" :description="error" />
+        
+        <UFormField name="active">
+          <UCheckbox v-model="form.active" :label="$t('common.active')" />
+        </UFormField>
       </UForm>
     </template>
 
     <template #footer>
-      <div class="flex justify-end gap-3">
-        <UButton @click="handleCancel" variant="ghost">
+      <div class="flex justify-end gap-2">
+        <UButton @click="closeModal" variant="soft">
           {{ $t('common.cancel') }}
         </UButton>
-        <UButton @click="() => formRef?.submit()" :loading="submitting" color="primary">
-          {{ isEditing ? $t('common.save') : $t('common.add') }}
+        <UButton @click="() => formRef?.submit()" :loading="submitting">
+          {{ $t('common.save') }}
         </UButton>
       </div>
     </template>
@@ -130,77 +151,123 @@ const formRef = ref()
 </template>
 
 <script setup lang="ts">
-const modelValue = defineModel<boolean>()
-const formRef = ref()
-const submitting = ref(false)
-const error = ref('')
+import type { FormType } from '~/composables/useValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
-const form = reactive({
-  name: '',
-  description: ''
-})
+const { t } = useI18n()
 
-const handleSubmit = async () => {
-  // Form submission logic
+interface Props {
+  open: boolean
+  item?: any
 }
 
-const handleCancel = () => {
-  modelValue.value = false
+interface Emits {
+  (e: 'update:open', value: boolean): void
+  (e: 'saved', item: any): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+const formRef = ref()
+const { validationSchema } = useValidation()
+
+const isOpen = computed({
+  get: () => props.open,
+  set: (value) => emit('update:open', value)
+})
+
+const submitting = ref(false)
+
+const form = reactive<FormType>({
+  name: '',
+  description: '',
+  active: true
+})
+
+// Initialize form when modal opens
+watch(() => props.open, (open) => {
+  if (open) {
+    if (props.item) {
+      // Edit mode
+      form.name = props.item.name
+      form.description = props.item.description || ''
+      form.active = props.item.active
+    } else {
+      // Add mode
+      form.name = ''
+      form.description = ''
+      form.active = true
+    }
+  }
+})
+
+const handleSubmit = async (event: FormSubmitEvent<FormType>) => {
+  submitting.value = true
+  
+  try {
+    const itemData = {
+      id: props.item?.id || crypto.randomUUID(),
+      ...event.data,
+      created_at: props.item?.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+    
+    emit('saved', itemData)
+    closeModal()
+  } catch (error) {
+    console.error('Error saving item:', error)
+  } finally {
+    submitting.value = false
+  }
+}
+
+const closeModal = () => {
+  isOpen.value = false
 }
 </script>
 ```
 
 ## Common Mistakes to Avoid
 
-1. **Don't** use card inside modal with custom slots
-2. **Don't** manually set height constraints on modal content
-3. **Don't** put action buttons inside the body slot
-4. **Don't** forget to add `formRef` for form submission
-5. **Don't** use fixed heights that might break on different screen sizes
-6. **Don't** forget to handle form validation and error states
+1. **Don't use `UFormGroup`** - Use `UFormField` instead
+2. **Don't add `:error` props** - Nuxt UI handles error display automatically
+3. **Don't use manual validation** - Let the schema handle validation
+4. **Don't forget `name` prop** - Each `UFormField` needs a `name` matching the schema
+5. **Don't use `form.value`** - Use `reactive` instead of `ref` for form state
+6. **Don't forget `ref="formRef"`** - Needed for programmatic submission
+7. **Don't use `@click="handleSubmit"`** - Use `@click="() => formRef?.submit()"` on submit button
 
 ## Testing Checklist
 
-- [ ] Modal opens and closes properly
-- [ ] Form content scrolls when screen is short
-- [ ] Action buttons are always visible
-- [ ] Form validation works correctly
-- [ ] Error messages display properly
-- [ ] Modal works on mobile devices
-- [ ] Keyboard navigation works
-- [ ] Form submission works from footer buttons
-
-## Migration from Card-Based Modals
-
-If you have existing modals using card slots, migrate them to use modal slots:
-
-### Before (Card-based):
-```vue
-<UModal v-model:open="modelValue">
-  <template #content>
-    <UCard class="max-h-[90vh] flex flex-col">
-      <template #header>...</template>
-      <div class="flex-1 overflow-y-auto">...</div>
-      <template #footer>...</template>
-    </UCard>
-  </template>
-</UModal>
-```
-
-### After (Modal slots):
-```vue
-<UModal v-model:open="modelValue">
-  <template #header>...</template>
-  <template #body>...</template>
-  <template #footer>...</template>
-</UModal>
-```
+- [ ] Modal opens and closes correctly
+- [ ] Form validation works with invalid data
+- [ ] Error messages display correctly
+- [ ] Form submission only occurs with valid data
+- [ ] Form resets properly when modal closes
+- [ ] Edit mode populates form correctly
+- [ ] Add mode starts with clean form
+- [ ] Loading states work correctly
+- [ ] TypeScript types are correct
 
 ## Related Components
 
-This rule applies to all modal forms in the project:
-- `StudentForm.vue`
-- `PackageForm.vue`
-- `AddPackageToStudent.vue`
-- `ScheduleModal.vue`
-- Any future modal forms
+### ✅ Completed Modal Forms
+- `components/StudentForm.vue` - Student creation/editing modal
+- `components/ScheduleModal.vue` - Class schedule modal
+- `components/PackageForm.vue` - Package creation/editing modal
+- `components/AddPackageToStudent.vue` - Add package to student modal
+- `components/ClassTypeModal.vue` - Class type creation/editing modal
+- `components/LocationModal.vue` - Location creation/editing modal
+
+### Validation Composables
+- `composables/useStudentValidation.ts`
+- `composables/useScheduleValidation.ts`
+- `composables/usePackageValidation.ts`
+- `composables/useStudentPackageValidation.ts`
+- `composables/useClassTypeValidation.ts`
+- `composables/useLocationValidation.ts`
+
+### Documentation
+- `.cursor/rules/form-validation.md`
+- `.cursor/rules/modal-forms.md`
