@@ -17,6 +17,7 @@
             v-model="form.name"
             class="w-full"
             :placeholder="$t('student.namePlaceholder')"
+            :error="errors.name"
           />
         </UFormField>
 
@@ -37,6 +38,7 @@
               type="tel"
               class="flex-1"
               :placeholder="$t('student.phonePlaceholder')"
+              :error="errors.phone"
             />
           </div>
         </UFormField>
@@ -50,6 +52,7 @@
             type="email"
             class="w-full"
             :placeholder="$t('student.emailPlaceholder')"
+            :error="errors.email"
           />
         </UFormField>
 
@@ -62,6 +65,7 @@
             class="w-full"
             :placeholder="$t('student.addressPlaceholder')"
             :rows="3"
+            :error="errors.address"
           />
         </UFormField>
 
@@ -75,6 +79,7 @@
             min="0"
             class="w-full"
             :placeholder="'0'"
+            :error="errors.credits"
           />
         </UFormField>
 
@@ -87,17 +92,11 @@
             class="w-full"
             :placeholder="$t('student.notesPlaceholder')"
             :rows="3"
+            :error="errors.notes"
           />
         </UFormField>
 
-        <UAlert
-          v-if="error"
-          color="error"
-          variant="soft"
-          :title="$t('common.error')"
-          :description="error"
-          icon="i-heroicons-exclamation-triangle"
-        />
+
       </UForm>
     </template>
 
@@ -141,7 +140,7 @@ const formRef = ref()
 const { studentSchema } = useStudentValidation()
 
 const submitting = ref(false)
-const error = ref('')
+const errors = ref<Record<string, string>>({})
 
 const form = reactive<StudentForm>({
   name: '',
@@ -195,12 +194,12 @@ const resetForm = () => {
   form.address = ''
   form.credits = 0
   form.notes = ''
-  error.value = ''
+  errors.value = {}
 }
 
 const handleSubmit = async () => {
   submitting.value = true
-  error.value = ''
+  errors.value = {}
   
   try {
     // Validate form data
@@ -213,11 +212,13 @@ const handleSubmit = async () => {
     modelValue.value = false
   } catch (err: any) {
     if (err.name === 'ZodError') {
-      error.value = err.errors[0]?.message || 'Validation error'
+      // Map validation errors to specific fields
+      err.errors.forEach((error: any) => {
+        errors.value[error.path[0]] = error.message
+      })
     } else {
-      error.value = err.message || 'Failed to save student'
+      console.error('Student form error:', err)
     }
-    console.error('Student form error:', err)
   } finally {
     submitting.value = false
   }
