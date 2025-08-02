@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import type { LoginForm } from '~/composables/useTranslatedValidation'
+import type { LoginForm } from '~/composables/useAuthValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { clearAllData } from '~/utils/dbHelper'
 
@@ -107,7 +107,7 @@ definePageMeta({
 })
 
 const { auth, login, checkFirstTimeSetup } = useAuth()
-const { loginSchema } = useTranslatedValidation()
+const { loginSchema } = useAuthValidation()
 const { isDark, toggleDarkMode } = useDarkMode()
 
 // Check for first time setup

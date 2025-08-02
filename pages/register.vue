@@ -157,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import type { RegisterForm } from '~/composables/useTranslatedValidation'
+import type { RegisterForm } from '~/composables/useAuthValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 // Use blank layout for register page
@@ -167,7 +167,7 @@ definePageMeta({
 
 const { createUser } = useUsers()
 const { isDark, toggleDarkMode } = useDarkMode()
-const { registerSchema } = useTranslatedValidation()
+const { registerSchema } = useAuthValidation()
 
 const { t, locale, setLocale } = useI18n()
 const loading = ref(false)

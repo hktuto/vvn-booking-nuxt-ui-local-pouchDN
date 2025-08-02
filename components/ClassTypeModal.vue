@@ -70,11 +70,11 @@
 </template>
 
 <script setup lang="ts">
-import type { ClassTypeForm } from '~/composables/useTranslatedValidation'
+import type { ClassTypeForm } from '~/composables/useClassTypeValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const { t } = useI18n()
-const { classTypeSchema } = useTranslatedValidation()
+const { classTypeSchema } = useClassTypeValidation()
 
 interface Props {
   open: boolean

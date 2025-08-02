@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PackageForm } from '~/composables/useTranslatedValidation'
+import type { PackageForm } from '~/composables/usePackageValidation'
 
 definePageMeta({
   middleware: 'auth'

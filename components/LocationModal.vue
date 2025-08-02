@@ -83,11 +83,11 @@
 </template>
 
 <script setup lang="ts">
-import type { LocationForm } from '~/composables/useTranslatedValidation'
+import type { LocationForm } from '~/composables/useLocationValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const { t } = useI18n()
-const { locationSchema } = useTranslatedValidation()
+const { locationSchema } = useLocationValidation()
 
 interface Props {
   open: boolean

@@ -113,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import type { StudentForm } from '~/composables/useTranslatedValidation'
+import type { StudentForm } from '~/composables/useStudentValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
@@ -130,7 +130,7 @@ const emit = defineEmits<Emits>()
 
 const formRef = ref()
 const { t } = useI18n()
-const { studentSchema } = useTranslatedValidation()
+const { studentSchema } = useStudentValidation()
 
 const submitting = ref(false)
 
