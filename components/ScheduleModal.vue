@@ -119,6 +119,7 @@
             v-model="form.description"
             :placeholder="$t('classes.enterDescription')"
             rows="3"
+            :error="errors.description"
           />
         </UFormGroup>
 

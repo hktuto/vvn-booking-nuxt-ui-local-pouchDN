@@ -39,6 +39,7 @@
             :placeholder="t('student.selectPackagePlaceholder')"
             :items="packageOptions"
             :loading="packagesLoading"
+            :error="errors.package_id"
           />
         </UFormField>
 
@@ -66,6 +67,7 @@
                 class="w-full"
                 :placeholder="t('package.durationDaysPlaceholder')"
                 min="1"
+                :error="errors.custom_package_duration"
               />
             </UFormField>
 
@@ -82,6 +84,7 @@
                   :placeholder="t('package.pricePlaceholder')"
                   min="0"
                   step="0.01"
+                  :error="errors.custom_package_price"
                 >
                   <template #leading>
                     $
@@ -100,6 +103,7 @@
                   class="w-full"
                   :placeholder="t('package.creditsPlaceholder')"
                   min="1"
+                  :error="errors.custom_package_credits"
                 />
               </UFormField>
             </div>
@@ -119,6 +123,7 @@
             :placeholder="t('student.customPricePlaceholder')"
             min="0"
             step="0.01"
+            :error="errors.custom_price"
           >
             <template #leading>
               $
@@ -168,17 +173,11 @@
             class="w-full"
             :placeholder="t('student.notesPlaceholder')"
             :rows="3"
+            :error="errors.notes"
           />
         </UFormField>
 
-        <UAlert
-          v-if="error"
-          color="error"
-          variant="soft"
-          :title="t('common.error')"
-          :description="error"
-          icon="i-heroicons-exclamation-triangle"
-        />
+
       </UForm>
     </template>
 
@@ -234,7 +233,7 @@ const { packages, loading: packagesLoading } = usePackages()
 const { addPackageToStudent } = useStudentPackages()
 
 const submitting = ref(false)
-const error = ref('')
+const errors = ref<Record<string, string>>({})
 
 const form = reactive({
   package_type: 'existing' as 'existing' | 'custom',
@@ -298,7 +297,7 @@ const resetForm = () => {
   form.custom_package_price = null
   form.custom_package_credits = null
   form.custom_package_duration = null
-  error.value = ''
+  errors.value = {}
 }
 
 const formatDate = (date: Date | null) => {
@@ -313,23 +312,32 @@ const formatDate = (date: Date | null) => {
 const handleSubmit = async () => {
   if (!props.student) return
 
-  // Validate form based on package type
-  if (form.package_type === 'existing' && !form.package_id) {
-    error.value = 'Please select a package'
-    return
-  }
-
-  if (form.package_type === 'custom') {
-    if (!form.custom_package_price || !form.custom_package_credits || !form.custom_package_duration) {
-      error.value = 'Please fill in all required custom package fields'
-      return
-    }
-  }
-
   submitting.value = true
-  error.value = ''
+  errors.value = {}
   
   try {
+    // Validate form based on package type
+    if (form.package_type === 'existing' && !form.package_id) {
+      errors.value.package_id = 'Please select a package'
+      return
+    }
+
+    if (form.package_type === 'custom') {
+      if (!form.custom_package_price) {
+        errors.value.custom_package_price = 'Price is required'
+      }
+      if (!form.custom_package_credits) {
+        errors.value.custom_package_credits = 'Credits are required'
+      }
+      if (!form.custom_package_duration) {
+        errors.value.custom_package_duration = 'Duration is required'
+      }
+      
+      if (Object.keys(errors.value).length > 0) {
+        return
+      }
+    }
+
     let packageId = form.package_id
     let customPrice: number | undefined = form.custom_price || undefined
 
@@ -360,7 +368,6 @@ const handleSubmit = async () => {
     emit('saved', studentPackage)
     modelValue.value = false
   } catch (err: any) {
-    error.value = err.message || 'Failed to add package to student'
     console.error('Error adding package to student:', err)
   } finally {
     submitting.value = false

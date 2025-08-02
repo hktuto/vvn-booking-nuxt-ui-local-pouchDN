@@ -17,6 +17,7 @@
             v-model="form.name"
             class="w-full"
             :placeholder="$t('package.namePlaceholder')"
+            :error="errors.name"
           />
         </UFormField>
 
@@ -29,6 +30,7 @@
             class="w-full"
             :placeholder="$t('package.descriptionPlaceholder')"
             :rows="3"
+            :error="errors.description"
           />
         </UFormField>
 
@@ -39,13 +41,14 @@
               :label="$t('package.price')"
               required
             >
-              <UInput
+                              <UInput
                   v-model.number="form.price"
                   type="number"
                   class="w-full"
                   :placeholder="$t('package.pricePlaceholder')"
                   min="0"
                   step="0.01"
+                  :error="errors.price"
                 >
                 <template #leading>
                 $
@@ -67,6 +70,7 @@
                 class="w-full"
                 :placeholder="$t('package.creditsPlaceholder')"
                 min="1"
+                :error="errors.credits"
               />
             </UFormField>
           </div>
@@ -82,6 +86,7 @@
               class="w-full"
               :placeholder="$t('package.durationDaysPlaceholder')"
               min="1"
+              :error="errors.duration_days"
             />
           </UFormField>
         </div>
@@ -94,14 +99,7 @@
           />
         </UFormField>
 
-        <UAlert
-          v-if="error"
-          color="error"
-          variant="soft"
-          :title="$t('common.error')"
-          :description="error"
-          icon="i-heroicons-exclamation-triangle"
-        />
+
       </UForm>
     </template>
 
@@ -145,7 +143,7 @@ const formRef = ref()
 const { packageSchema } = usePackageValidation()
 
 const submitting = ref(false)
-const error = ref('')
+const errors = ref<Record<string, string>>({})
 
 const form = reactive<PackageForm>({
   name: '',
@@ -181,12 +179,12 @@ const resetForm = () => {
   form.credits = 1
   form.duration_days = 30
   form.active = true
-  error.value = ''
+  errors.value = {}
 }
 
 const handleSubmit = async () => {
   submitting.value = true
-  error.value = ''
+  errors.value = {}
   
   try {
     // Validate form data
@@ -199,11 +197,13 @@ const handleSubmit = async () => {
     modelValue.value = false
   } catch (err: any) {
     if (err.name === 'ZodError') {
-      error.value = err.errors[0]?.message || 'Validation error'
+      // Map validation errors to specific fields
+      err.errors.forEach((error: any) => {
+        errors.value[error.path[0]] = error.message
+      })
     } else {
-      error.value = err.message || 'Failed to save package'
+      console.error('Package form error:', err)
     }
-    console.error('Package form error:', err)
   } finally {
     submitting.value = false
   }
