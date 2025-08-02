@@ -5,7 +5,7 @@ export const studentSchema = z.object({
   name: z.string()
     .min(1, 'Name is required')
     .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name must be less than 100 characters'),
+    .max(32, 'Name must be less than 32 characters'),
   phone: z.string()
     .min(1, 'Phone number is required')
     .regex(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
