@@ -1,4 +1,10 @@
 <template>
+  <!-- 
+    Default Layout with Header Slot
+    
+    Pages can now use the header slot to provide custom header content.
+    See the documentation in the README for usage examples.
+  -->
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Mobile Navigation Header -->
     <div class="lg:hidden">
@@ -9,7 +15,11 @@
           icon="i-heroicons-bars-3"
           size="sm"
         />
-        <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
+        <!-- Mobile header slot or fallback -->
+        <div v-if="$slots.header" class="flex-1 px-2">
+          <slot name="header" />
+        </div>
+        <h1 v-else class="text-lg font-semibold text-gray-900 dark:text-white">
           {{ t('app.title') }}
         </h1>
         
@@ -102,9 +112,12 @@
         <!-- Desktop Top Header -->
         <div class="hidden lg:flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center gap-4">
-            <h2 class="text-lg font-medium text-gray-900 dark:text-white">
+            <!-- Default page title (fallback) -->
+            <h2 v-if="!$slots.header" class="text-lg font-medium text-gray-900 dark:text-white">
               {{ getCurrentPageTitle() }}
             </h2>
+            <!-- Custom header slot -->
+            <slot name="header" />
           </div>
           
           <!-- User Profile Dropdown -->
