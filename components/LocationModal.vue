@@ -87,6 +87,7 @@ import type { LocationForm } from '~/composables/useLocationValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const { t } = useI18n()
+const { locationSchema } = useLocationValidation()
 
 interface Props {
   open: boolean
@@ -107,7 +108,6 @@ const isOpen = computed({
 })
 
 const formRef = ref()
-const { locationSchema } = useLocationValidation()
 
 const saving = ref(false)
 

@@ -80,8 +80,8 @@
 <script setup lang="ts">
 import type { StudentForm } from '~/composables/useStudentValidation'
 
-const { students, addStudent, updateStudent, deleteStudent, loadStudents } = useStudents()
 const { t } = useI18n()
+const { studentSchema } = useStudentValidation()
 
 const showAddModal = ref(false)
 const editingStudent = ref<any>(null)

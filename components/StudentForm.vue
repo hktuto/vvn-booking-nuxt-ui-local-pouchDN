@@ -129,6 +129,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const formRef = ref()
+const { t } = useI18n()
 const { studentSchema } = useStudentValidation()
 
 const submitting = ref(false)

@@ -141,6 +141,7 @@ import type { ScheduleForm } from '~/composables/useScheduleValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const { t } = useI18n()
+const { scheduleSchema } = useScheduleValidation()
 
 interface Props {
   open: boolean
@@ -161,7 +162,6 @@ const isOpen = computed({
 })
 
 const formRef = ref()
-const { scheduleSchema } = useScheduleValidation()
 
 const saving = ref(false)
 

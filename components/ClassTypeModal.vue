@@ -74,6 +74,7 @@ import type { ClassTypeForm } from '~/composables/useClassTypeValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const { t } = useI18n()
+const { classTypeSchema } = useClassTypeValidation()
 
 interface Props {
   open: boolean
@@ -94,7 +95,6 @@ const isOpen = computed({
 })
 
 const formRef = ref()
-const { classTypeSchema } = useClassTypeValidation()
 
 const saving = ref(false)
 
