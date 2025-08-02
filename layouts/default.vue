@@ -2,25 +2,8 @@
   <!-- 
     Default Layout with Header Slot
     
-    Pages can now use the header slot to provide custom header content:
-    
-    <template>
-      <NuxtLayout name="default">
-        <template #header>
-          <div class="flex items-center justify-between w-full">
-            <div>
-              <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Page Title</h1>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Page description</p>
-            </div>
-            <UButton icon="i-heroicons-plus" size="sm">Action</UButton>
-          </div>
-        </template>
-        
-        <div class="p-6">
-          <!-- Page content -->
-        </div>
-      </NuxtLayout>
-    </template>
+    Pages can now use the header slot to provide custom header content.
+    See the documentation in the README for usage examples.
   -->
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Mobile Navigation Header -->
