@@ -3,21 +3,21 @@ import { z } from 'zod'
 // Location form validation schema
 export const locationSchema = z.object({
   name: z.string()
-    .min(1, 'Name is required')
-    .max(100, 'Name must be less than 100 characters'),
+    .min(1, 'validation.name.required')
+    .max(100, 'validation.name.maxLength'),
   address: z.string()
-    .min(1, 'Address is required')
-    .max(500, 'Address must be less than 500 characters'),
+    .min(1, 'validation.address.required')
+    .max(500, 'validation.address.maxLength'),
   phone: z.string()
-    .min(1, 'Phone number is required')
-    .regex(/^[0-9+\-\s()]+$/, 'Please enter a valid phone number'),
+    .min(1, 'validation.phone.required')
+    .regex(/^[0-9+\-\s()]+$/, 'validation.phone.invalid'),
   email: z.string()
-    .email('Please enter a valid email address')
+    .email('validation.email.invalid')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   website: z.string()
-    .url('Please enter a valid URL')
+    .url('validation.website.invalid')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),

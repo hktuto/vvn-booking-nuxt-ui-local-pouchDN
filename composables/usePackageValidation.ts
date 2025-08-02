@@ -3,22 +3,22 @@ import { z } from 'zod'
 // Package form validation schema
 export const packageSchema = z.object({
   name: z.string()
-    .min(1, 'Name is required')
-    .max(100, 'Name must be less than 100 characters'),
+    .min(1, 'validation.name.required')
+    .max(100, 'validation.name.maxLength'),
   description: z.string()
-    .max(500, 'Description must be less than 500 characters')
+    .max(500, 'validation.description.maxLength')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   price: z.number()
-    .min(0, 'Price cannot be negative')
-    .max(99999.99, 'Price cannot exceed $99,999.99'),
+    .min(0, 'validation.price.negative')
+    .max(99999.99, 'validation.price.maxExceeded'),
   credits: z.number()
-    .min(1, 'Credits must be at least 1')
-    .max(99999, 'Credits cannot exceed 99999'),
+    .min(1, 'validation.packageCredits.min')
+    .max(99999, 'validation.packageCredits.maxExceeded'),
   duration_days: z.number()
-    .min(1, 'Duration must be at least 1 day')
-    .max(3650, 'Duration cannot exceed 10 years'),
+    .min(1, 'validation.duration.min')
+    .max(3650, 'validation.duration.maxExceeded'),
   active: z.boolean()
 })
 

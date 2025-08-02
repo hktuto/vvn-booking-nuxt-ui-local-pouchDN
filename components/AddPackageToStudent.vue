@@ -195,7 +195,7 @@
 
 <script setup lang="ts">
 import type { PackageDocument } from '~/composables/usePouchDB'
-import type { AddPackageToStudentForm } from '~/composables/useStudentPackageValidation'
+import type { AddPackageToStudentForm } from '~/composables/useTranslatedValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
@@ -225,7 +225,7 @@ const formRef = ref()
 const { t } = useI18n()
 const { packages, loading: packagesLoading } = usePackages()
 const { addPackageToStudent } = useStudentPackages()
-const { addPackageToStudentSchema } = useStudentPackageValidation()
+const { addPackageToStudentSchema } = useTranslatedValidation()
 
 const submitting = ref(false)
 

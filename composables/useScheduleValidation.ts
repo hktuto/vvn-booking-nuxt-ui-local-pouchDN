@@ -3,31 +3,31 @@ import { z } from 'zod'
 // Schedule form validation schema
 export const scheduleSchema = z.object({
   class_type_id: z.string()
-    .min(1, 'Class type is required'),
+    .min(1, 'validation.classType.required'),
   location_id: z.string()
-    .min(1, 'Location is required'),
+    .min(1, 'validation.location.required'),
   weekly_days: z.array(z.string())
-    .min(1, 'At least one day must be selected'),
+    .min(1, 'validation.weeklyDays.required'),
   start_time: z.string()
-    .min(1, 'Start time is required')
-    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Please enter a valid time'),
+    .min(1, 'validation.startTime.required')
+    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'validation.startTime.invalid'),
   end_time: z.string()
-    .min(1, 'End time is required')
-    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Please enter a valid time'),
+    .min(1, 'validation.endTime.required')
+    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'validation.endTime.invalid'),
   start_date: z.string()
-    .min(1, 'Start date is required'),
+    .min(1, 'validation.startDate.required'),
   end_date: z.string()
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   max_capacity: z.number()
-    .min(1, 'Maximum capacity must be at least 1')
-    .max(1000, 'Maximum capacity cannot exceed 1000'),
+    .min(1, 'validation.maxCapacity.min')
+    .max(1000, 'validation.maxCapacity.maxExceeded'),
   credit_cost: z.number()
-    .min(0, 'Credit cost cannot be negative')
-    .max(1000, 'Credit cost cannot exceed 1000'),
+    .min(0, 'validation.creditCost.negative')
+    .max(1000, 'validation.creditCost.maxExceeded'),
   description: z.string()
-    .max(1000, 'Description must be less than 1000 characters')
+    .max(1000, 'validation.notes.maxLength')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
@@ -38,7 +38,7 @@ export const scheduleSchema = z.object({
   }
   return true
 }, {
-  message: "End time must be after start time",
+  message: 'validation.endTimeAfterStart',
   path: ["end_time"]
 }).refine((data) => {
   if (data.start_date && data.end_date && data.end_date !== '') {
@@ -46,7 +46,7 @@ export const scheduleSchema = z.object({
   }
   return true
 }, {
-  message: "End date must be after or equal to start date",
+  message: 'validation.endDate.afterStart',
   path: ["end_date"]
 })
 

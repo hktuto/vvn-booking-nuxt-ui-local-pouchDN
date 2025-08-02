@@ -3,28 +3,28 @@ import { z } from 'zod'
 // Student form validation schema
 export const studentSchema = z.object({
   name: z.string()
-    .min(1, 'Name is required')
-    .max(100, 'Name must be less than 100 characters'),
+    .min(1, 'validation.name.required')
+    .max(100, 'validation.name.maxLength'),
   phone: z.string()
-    .min(1, 'Phone number is required')
-    .regex(/^[0-9+\-\s()]+$/, 'Please enter a valid phone number'),
+    .min(1, 'validation.phone.required')
+    .regex(/^[0-9+\-\s()]+$/, 'validation.phone.invalid'),
   country_code: z.string()
-    .min(1, 'Country code is required'),
+    .min(1, 'validation.countryCode.required'),
   email: z.string()
-    .email('Please enter a valid email address')
+    .email('validation.email.invalid')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   address: z.string()
-    .max(500, 'Address must be less than 500 characters')
+    .max(500, 'validation.address.maxLength')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   credits: z.number()
-    .min(0, 'Credits cannot be negative')
-    .max(99999, 'Credits cannot exceed 99999'),
+    .min(0, 'validation.credits.negative')
+    .max(99999, 'validation.credits.maxExceeded'),
   notes: z.string()
-    .max(1000, 'Notes must be less than 1000 characters')
+    .max(1000, 'validation.notes.maxLength')
     .optional()
     .or(z.literal(''))
     .transform(val => val || '')

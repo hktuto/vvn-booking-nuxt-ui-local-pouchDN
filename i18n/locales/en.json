@@ -266,7 +266,145 @@
     "positiveNumber": "{field} must be a positive number",
     "invalidEmail": "Invalid email address",
     "invalidUrl": "Invalid URL",
-    "endTimeAfterStart": "End time must be after start time"
+    "endTimeAfterStart": "End time must be after start time",
+    "username": {
+      "required": "Username is required",
+      "minLength": "Username must be at least 3 characters",
+      "maxLength": "Username must be less than 50 characters",
+      "format": "Username can only contain letters, numbers, and underscores"
+    },
+    "password": {
+      "required": "Password is required",
+      "minLength": "Password must be at least 6 characters",
+      "maxLength": "Password must be less than 128 characters",
+      "confirm": "Please confirm your password",
+      "mismatch": "Passwords don't match"
+    },
+    "displayName": {
+      "required": "Display name is required",
+      "maxLength": "Display name must be less than 100 characters"
+    },
+    "email": {
+      "invalid": "Please enter a valid email address"
+    },
+    "countryCode": {
+      "required": "Country code is required"
+    },
+    "phone": {
+      "required": "Phone number is required",
+      "invalid": "Please enter a valid phone number"
+    },
+    "language": {
+      "invalid": "Please select a valid language"
+    },
+    "name": {
+      "required": "Name is required",
+      "maxLength": "Name must be less than 100 characters"
+    },
+    "address": {
+      "required": "Address is required",
+      "maxLength": "Address must be less than 500 characters"
+    },
+    "credits": {
+      "negative": "Credits cannot be negative",
+      "maxExceeded": "Credits cannot exceed 99999"
+    },
+    "notes": {
+      "maxLength": "Notes must be less than 1000 characters"
+    },
+    "description": {
+      "maxLength": "Description must be less than 500 characters"
+    },
+    "price": {
+      "negative": "Price cannot be negative",
+      "maxExceeded": "Price cannot exceed $99,999.99",
+      "maxExceededSimple": "Price cannot exceed 99999"
+    },
+    "packageCredits": {
+      "min": "Credits must be at least 1",
+      "maxExceeded": "Credits cannot exceed 99999"
+    },
+    "duration": {
+      "min": "Duration must be at least 1 day",
+      "maxExceeded": "Duration cannot exceed 10 years"
+    },
+    "classType": {
+      "required": "Class type is required"
+    },
+    "location": {
+      "required": "Location is required"
+    },
+    "weeklyDays": {
+      "required": "At least one day must be selected"
+    },
+    "startTime": {
+      "required": "Start time is required",
+      "invalid": "Please enter a valid time"
+    },
+    "endTime": {
+      "required": "End time is required",
+      "invalid": "Please enter a valid time"
+    },
+    "startDate": {
+      "required": "Start date is required"
+    },
+    "endDate": {
+      "afterStart": "End date must be after or equal to start date"
+    },
+    "maxCapacity": {
+      "min": "Maximum capacity must be at least 1",
+      "maxExceeded": "Maximum capacity cannot exceed 1000"
+    },
+    "creditCost": {
+      "negative": "Credit cost cannot be negative",
+      "maxExceeded": "Credit cost cannot exceed 1000"
+    },
+    "className": {
+      "required": "Class name is required",
+      "minLength": "Class name must be at least 2 characters",
+      "maxLength": "Class name must be less than 100 characters"
+    },
+    "classTypeName": {
+      "required": "Class type name is required",
+      "minLength": "Class type name must be at least 2 characters",
+      "maxLength": "Class type name must be less than 100 characters"
+    },
+    "durationMinutes": {
+      "min": "Duration must be at least 15 minutes",
+      "maxExceeded": "Duration cannot exceed 8 hours"
+    },
+    "maxStudents": {
+      "min": "Maximum students must be at least 1",
+      "maxExceeded": "Maximum students cannot exceed 50"
+    },
+    "website": {
+      "invalid": "Please enter a valid URL"
+    },
+    "packageType": {
+      "required": "Please select a package type"
+    },
+    "package": {
+      "required": "Please select a package"
+    },
+    "customPrice": {
+      "negative": "Custom price cannot be negative",
+      "maxExceeded": "Custom price cannot exceed $99,999.99",
+      "required": "Price is required for custom packages"
+    },
+    "customCredits": {
+      "min": "Credits must be at least 1",
+      "maxExceeded": "Credits cannot exceed 99999",
+      "required": "Credits are required for custom packages"
+    },
+    "customDuration": {
+      "min": "Duration must be at least 1 day",
+      "maxExceeded": "Duration cannot exceed 10 years",
+      "required": "Duration is required for custom packages"
+    },
+    "defaultCreditCost": {
+      "negative": "Default credit cost cannot be negative",
+      "maxExceeded": "Default credit cost cannot exceed 1000"
+    }
   },
   "common": {
     "save": "Save",

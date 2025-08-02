@@ -3,39 +3,39 @@ import { z } from 'zod'
 // Add package to student form validation schema
 export const addPackageToStudentSchema = z.object({
   package_type: z.enum(['existing', 'custom'], {
-    errorMap: () => ({ message: 'Please select a package type' })
+    errorMap: () => ({ message: 'validation.packageType.required' })
   }),
   package_id: z.string()
-    .min(1, 'Please select a package')
+    .min(1, 'validation.package.required')
     .optional()
     .or(z.literal('')),
   custom_price: z.number()
-    .min(0, 'Custom price cannot be negative')
-    .max(99999.99, 'Custom price cannot exceed $99,999.99')
+    .min(0, 'validation.customPrice.negative')
+    .max(99999.99, 'validation.customPrice.maxExceeded')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   notes: z.string()
-    .max(1000, 'Notes must be less than 1000 characters')
+    .max(1000, 'validation.notes.maxLength')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   // Custom package fields
   custom_package_price: z.number()
-    .min(0, 'Price cannot be negative')
-    .max(99999.99, 'Price cannot exceed $99,999.99')
+    .min(0, 'validation.customPrice.negative')
+    .max(99999.99, 'validation.customPrice.maxExceeded')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   custom_package_credits: z.number()
-    .min(1, 'Credits must be at least 1')
-    .max(99999, 'Credits cannot exceed 99999')
+    .min(1, 'validation.customCredits.min')
+    .max(99999, 'validation.customCredits.maxExceeded')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   custom_package_duration: z.number()
-    .min(1, 'Duration must be at least 1 day')
-    .max(3650, 'Duration cannot exceed 10 years')
+    .min(1, 'validation.customDuration.min')
+    .max(3650, 'validation.customDuration.maxExceeded')
     .optional()
     .or(z.literal(''))
     .transform(val => val || '')
@@ -45,7 +45,7 @@ export const addPackageToStudentSchema = z.object({
   }
   return true
 }, {
-  message: "Please select a package",
+  message: 'validation.package.required',
   path: ["package_id"]
 }).refine((data) => {
   if (data.package_type === 'custom') {
@@ -53,7 +53,7 @@ export const addPackageToStudentSchema = z.object({
   }
   return true
 }, {
-  message: "Price is required for custom packages",
+  message: 'validation.customPrice.required',
   path: ["custom_package_price"]
 }).refine((data) => {
   if (data.package_type === 'custom') {
@@ -61,7 +61,7 @@ export const addPackageToStudentSchema = z.object({
   }
   return true
 }, {
-  message: "Credits are required for custom packages",
+  message: 'validation.customCredits.required',
   path: ["custom_package_credits"]
 }).refine((data) => {
   if (data.package_type === 'custom') {
@@ -69,7 +69,7 @@ export const addPackageToStudentSchema = z.object({
   }
   return true
 }, {
-  message: "Duration is required for custom packages",
+  message: 'validation.customDuration.required',
   path: ["custom_package_duration"]
 })
 

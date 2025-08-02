@@ -266,7 +266,145 @@
     "positiveNumber": "{field} 必須為正數",
     "invalidEmail": "無效的電子郵件地址",
     "invalidUrl": "無效的網址",
-    "endTimeAfterStart": "結束時間必須晚於開始時間"
+    "endTimeAfterStart": "結束時間必須晚於開始時間",
+    "username": {
+      "required": "用戶名為必填項",
+      "minLength": "用戶名至少需要3個字符",
+      "maxLength": "用戶名不能超過50個字符",
+      "format": "用戶名只能包含字母、數字和下劃線"
+    },
+    "password": {
+      "required": "密碼為必填項",
+      "minLength": "密碼至少需要6個字符",
+      "maxLength": "密碼不能超過128個字符",
+      "confirm": "請確認您的密碼",
+      "mismatch": "密碼不匹配"
+    },
+    "displayName": {
+      "required": "顯示名稱為必填項",
+      "maxLength": "顯示名稱不能超過100個字符"
+    },
+    "email": {
+      "invalid": "請輸入有效的電子郵件地址"
+    },
+    "countryCode": {
+      "required": "國家代碼為必填項"
+    },
+    "phone": {
+      "required": "電話號碼為必填項",
+      "invalid": "請輸入有效的電話號碼"
+    },
+    "language": {
+      "invalid": "請選擇有效的語言"
+    },
+    "name": {
+      "required": "名稱為必填項",
+      "maxLength": "名稱不能超過100個字符"
+    },
+    "address": {
+      "required": "地址為必填項",
+      "maxLength": "地址不能超過500個字符"
+    },
+    "credits": {
+      "negative": "學分不能為負數",
+      "maxExceeded": "學分不能超過99999"
+    },
+    "notes": {
+      "maxLength": "備註不能超過1000個字符"
+    },
+    "description": {
+      "maxLength": "描述不能超過500個字符"
+    },
+    "price": {
+      "negative": "價格不能為負數",
+      "maxExceeded": "價格不能超過$99,999.99",
+      "maxExceededSimple": "價格不能超過99999"
+    },
+    "packageCredits": {
+      "min": "學分至少需要1個",
+      "maxExceeded": "學分不能超過99999"
+    },
+    "duration": {
+      "min": "期限至少需要1天",
+      "maxExceeded": "期限不能超過10年"
+    },
+    "classType": {
+      "required": "課程類型為必填項"
+    },
+    "location": {
+      "required": "地點為必填項"
+    },
+    "weeklyDays": {
+      "required": "至少需要選擇一天"
+    },
+    "startTime": {
+      "required": "開始時間為必填項",
+      "invalid": "請輸入有效的時間"
+    },
+    "endTime": {
+      "required": "結束時間為必填項",
+      "invalid": "請輸入有效的時間"
+    },
+    "startDate": {
+      "required": "開始日期為必填項"
+    },
+    "endDate": {
+      "afterStart": "結束日期必須在開始日期之後或相等"
+    },
+    "maxCapacity": {
+      "min": "最大容量至少需要1",
+      "maxExceeded": "最大容量不能超過1000"
+    },
+    "creditCost": {
+      "negative": "學分成本不能為負數",
+      "maxExceeded": "學分成本不能超過1000"
+    },
+    "className": {
+      "required": "課程名稱為必填項",
+      "minLength": "課程名稱至少需要2個字符",
+      "maxLength": "課程名稱不能超過100個字符"
+    },
+    "classTypeName": {
+      "required": "課程類型名稱為必填項",
+      "minLength": "課程類型名稱至少需要2個字符",
+      "maxLength": "課程類型名稱不能超過100個字符"
+    },
+    "durationMinutes": {
+      "min": "時長至少需要15分鐘",
+      "maxExceeded": "時長不能超過8小時"
+    },
+    "maxStudents": {
+      "min": "最大學生數至少需要1",
+      "maxExceeded": "最大學生數不能超過50"
+    },
+    "website": {
+      "invalid": "請輸入有效的網址"
+    },
+    "packageType": {
+      "required": "請選擇套票類型"
+    },
+    "package": {
+      "required": "請選擇套票"
+    },
+    "customPrice": {
+      "negative": "自定義價格不能為負數",
+      "maxExceeded": "自定義價格不能超過$99,999.99",
+      "required": "自定義套票需要價格"
+    },
+    "customCredits": {
+      "min": "學分至少需要1個",
+      "maxExceeded": "學分不能超過99999",
+      "required": "自定義套票需要學分"
+    },
+    "customDuration": {
+      "min": "期限至少需要1天",
+      "maxExceeded": "期限不能超過10年",
+      "required": "自定義套票需要期限"
+    },
+    "defaultCreditCost": {
+      "negative": "預設學分成本不能為負數",
+      "maxExceeded": "預設學分成本不能超過1000"
+    }
   },
   "common": {
     "save": "儲存",

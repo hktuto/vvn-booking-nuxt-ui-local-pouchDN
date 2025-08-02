@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import type { StudentForm } from '~/composables/useStudentValidation'
+import type { StudentForm } from '~/composables/useTranslatedValidation'
 
 const { students, addStudent, updateStudent, deleteStudent, loadStudents } = useStudents()
 const { t } = useI18n()

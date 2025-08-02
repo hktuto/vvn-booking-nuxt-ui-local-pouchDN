@@ -117,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PackageForm } from '~/composables/usePackageValidation'
+import type { PackageForm } from '~/composables/useTranslatedValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
@@ -133,7 +133,8 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const formRef = ref()
-const { packageSchema } = usePackageValidation()
+const { t } = useI18n()
+const { packageSchema } = useTranslatedValidation()
 
 const submitting = ref(false)
 

@@ -137,10 +137,11 @@
 </template>
 
 <script setup lang="ts">
-import type { ScheduleForm } from '~/composables/useScheduleValidation'
+import type { ScheduleForm } from '~/composables/useTranslatedValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const { t } = useI18n()
+const { scheduleSchema } = useTranslatedValidation()
 
 interface Props {
   open: boolean
@@ -161,7 +162,6 @@ const isOpen = computed({
 })
 
 const formRef = ref()
-const { scheduleSchema } = useScheduleValidation()
 
 const saving = ref(false)
 

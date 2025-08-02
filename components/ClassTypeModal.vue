@@ -70,10 +70,11 @@
 </template>
 
 <script setup lang="ts">
-import type { ClassTypeForm } from '~/composables/useClassTypeValidation'
+import type { ClassTypeForm } from '~/composables/useTranslatedValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const { t } = useI18n()
+const { classTypeSchema } = useTranslatedValidation()
 
 interface Props {
   open: boolean
@@ -94,7 +95,6 @@ const isOpen = computed({
 })
 
 const formRef = ref()
-const { classTypeSchema } = useClassTypeValidation()
 
 const saving = ref(false)
 
