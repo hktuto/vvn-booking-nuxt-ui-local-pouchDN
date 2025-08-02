@@ -1,14 +1,18 @@
 <template>
-  <div class="p-6">
-    <!-- Dashboard Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-        {{ $t('dashboard.title') }}
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400 mt-2">
-        Welcome back! Here's your overview for today.
-      </p>
+  <template #header>
+    <div class="flex items-center justify-between w-full">
+      <div>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+          {{ $t('dashboard.title') }}
+        </h1>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          Welcome back! Here's your overview for today.
+        </p>
+      </div>
     </div>
+  </template>
+
+  <div class="p-6">
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

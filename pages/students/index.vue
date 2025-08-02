@@ -1,23 +1,25 @@
 <template>
-  <div class="p-6">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between mb-6">
+  <template #header>
+    <div class="flex items-center justify-between w-full">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
           {{ $t('student.students') }}
         </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
           Manage your students and their information
         </p>
       </div>
       <UButton 
         @click="addNewStudent"
         icon="i-heroicons-plus"
-        size="lg"
+        size="sm"
       >
         {{ $t('student.addStudent') }}
       </UButton>
     </div>
+  </template>
+
+  <div class="p-6">
 
     <!-- Search Bar -->
     <div class="mb-6">
