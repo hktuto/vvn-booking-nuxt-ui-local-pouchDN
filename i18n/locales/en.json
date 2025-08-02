@@ -130,6 +130,8 @@
     "price": "Price",
     "pricePlaceholder": "Enter price",
     "credits": "Credits",
+    "creditsPlaceholder": "Enter credits needed",
+    "credits": "Credits",
     "creditsPlaceholder": "Enter number of credits",
     "durationDays": "Duration (Days)",
     "durationDaysPlaceholder": "Enter duration in days",
@@ -365,6 +367,10 @@
       "negative": "Credit cost cannot be negative",
       "maxExceeded": "Credit cost cannot exceed 1000"
     },
+    "credits": {
+      "min": "Credits must be at least 1",
+      "max": "Credits cannot exceed 100"
+    },
     "className": {
       "required": "Class name is required",
       "minLength": "Class name must be at least 2 characters",
@@ -413,6 +419,53 @@
     },
     "tags": {
       "maxExceeded": "Maximum 10 tags allowed"
+    },
+    "location": {
+      "required": "Location is required"
+    },
+    "locationName": {
+      "required": "Location name is required"
+    },
+    "instructor": {
+      "required": "Instructor is required",
+      "maxLength": "Instructor name must be 100 characters or less"
+    },
+    "maxStudents": {
+      "min": "Maximum students must be at least 1",
+      "max": "Maximum students cannot exceed 100"
+    },
+    "duration": {
+      "min": "Duration must be at least 15 minutes",
+      "max": "Duration cannot exceed 8 hours"
+    },
+    "scheduleType": {
+      "invalid": "Invalid schedule type"
+    },
+    "startDate": {
+      "required": "Start date is required"
+    },
+    "endDate": {
+      "afterStartDate": "End date must be after start date"
+    },
+    "startTime": {
+      "required": "Start time is required"
+    },
+    "endTime": {
+      "required": "End time is required",
+      "afterStartTime": "End time must be after start time"
+    },
+    "daysOfWeek": {
+      "required": "Days of week are required for recurring classes"
+    },
+    "totalSessions": {
+      "min": "Total sessions must be at least 1",
+      "required": "Total sessions are required for series classes"
+    },
+    "currentSession": {
+      "min": "Current session must be at least 1"
+    },
+    "status": {
+      "invalid": "Invalid status"
     }
   },
   "common": {
@@ -453,7 +506,8 @@
     "friday": "Friday",
     "saturday": "Saturday",
     "sunday": "Sunday",
-    "days": "days"
+    "days": "days",
+    "minutes": "minutes"
   },
   "location": {
     "locations": "Locations",
@@ -481,5 +535,68 @@
     "manageLocations": "Manage your class locations and venues",
     "addFirstLocation": "Add First Location",
     "noLocationsDescription": "Create locations where your classes will be held"
+  },
+  "class": {
+    "classes": "Classes",
+    "addClass": "Add Class",
+    "editClass": "Edit Class",
+    "manageClasses": "Manage your classes and schedules",
+    "searchPlaceholder": "Search classes...",
+    "name": "Class Name",
+    "namePlaceholder": "Enter class name",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter class description",
+    "location": "Location",
+    "selectLocation": "Select a location",
+    "instructor": "Instructor",
+    "instructorPlaceholder": "Enter instructor name",
+    "maxStudents": "Max Students",
+    "price": "Price",
+    "pricePlaceholder": "Enter class price",
+    "duration": "Duration (minutes)",
+    "scheduleType": "Schedule Type",
+    "oneTime": "One-time",
+    "recurring": "Recurring",
+    "series": "Series",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "daysOfWeek": "Days of Week",
+    "totalSessions": "Total Sessions",
+    "currentSession": "Current Session",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "tags": "Tags",
+    "selectTagPlaceholder": "Select or search for tags",
+    "tagsHelp": "Add tags to organize classes (e.g., beginner, advanced, yoga, pilates)",
+    "filterByTags": "Filter by Tags",
+    "noTags": "No tags assigned",
+    "scheduleInfo": "Schedule Information",
+    "basicInfo": "Basic Information",
+    "locationInfo": "Location Information",
+    "noClasses": "No classes yet",
+    "getStartedMessage": "Get started by adding your first class",
+    "addFirstClass": "Add First Class",
+    "deleteClassMessage": "Are you sure you want to delete {name}? This action cannot be undone.",
+    "filterByStatus": "Filter by Status",
+    "filterByScheduleType": "Filter by Schedule Type",
+    "filterByInstructor": "Filter by Instructor",
+    "allStatuses": "All Statuses",
+    "allScheduleTypes": "All Schedule Types",
+    "allInstructors": "All Instructors",
+    "sortBy": "Sort By",
+    "sortByDateNewest": "Date (Newest)",
+    "sortByDateOldest": "Date (Oldest)",
+    "sortByName": "Name",
+    "sortByPrice": "Price (High to Low)",
+    "sortByInstructor": "Instructor",
+    "activeClasses": "Active Classes",
+    "upcomingClasses": "Upcoming Classes",
+    "totalInstructors": "Total Instructors",
+    "averagePrice": "Average Price"
   }
 }

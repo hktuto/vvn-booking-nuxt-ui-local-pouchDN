@@ -41,19 +41,6 @@ export interface ClassTypeDocument extends PouchDocument {
   active: boolean
 }
 
-export interface ClassDocument extends PouchDocument {
-  type: 'class'
-  name: string
-  description: string
-  class_type_id: string
-  location_id: string
-  start_time: string
-  end_time: string
-  max_students: number
-  price: number
-  active: boolean
-}
-
 export interface BookingDocument extends PouchDocument {
   type: 'booking'
   student_id: string
@@ -94,6 +81,27 @@ export interface LocationDocument extends PouchDocument {
   email: string
   website: string
   active: boolean
+}
+
+export interface ClassDocument extends PouchDocument {
+  type: 'class'
+  name: string
+  description: string
+  location_id: string
+  max_students: number
+  price: number
+  credits: number
+  duration_minutes: number
+  schedule_type: 'one-time' | 'recurring' | 'series'
+  start_date: string
+  end_date?: string
+  start_time: string
+  end_time: string
+  days_of_week?: string[]
+  total_sessions?: number
+  current_session: number
+  status: 'active' | 'inactive' | 'cancelled' | 'completed'
+  tags: string[]
 }
 
 export interface ScheduleDocument extends PouchDocument {

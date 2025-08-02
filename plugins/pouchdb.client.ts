@@ -62,10 +62,19 @@ export default defineNuxtPlugin(async () => {
 
     // Classes indexes
     await classesDB.createIndex({
-      index: { fields: ['type', 'class_type_id'] }
+      index: { fields: ['type', 'location_id'] }
     })
     await classesDB.createIndex({
-      index: { fields: ['type', 'start_time', 'created_at'] }
+      index: { fields: ['type', 'instructor'] }
+    })
+    await classesDB.createIndex({
+      index: { fields: ['type', 'schedule_type', 'status'] }
+    })
+    await classesDB.createIndex({
+      index: { fields: ['type', 'start_date', 'start_time'] }
+    })
+    await classesDB.createIndex({
+      index: { fields: ['type', 'status', 'created_at'] }
     })
 
     // Bookings indexes

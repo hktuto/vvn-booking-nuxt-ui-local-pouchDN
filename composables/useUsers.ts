@@ -1,9 +1,9 @@
 import type { UserDocument } from './usePouchDB'
 import { usePouchDB, usePouchCRUD } from './usePouchDB'
-import { seedSampleData } from '~/utils/sampleData'
+
 
 export const useUsers = () => {
-  const { users: usersDB, students: studentsDB, packages: packagesDB, locations: locationsDB } = usePouchDB()
+  const { users: usersDB } = usePouchDB()
   const usersCRUD = usePouchCRUD<UserDocument>(usersDB)
   
   // Check if any users exist
@@ -74,12 +74,9 @@ export const useUsers = () => {
           timezone: userData.settings?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           currency: userData.settings?.currency || 'USD'
         }
-      })
-      
-      // Seed sample data after creating the first user
-      await seedSampleData(studentsDB, packagesDB, locationsDB)
-      
-      return user
+              })
+        
+        return user
     } catch (error) {
       console.error('Error creating user:', error)
       throw error
