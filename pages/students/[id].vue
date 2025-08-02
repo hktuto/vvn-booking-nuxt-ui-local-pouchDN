@@ -100,6 +100,26 @@
               </label>
               <p class="text-gray-900 dark:text-white">{{ student.notes }}</p>
             </div>
+            
+            <div>
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('student.tags') }}
+              </label>
+              <div v-if="student.tags && student.tags.length > 0" class="flex flex-wrap gap-2 mt-1">
+                <UBadge
+                  v-for="tag in student.tags"
+                  :key="tag"
+                  color="secondary"
+                  variant="soft"
+                  size="sm"
+                >
+                  {{ tag }}
+                </UBadge>
+              </div>
+              <p v-else class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                {{ t('student.noTags') }}
+              </p>
+            </div>
           </div>
         </div>
       </UCard>
@@ -283,7 +303,7 @@ const packageFilter = ref('all')
 const packageSearchQuery = ref('')
 
 // Composables
-const { getStudentById } = useStudents()
+const { getStudentById, updateStudent } = useStudents()
 const { loadStudentPackagesByStudent } = useStudentPackages()
 
 // Computed
@@ -367,6 +387,7 @@ const editStudent = () => {
 }
 
 const handleStudentUpdated = async (updatedStudent: any) => {
+  await updateStudent(student.value.id, updatedStudent)
   student.value = updatedStudent
   showEditStudentModal.value = false
 }

@@ -55,19 +55,7 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormField
-              name="custom_package_duration"
-              :label="t('package.durationDays')"
-              required
-            >
-              <UInput
-                v-model.number="form.custom_package_duration"
-                type="number"
-                class="w-full"
-                :placeholder="t('package.durationDaysPlaceholder')"
-                min="1"
-              />
-            </UFormField>
+            
 
             <div class="grid grid-cols-2 gap-4">
               <UFormField
@@ -103,6 +91,20 @@
                 />
               </UFormField>
             </div>
+
+            <UFormField
+              name="custom_package_duration"
+              :label="t('package.durationDays')"
+              required
+            >
+              <UInput
+                v-model.number="form.custom_package_duration"
+                type="number"
+                class="w-full"
+                :placeholder="t('package.durationDaysPlaceholder')"
+                min="1"
+              />
+            </UFormField>
           </div>
         </div>
 
@@ -235,9 +237,9 @@ const form = reactive<AddPackageToStudentForm>({
   custom_price: '',
   notes: '',
   // Custom package fields
-  custom_package_price: '',
-  custom_package_credits: '',
-  custom_package_duration: ''
+  custom_package_price: 0,
+  custom_package_credits: 0,
+  custom_package_duration: 0
 })
 
 const selectedPackage = computed(() => {
@@ -288,9 +290,9 @@ const resetForm = () => {
   form.custom_price = ''
   form.notes = ''
   // Reset custom package fields
-  form.custom_package_price = ''
-  form.custom_package_credits = ''
-  form.custom_package_duration = ''
+  form.custom_package_price = 0
+  form.custom_package_credits = 0
+  form.custom_package_duration = 0
 }
 
 const handleSubmit = async (event: FormSubmitEvent<AddPackageToStudentForm>) => {
@@ -317,6 +319,10 @@ const handleSubmit = async (event: FormSubmitEvent<AddPackageToStudentForm>) => 
       packageId = customPackage.id
       // For custom packages, use the package price as the final price (no additional custom price)
       customPrice = undefined
+    }
+
+    if (!packageId) {
+      throw new Error('Package ID is required')
     }
 
     const studentPackage = await addPackageToStudent(

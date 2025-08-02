@@ -1,4 +1,4 @@
-import type { StudentDocument, PackageDocument } from '~/composables/usePouchDB'
+import type { StudentDocument, PackageDocument, LocationDocument } from '~/composables/usePouchDB'
 import { createBaseDocument } from '~/composables/usePouchDB'
 import type PouchDB from 'pouchdb'
 
@@ -13,8 +13,8 @@ export const sampleStudents: Omit<StudentDocument, '_id' | '_rev' | 'created_at'
     address: '123 Main St, City',
     credits: 5,
     notes: 'Regular student, prefers morning classes',
-    registered: true,
-    password_hash: ''
+    password_hash: '',
+    tags: ['regular', 'morning', 'intermediate']
   },
   {
     type: 'student',
@@ -25,8 +25,8 @@ export const sampleStudents: Omit<StudentDocument, '_id' | '_rev' | 'created_at'
     address: '456 Oak Ave, City',
     credits: 3,
     notes: 'New student, very enthusiastic',
-    registered: false,
-    password_hash: ''
+    password_hash: '',
+    tags: ['beginner', 'enthusiastic']
   },
   {
     type: 'student',
@@ -37,8 +37,8 @@ export const sampleStudents: Omit<StudentDocument, '_id' | '_rev' | 'created_at'
     address: '789 Pine St, City',
     credits: 8,
     notes: 'Advanced student, helps with demonstrations',
-    registered: true,
-    password_hash: ''
+    password_hash: '',
+    tags: ['advanced', 'helper', 'evening']
   }
 ]
 
@@ -82,12 +82,44 @@ export const samplePackages: Omit<PackageDocument, '_id' | '_rev' | 'created_at'
   }
 ]
 
+// Sample locations data
+export const sampleLocations: Omit<LocationDocument, '_id' | '_rev' | 'created_at' | 'updated_at'>[] = [
+  {
+    type: 'location',
+    name: 'Main Studio',
+    address: '123 Fitness Street, Downtown, City',
+    phone: '+1 (555) 123-4567',
+    email: 'main@fitnessstudio.com',
+    website: 'https://fitnessstudio.com',
+    active: true
+  },
+  {
+    type: 'location',
+    name: 'Downtown Branch',
+    address: '456 Business Ave, Downtown, City',
+    phone: '+1 (555) 234-5678',
+    email: 'downtown@fitnessstudio.com',
+    website: 'https://fitnessstudio.com/downtown',
+    active: true
+  },
+  {
+    type: 'location',
+    name: 'Suburban Center',
+    address: '789 Suburban Lane, Suburbia, City',
+    phone: '+1 (555) 345-6789',
+    email: 'suburban@fitnessstudio.com',
+    website: '',
+    active: false
+  }
+]
+
 // Function to seed sample data
-export const seedSampleData = async (studentsDB: PouchDB.Database, packagesDB: PouchDB.Database) => {
+export const seedSampleData = async (studentsDB: PouchDB.Database, packagesDB: PouchDB.Database, locationsDB: PouchDB.Database) => {
   try {
     // Check if data already exists
     const existingStudents = await studentsDB.find({ selector: { type: 'student' } })
     const existingPackages = await packagesDB.find({ selector: { type: 'package' } })
+    const existingLocations = await locationsDB.find({ selector: { type: 'location' } })
     
     // Only seed if databases are empty
     if (existingStudents.docs.length === 0) {
@@ -112,6 +144,18 @@ export const seedSampleData = async (studentsDB: PouchDB.Database, packagesDB: P
         await packagesDB.put(doc)
       }
       console.log(`Seeded ${samplePackages.length} packages`)
+    }
+    
+    if (existingLocations.docs.length === 0) {
+      console.log('Seeding sample locations...')
+      for (const locationData of sampleLocations) {
+        const doc = {
+          ...createBaseDocument('location'),
+          ...locationData
+        }
+        await locationsDB.put(doc)
+      }
+      console.log(`Seeded ${sampleLocations.length} locations`)
     }
     
   } catch (error) {

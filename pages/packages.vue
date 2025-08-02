@@ -107,12 +107,15 @@ const searchQuery = ref('')
 
 // Computed property for filtered packages
 const filteredPackages = computed(() => {
+  // First filter out custom packages
+  const regularPackages = packages.value.filter(package_ => !package_.is_custom)
+  
   if (!searchQuery.value.trim()) {
-    return packages.value
+    return regularPackages
   }
   
   const query = searchQuery.value.toLowerCase().trim()
-  return packages.value.filter(package_ => 
+  return regularPackages.filter(package_ => 
     package_.name.toLowerCase().includes(query) ||
     package_.description.toLowerCase().includes(query) ||
     package_.price.toString().includes(query) ||

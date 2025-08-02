@@ -13,8 +13,8 @@
   "navigation": {
     "dashboard": "Dashboard",
     "students": "Students",
+    "locations": "Locations",
     "classes": "Classes",
-    "schedules": "Schedules",
     "bookings": "Bookings",
     "packages": "Packages",
     "transactions": "Transactions",
@@ -110,7 +110,13 @@
       "active": "Active",
       "expired": "Expired",
       "completed": "Completed"
-    }
+    },
+    "tags": "Tags",
+    "addTagPlaceholder": "Type a tag and press Enter",
+    "selectTagPlaceholder": "Select or search for tags",
+    "tagsHelp": "Add tags to organize students (e.g., beginner, advanced, morning, evening)",
+    "filterByTags": "Filter by Tags",
+    "noTags": "No tags assigned"
   },
   "package": {
     "packages": "Packages",
@@ -404,6 +410,9 @@
     "defaultCreditCost": {
       "negative": "Default credit cost cannot be negative",
       "maxExceeded": "Default credit cost cannot exceed 1000"
+    },
+    "tags": {
+      "maxExceeded": "Maximum 10 tags allowed"
     }
   },
   "common": {
@@ -443,6 +452,34 @@
     "thursday": "Thursday",
     "friday": "Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "days": "days"
+  },
+  "location": {
+    "locations": "Locations",
+    "addLocation": "Add Location",
+    "editLocation": "Edit Location",
+    "name": "Name",
+    "namePlaceholder": "Enter location name",
+    "address": "Address",
+    "addressPlaceholder": "Enter full address",
+    "phone": "Phone",
+    "phonePlaceholder": "Enter phone number",
+    "email": "Email",
+    "emailPlaceholder": "Enter email (optional)",
+    "website": "Website",
+    "websitePlaceholder": "Enter website URL (optional)",
+    "active": "Active",
+    "activeDescription": "This location is available for classes",
+    "searchPlaceholder": "Search locations by name, address, phone, email, or website",
+    "noLocations": "No locations yet",
+    "noSearchResults": "No locations found",
+    "getStartedMessage": "Get started by adding your first location",
+    "tryDifferentSearch": "Try a different search term",
+    "deleteLocation": "Delete Location",
+    "deleteLocationMessage": "Are you sure you want to delete {name}? This action cannot be undone.",
+    "manageLocations": "Manage your class locations and venues",
+    "addFirstLocation": "Add First Location",
+    "noLocationsDescription": "Create locations where your classes will be held"
   }
 }

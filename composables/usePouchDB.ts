@@ -19,6 +19,7 @@ export interface StudentDocument extends PouchDocument {
   credits: number
   notes: string
   password_hash: string
+  tags: string[]
 }
 
 export interface PackageDocument extends PouchDocument {
@@ -89,6 +90,9 @@ export interface LocationDocument extends PouchDocument {
   type: 'location'
   name: string
   address: string
+  phone: string
+  email: string
+  website: string
   active: boolean
 }
 

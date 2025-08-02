@@ -23,20 +23,7 @@
           {{ t('app.title') }}
         </h1>
         
-        <div class="flex items-center gap-2">
-          <UButton 
-            @click="toggleLanguage"
-            variant="ghost"
-            icon="i-heroicons-language"
-            size="sm"
-          />
-          <UButton 
-            @click="toggleDarkMode"
-            variant="ghost"
-            :icon="isDark ? 'i-heroicons-sun' : 'i-heroicons-moon'"
-            size="sm"
-          />
-        </div>
+       
       </div>
     </div>
 
@@ -140,6 +127,7 @@ const route = useRoute()
 const navigation = [
   { to: '/', label: 'navigation.dashboard', icon: 'i-heroicons-home' },
   { to: '/students', label: 'navigation.students', icon: 'i-heroicons-users' },
+  { to: '/locations', label: 'navigation.locations', icon: 'i-heroicons-map-pin' },
   { to: '/classes', label: 'navigation.classes', icon: 'i-heroicons-calendar-days' },
   { to: '/packages', label: 'navigation.packages', icon: 'i-heroicons-book-open' },
   { to: '/bookings', label: 'navigation.bookings', icon: 'i-heroicons-clipboard-document-list' },

@@ -1,8 +1,9 @@
 import type { UserDocument } from './usePouchDB'
 import { usePouchDB, usePouchCRUD } from './usePouchDB'
+import { seedSampleData } from '~/utils/sampleData'
 
 export const useUsers = () => {
-  const { users: usersDB } = usePouchDB()
+  const { users: usersDB, students: studentsDB, packages: packagesDB, locations: locationsDB } = usePouchDB()
   const usersCRUD = usePouchCRUD<UserDocument>(usersDB)
   
   // Check if any users exist
@@ -74,6 +75,9 @@ export const useUsers = () => {
           currency: userData.settings?.currency || 'USD'
         }
       })
+      
+      // Seed sample data after creating the first user
+      await seedSampleData(studentsDB, packagesDB, locationsDB)
       
       return user
     } catch (error) {

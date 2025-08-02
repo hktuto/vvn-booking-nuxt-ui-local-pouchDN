@@ -22,8 +22,8 @@
 
     <div class="p-6">
 
-    <!-- Search Bar -->
-    <div class="mb-6">
+    <!-- Search and Filter Bar -->
+    <div class="mb-6 space-y-4">
       <UFormField name="search" :label="$t('common.search')">
         <UInput
           v-model="searchQuery"
@@ -32,6 +32,29 @@
           class="w-full"
         />
       </UFormField>
+      
+      <!-- Tag Filter -->
+      <div v-if="availableTags.length > 0">
+        <UFormField name="tagFilter" :label="$t('student.filterByTags')">
+          <div class="flex flex-wrap gap-2">
+            <UButton
+              v-for="tag in availableTags"
+              :key="tag"
+              :variant="selectedTags.includes(tag) ? 'solid' : 'soft'"
+              :color="selectedTags.includes(tag) ? 'primary' : 'neutral'"
+              size="sm"
+              @click="toggleTag(tag)"
+            >
+              {{ tag }}
+              <UIcon 
+                v-if="selectedTags.includes(tag)" 
+                name="i-heroicons-check" 
+                class="w-4 h-4 ml-1" 
+              />
+            </UButton>
+          </div>
+        </UFormField>
+      </div>
     </div>
 
     <!-- Students Grid -->
@@ -88,21 +111,40 @@ const editingStudent = ref<any>(null)
 const searchQuery = ref('')
 const showAddPackageModal = ref(false)
 const selectedStudent = ref<any>(null)
+const { students, addStudent, updateStudent, deleteStudent, loadStudents, getAllTags, filterStudentsByTags } = useStudents()
 
+const selectedTags = ref<string[]>([])
+const availableTags = computed(() => getAllTags())
+
+const toggleTag = (tag: string) => {
+  const index = selectedTags.value.indexOf(tag)
+  if (index > -1) {
+    selectedTags.value.splice(index, 1)
+  } else {
+    selectedTags.value.push(tag)
+  }
+}
 // Computed property for filtered students
 const filteredStudents = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return students.value
+  // First filter by tags
+  let filtered = selectedTags.value.length > 0 
+    ? filterStudentsByTags(selectedTags.value)
+    : students.value
+  
+  // Then filter by search query
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim()
+    filtered = filtered.filter(student => 
+      student.name.toLowerCase().includes(query) ||
+      student.phone.toLowerCase().includes(query) ||
+      student.email.toLowerCase().includes(query) ||
+      student.address.toLowerCase().includes(query) ||
+      student.notes.toLowerCase().includes(query) ||
+      student.tags.some(tag => tag.toLowerCase().includes(query))
+    )
   }
   
-  const query = searchQuery.value.toLowerCase().trim()
-  return students.value.filter(student => 
-    student.name.toLowerCase().includes(query) ||
-    student.phone.toLowerCase().includes(query) ||
-    student.email.toLowerCase().includes(query) ||
-    student.address.toLowerCase().includes(query) ||
-    student.notes.toLowerCase().includes(query)
-  )
+  return filtered
 })
 
 definePageMeta({

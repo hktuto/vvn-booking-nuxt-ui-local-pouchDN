@@ -40,6 +40,24 @@
             <UIcon name="i-heroicons-chat-bubble-left-ellipsis" class="w-4 h-4 mt-0.5" />
             <span class="line-clamp-2">{{ student.notes }}</span>
           </div>
+          
+          <div class="flex items-start gap-2">
+            <UIcon name="i-heroicons-tag" class="w-4 h-4 mt-0.5" />
+            <div v-if="student.tags && student.tags.length > 0" class="flex flex-wrap gap-1">
+              <UBadge
+                v-for="tag in student.tags"
+                :key="tag"
+                color="secondary"
+                variant="soft"
+                size="xs"
+              >
+                {{ tag }}
+              </UBadge>
+            </div>
+            <span v-else class="text-xs text-gray-500 dark:text-gray-400">
+              {{ $t('student.noTags') }}
+            </span>
+          </div>
         </div>
       </div>
       <UDropdownMenu :items="getStudentActions()">
@@ -79,6 +97,7 @@ interface Props {
     address: string
     credits: number
     notes: string
+    tags: readonly string[]
     created_at: string
     updated_at: string
   }

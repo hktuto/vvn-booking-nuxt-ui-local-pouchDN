@@ -12,6 +12,7 @@ const transformStudentDoc = (doc: StudentDocument) => ({
   credits: doc.credits,
   notes: doc.notes,
   password_hash: doc.password_hash,
+  tags: doc.tags || [],
   created_at: doc.created_at,
   updated_at: doc.updated_at
 })
@@ -53,6 +54,7 @@ export const useStudents = () => {
     credits: number
     notes: string
     password_hash: string
+    tags: string[]
   }) => {
     loading.value = true
     error.value = null
@@ -86,6 +88,7 @@ export const useStudents = () => {
     credits: number
     notes: string
     password_hash: string
+    tags: string[]
   }>) => {
     loading.value = true
     error.value = null
@@ -99,7 +102,7 @@ export const useStudents = () => {
       if (index !== -1) {
         students.value[index] = student
       }
-      
+      console.log('student', student)
       return student
     } catch (err: any) {
       error.value = err.message || 'Failed to update student'
@@ -172,6 +175,25 @@ export const useStudents = () => {
     }
   }
 
+  // Get all unique tags from students
+  const getAllTags = () => {
+    const allTags = new Set<string>()
+    students.value.forEach(student => {
+      student.tags.forEach(tag => allTags.add(tag))
+    })
+    return Array.from(allTags).sort()
+  }
+
+  // Filter students by tags
+  const filterStudentsByTags = (selectedTags: string[]) => {
+    if (selectedTags.length === 0) {
+      return students.value
+    }
+    return students.value.filter(student => 
+      selectedTags.some(tag => student.tags.includes(tag))
+    )
+  }
+
   // Initialize - load students on first use
   onMounted(() => {
     loadStudents()
@@ -187,6 +209,8 @@ export const useStudents = () => {
     getStudentById,
     searchStudents,
     loadStudents,
-    transformStudentDoc
+    transformStudentDoc,
+    getAllTags,
+    filterStudentsByTags
   }
 }

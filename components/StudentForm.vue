@@ -89,6 +89,29 @@
             :rows="3"
           />
         </UFormField>
+
+        <UFormField
+          name="tags"
+          :label="$t('student.tags')"
+        >
+          <div class="space-y-2">
+            <USelectMenu
+              v-model="selectedTag"
+              class="w-full"
+              :items="availableTagOptions"
+              :placeholder="$t('student.selectTagPlaceholder')"
+              searchable
+              multiple
+              create-item
+              @create="onCreateTag"
+              @update:model-value="handleTagSelection"
+            />
+            
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              {{ $t('student.tagsHelp') }}
+            </p>
+          </div>
+        </UFormField>
       </UForm>
     </template>
 
@@ -141,7 +164,21 @@ const form = reactive<StudentForm>({
   email: '',
   address: '',
   credits: 0,
-  notes: ''
+  notes: '',
+  tags: []
+})
+
+const selectedTag = ref<string[]>([])
+const { getAllTags } = useStudents()
+
+const customTag = ref<string[]>([])
+const onCreateTag = (tag: string) => {
+  customTag.value.push(tag)
+}
+// Get available tags for the select menu
+const availableTagOptions = computed(() => {
+  const allTags = getAllTags()
+  return [...allTags, ...customTag.value]
 })
 
 const countryCodeOptions = [
@@ -174,6 +211,8 @@ watch(() => modelValue.value, (newValue) => {
       form.address = props.student.address || ''
       form.credits = props.student.credits || 0
       form.notes = props.student.notes || ''
+      form.tags = props.student.tags || []
+      selectedTag.value = [...form.tags]
     }
   }
 })
@@ -186,6 +225,14 @@ const resetForm = () => {
   form.address = ''
   form.credits = 0
   form.notes = ''
+  form.tags = []
+  selectedTag.value = []
+}
+
+const handleTagSelection = (selectedTags: any[]) => {
+  // Extract the tag values from the selected items
+  const tagValues = selectedTags.map(item => item.value || item).filter(Boolean)
+  form.tags = tagValues
 }
 
 const handleSubmit = async (event: FormSubmitEvent<StudentForm>) => {
@@ -193,7 +240,7 @@ const handleSubmit = async (event: FormSubmitEvent<StudentForm>) => {
   
   try {
     // Emit the validated data to parent
-    emit('saved', event.data)
+    emit('saved', JSON.parse(JSON.stringify(event.data)))
     
     // Close modal
     modelValue.value = false
@@ -201,10 +248,12 @@ const handleSubmit = async (event: FormSubmitEvent<StudentForm>) => {
     console.error('Student form error:', err)
   } finally {
     submitting.value = false
+    customTag.value = []
   }
 }
 
 const handleCancel = () => {
   modelValue.value = false
+  customTag.value = []
 }
 </script> 

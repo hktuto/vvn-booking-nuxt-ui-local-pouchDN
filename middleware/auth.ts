@@ -1,6 +1,5 @@
 export default defineNuxtRouteMiddleware((to) => {
   const { auth } = useAuth()
-  console.log(auth.value)
   // Skip middleware if auth is still loading
   if (auth.value.loading) {
     return

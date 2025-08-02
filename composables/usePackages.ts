@@ -10,6 +10,7 @@ const transformPackageDoc = (doc: PackageDocument) => ({
   credits: doc.credits,
   duration_days: doc.duration_days,
   active: doc.active,
+  is_custom: doc.is_custom || false,
   created_at: doc.created_at,
   updated_at: doc.updated_at
 })
