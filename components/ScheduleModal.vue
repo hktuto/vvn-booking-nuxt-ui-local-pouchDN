@@ -1,155 +1,153 @@
 <template>
   <UModal v-model="isOpen" :ui="{ width: 'sm:max-w-lg' }">
-    <UCard class="max-h-[90vh] flex flex-col">
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ schedule ? $t('classes.editSchedule') : $t('classes.addSchedule') }}
-          </h3>
-          <UButton
-            @click="closeModal"
-            variant="ghost"
-            icon="i-heroicons-x-mark"
-            size="sm"
-          />
-        </div>
-      </template>
-
-      <div class="flex-1 overflow-y-auto">
-        <form @submit.prevent="saveSchedule" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormGroup :label="$t('classes.classType')" required>
-              <USelect
-                v-model="form.class_type_id"
-                :options="classTypeOptions"
-                option-attribute="label"
-                value-attribute="value"
-                :placeholder="$t('classes.selectClassType')"
-                :error="errors.class_type_id"
-              />
-            </UFormGroup>
-
-            <UFormGroup :label="$t('classes.location')" required>
-              <USelect
-                v-model="form.location_id"
-                :options="locationOptions"
-                option-attribute="label"
-                value-attribute="value"
-                :placeholder="$t('classes.selectLocation')"
-                :error="errors.location_id"
-              />
-            </UFormGroup>
-          </div>
-
-          <UFormGroup :label="$t('classes.weeklyDays')" required>
-            <div class="grid grid-cols-4 gap-2">
-              <UCheckbox
-                v-for="day in weekDays"
-                :key="day.value"
-                v-model="form.weekly_days"
-                :value="day.value"
-                :label="day.label"
-              />
-            </div>
-            <p v-if="errors.weekly_days" class="text-red-500 text-sm mt-1">
-              {{ errors.weekly_days }}
-            </p>
-          </UFormGroup>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormGroup :label="$t('classes.startTime')" required>
-              <UInput
-                v-model="form.start_time"
-                type="time"
-                :error="errors.start_time"
-              />
-            </UFormGroup>
-
-            <UFormGroup :label="$t('classes.endTime')" required>
-              <UInput
-                v-model="form.end_time"
-                type="time"
-                :error="errors.end_time"
-              />
-            </UFormGroup>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormGroup :label="$t('classes.startDate')" required>
-              <UInput
-                v-model="form.start_date"
-                type="date"
-                :error="errors.start_date"
-              />
-            </UFormGroup>
-
-            <UFormGroup :label="$t('classes.endDate')">
-              <UInput
-                v-model="form.end_date"
-                type="date"
-                :min="form.start_date"
-              />
-            </UFormGroup>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormGroup :label="$t('classes.maxCapacity')" required>
-              <UInput
-                v-model.number="form.max_capacity"
-                type="number"
-                min="1"
-                :placeholder="$t('classes.enterCapacity')"
-                :error="errors.max_capacity"
-              />
-            </UFormGroup>
-
-            <UFormGroup :label="$t('classes.creditCost')" required>
-              <UInput
-                v-model.number="form.credit_cost"
-                type="number"
-                min="0"
-                step="0.5"
-                :placeholder="$t('classes.enterCreditCost')"
-                :error="errors.credit_cost"
-              />
-            </UFormGroup>
-          </div>
-
-          <UFormGroup :label="$t('classes.description')">
-            <UTextarea
-              v-model="form.description"
-              :placeholder="$t('classes.enterDescription')"
-              rows="3"
-            />
-          </UFormGroup>
-
-          <UFormGroup>
-            <UCheckbox
-              v-model="form.active"
-              :label="$t('common.active')"
-            />
-          </UFormGroup>
-        </form>
+    <template #header>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          {{ schedule ? $t('classes.editSchedule') : $t('classes.addSchedule') }}
+        </h3>
+        <UButton
+          @click="closeModal"
+          variant="ghost"
+          icon="i-heroicons-x-mark"
+          size="sm"
+        />
       </div>
+    </template>
 
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton
-            @click="closeModal"
-            variant="soft"
-          >
-            {{ $t('common.cancel') }}
-          </UButton>
-          <UButton
-            @click="saveSchedule"
-            :loading="saving"
-            :disabled="!isFormValid"
-          >
-            {{ $t('common.save') }}
-          </UButton>
+    <template #body>
+      <form @submit.prevent="saveSchedule" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <UFormGroup :label="$t('classes.classType')" required>
+            <USelect
+              v-model="form.class_type_id"
+              :options="classTypeOptions"
+              option-attribute="label"
+              value-attribute="value"
+              :placeholder="$t('classes.selectClassType')"
+              :error="errors.class_type_id"
+            />
+          </UFormGroup>
+
+          <UFormGroup :label="$t('classes.location')" required>
+            <USelect
+              v-model="form.location_id"
+              :options="locationOptions"
+              option-attribute="label"
+              value-attribute="value"
+              :placeholder="$t('classes.selectLocation')"
+              :error="errors.location_id"
+            />
+          </UFormGroup>
         </div>
-      </template>
-    </UCard>
+
+        <UFormGroup :label="$t('classes.weeklyDays')" required>
+          <div class="grid grid-cols-4 gap-2">
+            <UCheckbox
+              v-for="day in weekDays"
+              :key="day.value"
+              v-model="form.weekly_days"
+              :value="day.value"
+              :label="day.label"
+            />
+          </div>
+          <p v-if="errors.weekly_days" class="text-red-500 text-sm mt-1">
+            {{ errors.weekly_days }}
+          </p>
+        </UFormGroup>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <UFormGroup :label="$t('classes.startTime')" required>
+            <UInput
+              v-model="form.start_time"
+              type="time"
+              :error="errors.start_time"
+            />
+          </UFormGroup>
+
+          <UFormGroup :label="$t('classes.endTime')" required>
+            <UInput
+              v-model="form.end_time"
+              type="time"
+              :error="errors.end_time"
+            />
+          </UFormGroup>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <UFormGroup :label="$t('classes.startDate')" required>
+            <UInput
+              v-model="form.start_date"
+              type="date"
+              :error="errors.start_date"
+            />
+          </UFormGroup>
+
+          <UFormGroup :label="$t('classes.endDate')">
+            <UInput
+              v-model="form.end_date"
+              type="date"
+              :min="form.start_date"
+            />
+          </UFormGroup>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <UFormGroup :label="$t('classes.maxCapacity')" required>
+            <UInput
+              v-model.number="form.max_capacity"
+              type="number"
+              min="1"
+              :placeholder="$t('classes.enterCapacity')"
+              :error="errors.max_capacity"
+            />
+          </UFormGroup>
+
+          <UFormGroup :label="$t('classes.creditCost')" required>
+            <UInput
+              v-model.number="form.credit_cost"
+              type="number"
+              min="0"
+              step="0.5"
+              :placeholder="$t('classes.enterCreditCost')"
+              :error="errors.credit_cost"
+            />
+          </UFormGroup>
+        </div>
+
+        <UFormGroup :label="$t('classes.description')">
+          <UTextarea
+            v-model="form.description"
+            :placeholder="$t('classes.enterDescription')"
+            rows="3"
+          />
+        </UFormGroup>
+
+        <UFormGroup>
+          <UCheckbox
+            v-model="form.active"
+            :label="$t('common.active')"
+          />
+        </UFormGroup>
+      </form>
+    </template>
+
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton
+          @click="closeModal"
+          variant="soft"
+        >
+          {{ $t('common.cancel') }}
+        </UButton>
+        <UButton
+          @click="saveSchedule"
+          :loading="saving"
+          :disabled="!isFormValid"
+        >
+          {{ $t('common.save') }}
+        </UButton>
+      </div>
+    </template>
   </UModal>
 </template>
 

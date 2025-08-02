@@ -1,130 +1,126 @@
 <template>
   <UModal v-model:open="modelValue">
-    <template #content>
-      <UCard class="max-h-[90vh] flex flex-col">
-        <template #header>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ isEditing ? $t('package.editPackage') : $t('package.addPackage') }}
-          </h3>
-        </template>
+    <template #header>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+        {{ isEditing ? $t('package.editPackage') : $t('package.addPackage') }}
+      </h3>
+    </template>
 
-        <div class="flex-1 overflow-y-auto">
-          <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+    <template #body>
+      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+        <UFormField
+          name="name"
+          :label="$t('package.name')"
+          required
+        >
+          <UInput
+            v-model="form.name"
+            class="w-full"
+            :placeholder="$t('package.namePlaceholder')"
+          />
+        </UFormField>
+
+        <UFormField
+          name="description"
+          :label="$t('package.description')"
+        >
+          <UTextarea
+            v-model="form.description"
+            class="w-full"
+            :placeholder="$t('package.descriptionPlaceholder')"
+            :rows="3"
+          />
+        </UFormField>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-4">
             <UFormField
-              name="name"
-              :label="$t('package.name')"
+              name="price"
+              :label="$t('package.price')"
               required
             >
               <UInput
-                v-model="form.name"
-                class="w-full"
-                :placeholder="$t('package.namePlaceholder')"
-              />
+                  v-model.number="form.price"
+                  type="number"
+                  class="w-full"
+                  :placeholder="$t('package.pricePlaceholder')"
+                  min="0"
+                  step="0.01"
+                >
+                <template #leading>
+                $
+                </template>
+                </UInput>
+              <div v-if="form.price > 0 && form.credits > 0" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ $t('package.creditUnitPrice', { price: (form.price / form.credits).toFixed(2) }) }}
+              </div>
             </UFormField>
 
             <UFormField
-              name="description"
-              :label="$t('package.description')"
+              name="credits"
+              :label="$t('package.credits')"
+              required
             >
-              <UTextarea
-                v-model="form.description"
+              <UInput
+                v-model.number="form.credits"
+                type="number"
                 class="w-full"
-                :placeholder="$t('package.descriptionPlaceholder')"
-                :rows="3"
+                :placeholder="$t('package.creditsPlaceholder')"
+                min="1"
               />
             </UFormField>
+          </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="grid grid-cols-2 gap-4">
-                <UFormField
-                  name="price"
-                  :label="$t('package.price')"
-                  required
-                >
-                  <UInput
-                      v-model.number="form.price"
-                      type="number"
-                      class="w-full"
-                      :placeholder="$t('package.pricePlaceholder')"
-                      min="0"
-                      step="0.01"
-                    >
-                    <template #leading>
-                    $
-                    </template>
-                    </UInput>
-                  <div v-if="form.price > 0 && form.credits > 0" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {{ $t('package.creditUnitPrice', { price: (form.price / form.credits).toFixed(2) }) }}
-                  </div>
-                </UFormField>
-
-                <UFormField
-                  name="credits"
-                  :label="$t('package.credits')"
-                  required
-                >
-                  <UInput
-                    v-model.number="form.credits"
-                    type="number"
-                    class="w-full"
-                    :placeholder="$t('package.creditsPlaceholder')"
-                    min="1"
-                  />
-                </UFormField>
-              </div>
-
-              <UFormField
-                name="duration_days"
-                :label="$t('package.durationDays')"
-                required
-              >
-                <UInput
-                  v-model.number="form.duration_days"
-                  type="number"
-                  class="w-full"
-                  :placeholder="$t('package.durationDaysPlaceholder')"
-                  min="1"
-                />
-              </UFormField>
-            </div>
-
-            <UFormField name="active">
-              <UCheckbox
-                v-model="form.active"
-                class="w-full"
-                :label="$t('package.active')"
-              />
-            </UFormField>
-
-            <UAlert
-              v-if="error"
-              color="error"
-              variant="soft"
-              :title="$t('common.error')"
-              :description="error"
-              icon="i-heroicons-exclamation-triangle"
+          <UFormField
+            name="duration_days"
+            :label="$t('package.durationDays')"
+            required
+          >
+            <UInput
+              v-model.number="form.duration_days"
+              type="number"
+              class="w-full"
+              :placeholder="$t('package.durationDaysPlaceholder')"
+              min="1"
             />
-          </UForm>
+          </UFormField>
         </div>
 
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton
-              @click="handleCancel"
-              variant="ghost"
-            >
-              {{ $t('common.cancel') }}
-            </UButton>
-            <UButton
-              @click="() => formRef?.submit()"
-              :loading="submitting"
-              color="primary"
-            >
-              {{ isEditing ? $t('common.save') : $t('common.add') }}
-            </UButton>
-          </div>
-        </template>
-      </UCard>
+        <UFormField name="active">
+          <UCheckbox
+            v-model="form.active"
+            class="w-full"
+            :label="$t('package.active')"
+          />
+        </UFormField>
+
+        <UAlert
+          v-if="error"
+          color="error"
+          variant="soft"
+          :title="$t('common.error')"
+          :description="error"
+          icon="i-heroicons-exclamation-triangle"
+        />
+      </UForm>
+    </template>
+
+    <template #footer>
+      <div class="flex justify-end gap-3">
+        <UButton
+          @click="handleCancel"
+          variant="ghost"
+        >
+          {{ $t('common.cancel') }}
+        </UButton>
+        <UButton
+          @click="() => formRef?.submit()"
+          :loading="submitting"
+          color="primary"
+        >
+          {{ isEditing ? $t('common.save') : $t('common.add') }}
+        </UButton>
+      </div>
     </template>
   </UModal>
 </template>

@@ -1,20 +1,20 @@
 <template>
   <UModal v-model="isOpen" :ui="{ width: 'sm:max-w-md' }">
-    <UCard>
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ location ? $t('classes.editLocation') : $t('classes.addLocation') }}
-          </h3>
-          <UButton
-            @click="closeModal"
-            variant="ghost"
-            icon="i-heroicons-x-mark"
-            size="sm"
-          />
-        </div>
-      </template>
+    <template #header>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          {{ location ? $t('classes.editLocation') : $t('classes.addLocation') }}
+        </h3>
+        <UButton
+          @click="closeModal"
+          variant="ghost"
+          icon="i-heroicons-x-mark"
+          size="sm"
+        />
+      </div>
+    </template>
 
+    <template #body>
       <form @submit.prevent="saveLocation" class="space-y-4">
         <UFormGroup :label="$t('classes.name')" required>
           <UInput
@@ -66,25 +66,25 @@
           />
         </UFormGroup>
       </form>
+    </template>
 
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton
-            @click="closeModal"
-            variant="soft"
-          >
-            {{ $t('common.cancel') }}
-          </UButton>
-          <UButton
-            @click="saveLocation"
-            :loading="saving"
-            :disabled="!isFormValid"
-          >
-            {{ $t('common.save') }}
-          </UButton>
-        </div>
-      </template>
-    </UCard>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <UButton
+          @click="closeModal"
+          variant="soft"
+        >
+          {{ $t('common.cancel') }}
+        </UButton>
+        <UButton
+          @click="saveLocation"
+          :loading="saving"
+          :disabled="!isFormValid"
+        >
+          {{ $t('common.save') }}
+        </UButton>
+      </div>
+    </template>
   </UModal>
 </template>
 
