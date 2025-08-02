@@ -11,7 +11,7 @@
       </div>
       
       <UCard>
-        <UForm :state="form" class="space-y-4" @submit="handleRegister">
+        <UForm :state="form" :schema="registerSchema" class="space-y-4" @submit="handleRegister">
           <UFormField
             name="display_name"
             :label="$t('auth.displayName')"
@@ -157,6 +157,9 @@
 </template>
 
 <script setup lang="ts">
+import type { RegisterForm } from '~/composables/useAuthValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
 // Use blank layout for register page
 definePageMeta({
   layout: 'blank'
@@ -170,7 +173,7 @@ const { t, locale, setLocale } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
-const form = reactive({
+const form = reactive<RegisterForm>({
   display_name: '',
   username: '',
   email: '',
@@ -182,18 +185,18 @@ const form = reactive({
 })
 
 const countryCodeOptions = [
-  { label: '🇭🇰 +852', value: '852' },
-  { label: '🇨🇳 +86', value: '86' },
-  { label: '🇹🇼 +886', value: '886' },
-  { label: '🇺🇸 +1', value: '1' },
-  { label: '🇬🇧 +44', value: '44' },
-  { label: '🇯🇵 +81', value: '81' },
-  { label: '🇰🇷 +82', value: '82' },
-  { label: '🇸🇬 +65', value: '65' },
-  { label: '🇲🇾 +60', value: '60' },
-  { label: '🇹🇭 +66', value: '66' },
-  { label: '🇦🇺 +61', value: '61' },
-  { label: '🇨🇦 +1', value: '1' }
+  { label: '🇭🇰 +852', value: '+852' },
+  { label: '🇨🇳 +86', value: '+86' },
+  { label: '🇹🇼 +886', value: '+886' },
+  { label: '🇺🇸 +1', value: '+1' },
+  { label: '🇬🇧 +44', value: '+44' },
+  { label: '🇯🇵 +81', value: '+81' },
+  { label: '🇰🇷 +82', value: '+82' },
+  { label: '🇸🇬 +65', value: '+65' },
+  { label: '🇲🇾 +60', value: '+60' },
+  { label: '🇹🇭 +66', value: '+66' },
+  { label: '🇦🇺 +61', value: '+61' },
+  { label: '🇨🇦 +1', value: '+1' }
 ]
 
 const languageOptions = [
@@ -207,43 +210,34 @@ const toggleLanguage = () => {
   form.language = newLocale
 }
 
-const handleRegister = async () => {
+const handleRegister = async (event: FormSubmitEvent<RegisterForm>) => {
   loading.value = true
   error.value = ''
   
   try {
-    // Validate form data using Zod schema
-    const validatedData = registerSchema.parse(form)
-    
     // Create user
     await createUser({
-      username: validatedData.username,
-      password: validatedData.password,
-      email: validatedData.email || undefined,
-      phone: validatedData.phone,
-      country_code: validatedData.country_code,
-      display_name: validatedData.display_name,
+      username: event.data.username,
+      password: event.data.password,
+      email: event.data.email || undefined,
+      phone: event.data.phone,
+      country_code: event.data.country_code,
+      display_name: event.data.display_name,
       settings: {
-        language: validatedData.language,
+        language: event.data.language,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         currency: 'USD'
       }
     })
     
-    
     // Set language preference
-    setLocale(validatedData.language)
+    setLocale(event.data.language)
     
     // Navigate to login page with success message
     await navigateTo('/login?registered=true')
     
   } catch (err: any) {
-    if (err.name === 'ZodError') {
-      // Handle validation errors
-      error.value = err.errors[0]?.message || t('auth.registrationError')
-    } else {
-      error.value = err.message || t('auth.registrationError')
-    }
+    error.value = err.message || t('auth.registrationError')
     console.error('Registration error:', err)
   } finally {
     loading.value = false

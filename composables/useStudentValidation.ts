@@ -4,10 +4,10 @@ import { z } from 'zod'
 export const studentSchema = z.object({
   name: z.string()
     .min(1, 'Name is required')
-    .max(32, 'Name must be less than 32 characters'),
+    .max(100, 'Name must be less than 100 characters'),
   phone: z.string()
     .min(1, 'Phone number is required')
-    .regex(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
+    .regex(/^[0-9+\-\s()]+$/, 'Please enter a valid phone number'),
   country_code: z.string()
     .min(1, 'Country code is required'),
   email: z.string()
@@ -16,15 +16,15 @@ export const studentSchema = z.object({
     .or(z.literal(''))
     .transform(val => val || ''),
   address: z.string()
-    .max(200, 'Address must be less than 200 characters')
+    .max(500, 'Address must be less than 500 characters')
     .optional()
     .or(z.literal(''))
     .transform(val => val || ''),
   credits: z.number()
     .min(0, 'Credits cannot be negative')
-    .max(9999, 'Credits cannot exceed 9999'),
+    .max(99999, 'Credits cannot exceed 99999'),
   notes: z.string()
-    .max(500, 'Notes must be less than 500 characters')
+    .max(1000, 'Notes must be less than 1000 characters')
     .optional()
     .or(z.literal(''))
     .transform(val => val || '')

@@ -7,7 +7,7 @@
     </template>
 
     <template #body>
-      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+      <UForm :state="form" :schema="packageSchema" class="space-y-4" @submit="handleSubmit" ref="formRef">
         <UFormField
           name="name"
           :label="$t('package.name')"
@@ -17,7 +17,6 @@
             v-model="form.name"
             class="w-full"
             :placeholder="$t('package.namePlaceholder')"
-            :error="errors.name"
           />
         </UFormField>
 
@@ -30,7 +29,6 @@
             class="w-full"
             :placeholder="$t('package.descriptionPlaceholder')"
             :rows="3"
-            :error="errors.description"
           />
         </UFormField>
 
@@ -41,19 +39,18 @@
               :label="$t('package.price')"
               required
             >
-                              <UInput
-                  v-model.number="form.price"
-                  type="number"
-                  class="w-full"
-                  :placeholder="$t('package.pricePlaceholder')"
-                  min="0"
-                  step="0.01"
-                  :error="errors.price"
-                >
+              <UInput
+                v-model.number="form.price"
+                type="number"
+                class="w-full"
+                :placeholder="$t('package.pricePlaceholder')"
+                min="0"
+                step="0.01"
+              >
                 <template #leading>
-                $
+                  $
                 </template>
-                </UInput>
+              </UInput>
               <div v-if="form.price > 0 && form.credits > 0" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ $t('package.creditUnitPrice', { price: (form.price / form.credits).toFixed(2) }) }}
               </div>
@@ -70,7 +67,6 @@
                 class="w-full"
                 :placeholder="$t('package.creditsPlaceholder')"
                 min="1"
-                :error="errors.credits"
               />
             </UFormField>
           </div>
@@ -86,7 +82,6 @@
               class="w-full"
               :placeholder="$t('package.durationDaysPlaceholder')"
               min="1"
-              :error="errors.duration_days"
             />
           </UFormField>
         </div>
@@ -98,8 +93,6 @@
             :label="$t('package.active')"
           />
         </UFormField>
-
-
       </UForm>
     </template>
 
@@ -125,6 +118,7 @@
 
 <script setup lang="ts">
 import type { PackageForm } from '~/composables/usePackageValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
   package_?: any
@@ -139,11 +133,9 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const formRef = ref()
-
 const { packageSchema } = usePackageValidation()
 
 const submitting = ref(false)
-const errors = ref<Record<string, string>>({})
 
 const form = reactive<PackageForm>({
   name: '',
@@ -179,31 +171,19 @@ const resetForm = () => {
   form.credits = 1
   form.duration_days = 30
   form.active = true
-  errors.value = {}
 }
 
-const handleSubmit = async () => {
+const handleSubmit = async (event: FormSubmitEvent<PackageForm>) => {
   submitting.value = true
-  errors.value = {}
   
   try {
-    // Validate form data
-    const validatedData = packageSchema.parse(form)
-    
     // Emit the validated data to parent
-    emit('saved', validatedData)
+    emit('saved', event.data)
     
     // Close modal
     modelValue.value = false
   } catch (err: any) {
-    if (err.name === 'ZodError') {
-      // Map validation errors to specific fields
-      err.errors.forEach((error: any) => {
-        errors.value[error.path[0]] = error.message
-      })
-    } else {
-      console.error('Package form error:', err)
-    }
+    console.error('Package form error:', err)
   } finally {
     submitting.value = false
   }

@@ -7,7 +7,7 @@
     </template>
 
     <template #body>
-      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+      <UForm :state="form" :schema="studentSchema" class="space-y-4" @submit="handleSubmit" ref="formRef">
         <UFormField
           name="name"
           :label="$t('student.name')"
@@ -17,7 +17,6 @@
             v-model="form.name"
             class="w-full"
             :placeholder="$t('student.namePlaceholder')"
-            :error="errors.name"
           />
         </UFormField>
 
@@ -38,7 +37,6 @@
               type="tel"
               class="flex-1"
               :placeholder="$t('student.phonePlaceholder')"
-              :error="errors.phone"
             />
           </div>
         </UFormField>
@@ -52,7 +50,6 @@
             type="email"
             class="w-full"
             :placeholder="$t('student.emailPlaceholder')"
-            :error="errors.email"
           />
         </UFormField>
 
@@ -65,7 +62,6 @@
             class="w-full"
             :placeholder="$t('student.addressPlaceholder')"
             :rows="3"
-            :error="errors.address"
           />
         </UFormField>
 
@@ -79,7 +75,6 @@
             min="0"
             class="w-full"
             :placeholder="'0'"
-            :error="errors.credits"
           />
         </UFormField>
 
@@ -92,11 +87,8 @@
             class="w-full"
             :placeholder="$t('student.notesPlaceholder')"
             :rows="3"
-            :error="errors.notes"
           />
         </UFormField>
-
-
       </UForm>
     </template>
 
@@ -122,6 +114,7 @@
 
 <script setup lang="ts">
 import type { StudentForm } from '~/composables/useStudentValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
   student?: any
@@ -136,11 +129,9 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const formRef = ref()
-
 const { studentSchema } = useStudentValidation()
 
 const submitting = ref(false)
-const errors = ref<Record<string, string>>({})
 
 const form = reactive<StudentForm>({
   name: '',
@@ -194,31 +185,19 @@ const resetForm = () => {
   form.address = ''
   form.credits = 0
   form.notes = ''
-  errors.value = {}
 }
 
-const handleSubmit = async () => {
+const handleSubmit = async (event: FormSubmitEvent<StudentForm>) => {
   submitting.value = true
-  errors.value = {}
   
   try {
-    // Validate form data
-    const validatedData = studentSchema.parse(form)
-    
     // Emit the validated data to parent
-    emit('saved', validatedData)
+    emit('saved', event.data)
     
     // Close modal
     modelValue.value = false
   } catch (err: any) {
-    if (err.name === 'ZodError') {
-      // Map validation errors to specific fields
-      err.errors.forEach((error: any) => {
-        errors.value[error.path[0]] = error.message
-      })
-    } else {
-      console.error('Student form error:', err)
-    }
+    console.error('Student form error:', err)
   } finally {
     submitting.value = false
   }

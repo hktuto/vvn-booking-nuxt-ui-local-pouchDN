@@ -7,7 +7,7 @@
     </template>
 
     <template #body>
-      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+      <UForm :state="form" :schema="addPackageToStudentSchema" class="space-y-4" @submit="handleSubmit" ref="formRef">
         <!-- Package Type Toggle -->
         <div class="flex gap-4 mb-4">
           <UButton
@@ -39,7 +39,6 @@
             :placeholder="t('student.selectPackagePlaceholder')"
             :items="packageOptions"
             :loading="packagesLoading"
-            :error="errors.package_id"
           />
         </UFormField>
 
@@ -67,7 +66,6 @@
                 class="w-full"
                 :placeholder="t('package.durationDaysPlaceholder')"
                 min="1"
-                :error="errors.custom_package_duration"
               />
             </UFormField>
 
@@ -84,7 +82,6 @@
                   :placeholder="t('package.pricePlaceholder')"
                   min="0"
                   step="0.01"
-                  :error="errors.custom_package_price"
                 >
                   <template #leading>
                     $
@@ -103,7 +100,6 @@
                   class="w-full"
                   :placeholder="t('package.creditsPlaceholder')"
                   min="1"
-                  :error="errors.custom_package_credits"
                 />
               </UFormField>
             </div>
@@ -123,7 +119,6 @@
             :placeholder="t('student.customPricePlaceholder')"
             min="0"
             step="0.01"
-            :error="errors.custom_price"
           >
             <template #leading>
               $
@@ -173,11 +168,8 @@
             class="w-full"
             :placeholder="t('student.notesPlaceholder')"
             :rows="3"
-            :error="errors.notes"
           />
         </UFormField>
-
-
       </UForm>
     </template>
 
@@ -203,6 +195,8 @@
 
 <script setup lang="ts">
 import type { PackageDocument } from '~/composables/usePouchDB'
+import type { AddPackageToStudentForm } from '~/composables/useStudentPackageValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
   student?: {
@@ -231,19 +225,19 @@ const formRef = ref()
 const { t } = useI18n()
 const { packages, loading: packagesLoading } = usePackages()
 const { addPackageToStudent } = useStudentPackages()
+const { addPackageToStudentSchema } = useStudentPackageValidation()
 
 const submitting = ref(false)
-const errors = ref<Record<string, string>>({})
 
-const form = reactive({
-  package_type: 'existing' as 'existing' | 'custom',
+const form = reactive<AddPackageToStudentForm>({
+  package_type: 'existing',
   package_id: '',
-  custom_price: null as number | null,
+  custom_price: '',
   notes: '',
   // Custom package fields
-  custom_package_price: null as number | null,
-  custom_package_credits: null as number | null,
-  custom_package_duration: null as number | null
+  custom_package_price: '',
+  custom_package_credits: '',
+  custom_package_duration: ''
 })
 
 const selectedPackage = computed(() => {
@@ -291,65 +285,32 @@ watch(() => modelValue.value, (newValue) => {
 const resetForm = () => {
   form.package_type = 'existing'
   form.package_id = ''
-  form.custom_price = null
+  form.custom_price = ''
   form.notes = ''
   // Reset custom package fields
-  form.custom_package_price = null
-  form.custom_package_credits = null
-  form.custom_package_duration = null
-  errors.value = {}
+  form.custom_package_price = ''
+  form.custom_package_credits = ''
+  form.custom_package_duration = ''
 }
 
-const formatDate = (date: Date | null) => {
-  if (!date) return ''
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }).format(date)
-}
-
-const handleSubmit = async () => {
+const handleSubmit = async (event: FormSubmitEvent<AddPackageToStudentForm>) => {
   if (!props.student) return
 
   submitting.value = true
-  errors.value = {}
   
   try {
-    // Validate form based on package type
-    if (form.package_type === 'existing' && !form.package_id) {
-      errors.value.package_id = 'Please select a package'
-      return
-    }
-
-    if (form.package_type === 'custom') {
-      if (!form.custom_package_price) {
-        errors.value.custom_package_price = 'Price is required'
-      }
-      if (!form.custom_package_credits) {
-        errors.value.custom_package_credits = 'Credits are required'
-      }
-      if (!form.custom_package_duration) {
-        errors.value.custom_package_duration = 'Duration is required'
-      }
-      
-      if (Object.keys(errors.value).length > 0) {
-        return
-      }
-    }
-
-    let packageId = form.package_id
-    let customPrice: number | undefined = form.custom_price || undefined
+    let packageId = event.data.package_id
+    let customPrice: number | undefined = event.data.custom_price || undefined
 
     // If custom package, create it first
-    if (form.package_type === 'custom') {
+    if (event.data.package_type === 'custom') {
       const { addPackage } = usePackages()
       const customPackage = await addPackage({
         name: generatedPackageName.value,
         description: '', // Custom packages don't need description, use notes field instead
-        price: form.custom_package_price!,
-        credits: form.custom_package_credits!,
-        duration_days: form.custom_package_duration!,
+        price: event.data.custom_package_price!,
+        credits: event.data.custom_package_credits!,
+        duration_days: event.data.custom_package_duration!,
         active: true,
         is_custom: true // Flag to identify custom packages
       })
@@ -361,7 +322,7 @@ const handleSubmit = async () => {
     const studentPackage = await addPackageToStudent(
       props.student.id,
       packageId,
-      form.notes,
+      event.data.notes,
       customPrice || undefined
     )
     

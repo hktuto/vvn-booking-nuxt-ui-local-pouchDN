@@ -15,32 +15,26 @@
     </template>
 
     <template #body>
-      <form @submit.prevent="saveSchedule" class="space-y-4">
+      <UForm :state="form" :schema="scheduleSchema" class="space-y-4" @submit="saveSchedule" ref="formRef">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <UFormGroup :label="$t('classes.classType')" required>
+          <UFormField name="class_type_id" :label="$t('classes.classType')" required>
             <USelect
               v-model="form.class_type_id"
-              :options="classTypeOptions"
-              option-attribute="label"
-              value-attribute="value"
+              :items="classTypeOptions"
               :placeholder="$t('classes.selectClassType')"
-              :error="errors.class_type_id"
             />
-          </UFormGroup>
+          </UFormField>
 
-          <UFormGroup :label="$t('classes.location')" required>
+          <UFormField name="location_id" :label="$t('classes.location')" required>
             <USelect
               v-model="form.location_id"
-              :options="locationOptions"
-              option-attribute="label"
-              value-attribute="value"
+              :items="locationOptions"
               :placeholder="$t('classes.selectLocation')"
-              :error="errors.location_id"
             />
-          </UFormGroup>
+          </UFormField>
         </div>
 
-        <UFormGroup :label="$t('classes.weeklyDays')" required>
+        <UFormField name="weekly_days" :label="$t('classes.weeklyDays')" required>
           <div class="grid grid-cols-4 gap-2">
             <UCheckbox
               v-for="day in weekDays"
@@ -50,86 +44,77 @@
               :label="day.label"
             />
           </div>
-          <p v-if="errors.weekly_days" class="text-red-500 text-sm mt-1">
-            {{ errors.weekly_days }}
-          </p>
-        </UFormGroup>
+        </UFormField>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <UFormGroup :label="$t('classes.startTime')" required>
+          <UFormField name="start_time" :label="$t('classes.startTime')" required>
             <UInput
               v-model="form.start_time"
               type="time"
-              :error="errors.start_time"
             />
-          </UFormGroup>
+          </UFormField>
 
-          <UFormGroup :label="$t('classes.endTime')" required>
+          <UFormField name="end_time" :label="$t('classes.endTime')" required>
             <UInput
               v-model="form.end_time"
               type="time"
-              :error="errors.end_time"
             />
-          </UFormGroup>
+          </UFormField>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <UFormGroup :label="$t('classes.startDate')" required>
+          <UFormField name="start_date" :label="$t('classes.startDate')" required>
             <UInput
               v-model="form.start_date"
               type="date"
-              :error="errors.start_date"
             />
-          </UFormGroup>
+          </UFormField>
 
-          <UFormGroup :label="$t('classes.endDate')">
+          <UFormField name="end_date" :label="$t('classes.endDate')">
             <UInput
               v-model="form.end_date"
               type="date"
               :min="form.start_date"
             />
-          </UFormGroup>
+          </UFormField>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <UFormGroup :label="$t('classes.maxCapacity')" required>
+          <UFormField name="max_capacity" :label="$t('classes.maxCapacity')" required>
             <UInput
               v-model.number="form.max_capacity"
               type="number"
               min="1"
               :placeholder="$t('classes.enterCapacity')"
-              :error="errors.max_capacity"
             />
-          </UFormGroup>
+          </UFormField>
 
-          <UFormGroup :label="$t('classes.creditCost')" required>
+          <UFormField name="credit_cost" :label="$t('classes.creditCost')" required>
             <UInput
               v-model.number="form.credit_cost"
               type="number"
               min="0"
               step="0.5"
               :placeholder="$t('classes.enterCreditCost')"
-              :error="errors.credit_cost"
             />
-          </UFormGroup>
+          </UFormField>
         </div>
 
-        <UFormGroup :label="$t('classes.description')">
+        <UFormField name="description" :label="$t('classes.description')">
           <UTextarea
             v-model="form.description"
             :placeholder="$t('classes.enterDescription')"
             rows="3"
-            :error="errors.description"
           />
-        </UFormGroup>
+        </UFormField>
 
-        <UFormGroup>
+        <UFormField name="active">
           <UCheckbox
             v-model="form.active"
             :label="$t('common.active')"
           />
-        </UFormGroup>
-      </form>
+        </UFormField>
+      </UForm>
     </template>
 
     <template #footer>
@@ -141,9 +126,8 @@
           {{ $t('common.cancel') }}
         </UButton>
         <UButton
-          @click="saveSchedule"
+          @click="() => formRef?.submit()"
           :loading="saving"
-          :disabled="!isFormValid"
         >
           {{ $t('common.save') }}
         </UButton>
@@ -153,6 +137,9 @@
 </template>
 
 <script setup lang="ts">
+import type { ScheduleForm } from '~/composables/useScheduleValidation'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
 const { t } = useI18n()
 
 interface Props {
@@ -173,13 +160,15 @@ const isOpen = computed({
   set: (value) => emit('update:open', value)
 })
 
-const saving = ref(false)
-const errors = ref<Record<string, string>>({})
+const formRef = ref()
+const { scheduleSchema } = useScheduleValidation()
 
-const form = ref({
+const saving = ref(false)
+
+const form = reactive<ScheduleForm>({
   class_type_id: '',
   location_id: '',
-  weekly_days: [] as string[],
+  weekly_days: [],
   start_time: '',
   end_time: '',
   start_date: '',
@@ -225,116 +214,46 @@ const locationOptions = computed(() =>
   }))
 )
 
-const isFormValid = computed(() => {
-  return form.value.class_type_id && 
-         form.value.location_id && 
-         form.value.weekly_days.length > 0 &&
-         form.value.start_time &&
-         form.value.end_time &&
-         form.value.start_date &&
-         form.value.max_capacity > 0 &&
-         form.value.credit_cost >= 0
-})
-
 // Initialize form when modal opens
 watch(() => props.open, (open) => {
   if (open) {
     if (props.schedule) {
       // Edit mode
-      form.value = {
-        class_type_id: props.schedule.class_type_id,
-        location_id: props.schedule.location_id,
-        weekly_days: [...props.schedule.weekly_days],
-        start_time: props.schedule.start_time,
-        end_time: props.schedule.end_time,
-        start_date: props.schedule.start_date,
-        end_date: props.schedule.end_date || '',
-        max_capacity: props.schedule.max_capacity,
-        credit_cost: props.schedule.credit_cost,
-        description: props.schedule.description || '',
-        active: props.schedule.active
-      }
+      form.class_type_id = props.schedule.class_type_id
+      form.location_id = props.schedule.location_id
+      form.weekly_days = [...props.schedule.weekly_days]
+      form.start_time = props.schedule.start_time
+      form.end_time = props.schedule.end_time
+      form.start_date = props.schedule.start_date
+      form.end_date = props.schedule.end_date || ''
+      form.max_capacity = props.schedule.max_capacity
+      form.credit_cost = props.schedule.credit_cost
+      form.description = props.schedule.description || ''
+      form.active = props.schedule.active
     } else {
       // Add mode
-      form.value = {
-        class_type_id: '',
-        location_id: '',
-        weekly_days: [],
-        start_time: '',
-        end_time: '',
-        start_date: '',
-        end_date: '',
-        max_capacity: 10,
-        credit_cost: 1,
-        description: '',
-        active: true
-      }
+      form.class_type_id = ''
+      form.location_id = ''
+      form.weekly_days = []
+      form.start_time = ''
+      form.end_time = ''
+      form.start_date = ''
+      form.end_date = ''
+      form.max_capacity = 10
+      form.credit_cost = 1
+      form.description = ''
+      form.active = true
     }
-    errors.value = {}
   }
 })
 
-const validateForm = () => {
-  errors.value = {}
-  
-  if (!form.value.class_type_id) {
-    errors.value.class_type_id = t('validation.required', { field: t('classes.classType') })
-  }
-  
-  if (!form.value.location_id) {
-    errors.value.location_id = t('validation.required', { field: t('classes.location') })
-  }
-  
-  if (form.value.weekly_days.length === 0) {
-    errors.value.weekly_days = t('validation.required', { field: t('classes.weeklyDays') })
-  }
-  
-  if (!form.value.start_time) {
-    errors.value.start_time = t('validation.required', { field: t('classes.startTime') })
-  }
-  
-  if (!form.value.end_time) {
-    errors.value.end_time = t('validation.required', { field: t('classes.endTime') })
-  }
-  
-  if (!form.value.start_date) {
-    errors.value.start_date = t('validation.required', { field: t('classes.startDate') })
-  }
-  
-  if (!form.value.max_capacity || form.value.max_capacity <= 0) {
-    errors.value.max_capacity = t('validation.positiveNumber', { field: t('classes.maxCapacity') })
-  }
-  
-  if (form.value.credit_cost < 0) {
-    errors.value.credit_cost = t('validation.positiveNumber', { field: t('classes.creditCost') })
-  }
-  
-  if (form.value.start_time && form.value.end_time && form.value.start_time >= form.value.end_time) {
-    errors.value.end_time = t('validation.endTimeAfterStart')
-  }
-  
-  return Object.keys(errors.value).length === 0
-}
-
-const saveSchedule = async () => {
-  if (!validateForm()) return
-  
+const saveSchedule = async (event: FormSubmitEvent<ScheduleForm>) => {
   saving.value = true
   
   try {
     const scheduleData = {
       id: props.schedule?.id || crypto.randomUUID(),
-      class_type_id: form.value.class_type_id,
-      location_id: form.value.location_id,
-      weekly_days: form.value.weekly_days,
-      start_time: form.value.start_time,
-      end_time: form.value.end_time,
-      start_date: form.value.start_date,
-      end_date: form.value.end_date || null,
-      max_capacity: form.value.max_capacity,
-      credit_cost: form.value.credit_cost,
-      description: form.value.description.trim(),
-      active: form.value.active,
+      ...event.data,
       created_at: props.schedule?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
