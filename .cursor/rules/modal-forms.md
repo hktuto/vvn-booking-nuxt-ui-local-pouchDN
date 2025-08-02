@@ -1,39 +1,25 @@
 # Modal Forms Setup Rule
 
 ## Overview
-When creating modals with forms in this project, always use the proper structure to ensure the form content is scrollable on short screens and action buttons are always accessible.
+When creating modals with forms in this project, always use Nuxt UI's modal slot structure to ensure proper responsive behavior and prevent content cropping on small screens.
 
 ## Required Structure
 
-### 1. Modal Container
+### 1. Modal Container with Proper Slots
 ```vue
 <UModal v-model:open="modelValue">
-  <template #content>
-    <UCard class="max-h-[90vh] flex flex-col">
-      <!-- Header, Content, Footer structure -->
-    </UCard>
-  </template>
-</UModal>
-```
-
-### 2. Card Structure with Three Sections
-```vue
-<UCard class="max-h-[90vh] flex flex-col">
-  <!-- Header - Always visible -->
   <template #header>
     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
       {{ modalTitle }}
     </h3>
   </template>
 
-  <!-- Scrollable Content Area -->
-  <div class="flex-1 overflow-y-auto">
+  <template #body>
     <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
       <!-- Form fields go here -->
     </UForm>
-  </div>
+  </template>
 
-  <!-- Footer - Always visible with action buttons -->
   <template #footer>
     <div class="flex justify-end gap-3">
       <UButton @click="handleCancel" variant="ghost">
@@ -44,15 +30,26 @@ When creating modals with forms in this project, always use the proper structure
       </UButton>
     </div>
   </template>
-</UCard>
+</UModal>
 ```
 
-## Key CSS Classes
+## Key Principles
 
-- `max-h-[90vh]` - Limits modal height to 90% of viewport
-- `flex flex-col` - Enables vertical flexbox layout
-- `flex-1` - Makes content area take remaining space
-- `overflow-y-auto` - Enables vertical scrolling when content overflows
+### 1. Use Modal Slots, Not Card Slots
+- **Header slot**: For modal title
+- **Body slot**: For form content (automatically scrollable)
+- **Footer slot**: For action buttons (always visible)
+
+### 2. Responsive Design
+- Modal automatically handles height constraints
+- Body content scrolls when needed
+- Footer buttons remain accessible
+- No manual height calculations required
+
+### 3. Form Structure
+- Use `UForm` component with proper state management
+- Include error handling with `UAlert` components
+- Use consistent spacing with `space-y-4`
 
 ## Script Setup Requirements
 
@@ -74,10 +71,10 @@ const formRef = ref()
 
 ## Best Practices
 
-### 1. Always Use This Structure
-- Never put forms directly in the card body without the scrollable wrapper
-- Always separate header, content, and footer sections
-- Always use the footer template for action buttons
+### 1. Always Use Modal Slots
+- Never use card inside modal with custom slots
+- Let Nuxt UI handle the responsive behavior
+- Use the built-in header, body, and footer slots
 
 ### 2. Form Validation
 - Use `UForm` component with proper state management
@@ -99,39 +96,35 @@ const formRef = ref()
 ```vue
 <template>
   <UModal v-model:open="modelValue">
-    <template #content>
-      <UCard class="max-h-[90vh] flex flex-col">
-        <template #header>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ isEditing ? $t('item.editItem') : $t('item.addItem') }}
-          </h3>
-        </template>
+    <template #header>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+        {{ isEditing ? $t('item.editItem') : $t('item.addItem') }}
+      </h3>
+    </template>
 
-        <div class="flex-1 overflow-y-auto">
-          <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
-            <UFormField name="name" :label="$t('item.name')" required>
-              <UInput v-model="form.name" class="w-full" :placeholder="$t('item.namePlaceholder')" />
-            </UFormField>
+    <template #body>
+      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+        <UFormField name="name" :label="$t('item.name')" required>
+          <UInput v-model="form.name" class="w-full" :placeholder="$t('item.namePlaceholder')" />
+        </UFormField>
 
-            <UFormField name="description" :label="$t('item.description')">
-              <UTextarea v-model="form.description" class="w-full" :placeholder="$t('item.descriptionPlaceholder')" :rows="3" />
-            </UFormField>
+        <UFormField name="description" :label="$t('item.description')">
+          <UTextarea v-model="form.description" class="w-full" :placeholder="$t('item.descriptionPlaceholder')" :rows="3" />
+        </UFormField>
 
-            <UAlert v-if="error" color="error" variant="soft" :title="$t('common.error')" :description="error" />
-          </UForm>
-        </div>
+        <UAlert v-if="error" color="error" variant="soft" :title="$t('common.error')" :description="error" />
+      </UForm>
+    </template>
 
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton @click="handleCancel" variant="ghost">
-              {{ $t('common.cancel') }}
-            </UButton>
-            <UButton @click="() => formRef?.submit()" :loading="submitting" color="primary">
-              {{ isEditing ? $t('common.save') : $t('common.add') }}
-            </UButton>
-          </div>
-        </template>
-      </UCard>
+    <template #footer>
+      <div class="flex justify-end gap-3">
+        <UButton @click="handleCancel" variant="ghost">
+          {{ $t('common.cancel') }}
+        </UButton>
+        <UButton @click="() => formRef?.submit()" :loading="submitting" color="primary">
+          {{ isEditing ? $t('common.save') : $t('common.add') }}
+        </UButton>
+      </div>
     </template>
   </UModal>
 </template>
@@ -159,11 +152,12 @@ const handleCancel = () => {
 
 ## Common Mistakes to Avoid
 
-1. **Don't** put forms directly in card body without scrollable wrapper
-2. **Don't** put action buttons inside the scrollable content area
-3. **Don't** forget to add `formRef` for form submission
-4. **Don't** use fixed heights that might break on different screen sizes
-5. **Don't** forget to handle form validation and error states
+1. **Don't** use card inside modal with custom slots
+2. **Don't** manually set height constraints on modal content
+3. **Don't** put action buttons inside the body slot
+4. **Don't** forget to add `formRef` for form submission
+5. **Don't** use fixed heights that might break on different screen sizes
+6. **Don't** forget to handle form validation and error states
 
 ## Testing Checklist
 
@@ -175,6 +169,32 @@ const handleCancel = () => {
 - [ ] Modal works on mobile devices
 - [ ] Keyboard navigation works
 - [ ] Form submission works from footer buttons
+
+## Migration from Card-Based Modals
+
+If you have existing modals using card slots, migrate them to use modal slots:
+
+### Before (Card-based):
+```vue
+<UModal v-model:open="modelValue">
+  <template #content>
+    <UCard class="max-h-[90vh] flex flex-col">
+      <template #header>...</template>
+      <div class="flex-1 overflow-y-auto">...</div>
+      <template #footer>...</template>
+    </UCard>
+  </template>
+</UModal>
+```
+
+### After (Modal slots):
+```vue
+<UModal v-model:open="modelValue">
+  <template #header>...</template>
+  <template #body>...</template>
+  <template #footer>...</template>
+</UModal>
+```
 
 ## Related Components
 

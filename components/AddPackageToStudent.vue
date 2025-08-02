@@ -1,207 +1,203 @@
 <template>
   <UModal v-model:open="modelValue">
-    <template #content>
-      <UCard class="max-h-[90vh] flex flex-col">
-        <template #header>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ t('student.addPackageToStudent', { name: student?.name }) }}
-          </h3>
-        </template>
+    <template #header>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+        {{ t('student.addPackageToStudent', { name: student?.name }) }}
+      </h3>
+    </template>
 
-        <div class="flex-1 overflow-y-auto">
-          <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
-            <!-- Package Type Toggle -->
-            <div class="flex gap-4 mb-4">
-              <UButton
-                @click="form.package_type = 'existing'"
-                :variant="form.package_type === 'existing' ? 'solid' : 'ghost'"
-                size="sm"
-              >
-                {{ t('student.existingPackage') }}
-              </UButton>
-              <UButton
-                @click="form.package_type = 'custom'"
-                :variant="form.package_type === 'custom' ? 'solid' : 'ghost'"
-                size="sm"
-              >
-                {{ t('student.customPackage') }}
-              </UButton>
-            </div>
-
-            <!-- Existing Package Selection -->
-            <UFormField
-              v-if="form.package_type === 'existing'"
-              name="package_id"
-              :label="t('student.selectPackage')"
-              required
-            >
-              <USelect
-                v-model="form.package_id"
-                class="w-full"
-                :placeholder="t('student.selectPackagePlaceholder')"
-                :items="packageOptions"
-                :loading="packagesLoading"
-              />
-            </UFormField>
-
-            <!-- Custom Package Form -->
-            <div v-if="form.package_type === 'custom'" class="space-y-4">
-              <!-- Auto-generated package name preview -->
-              <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {{ t('student.packageNamePreview') }}:
-                </div>
-                <div class="font-medium text-gray-900 dark:text-white">
-                  {{ generatedPackageName }}
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UFormField
-                  name="custom_package_duration"
-                  :label="t('package.durationDays')"
-                  required
-                >
-                  <UInput
-                    v-model.number="form.custom_package_duration"
-                    type="number"
-                    class="w-full"
-                    :placeholder="t('package.durationDaysPlaceholder')"
-                    min="1"
-                  />
-                </UFormField>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <UFormField
-                    name="custom_package_price"
-                    :label="t('package.price')"
-                    required
-                  >
-                    <UInput
-                      v-model.number="form.custom_package_price"
-                      type="number"
-                      class="w-full"
-                      :placeholder="t('package.pricePlaceholder')"
-                      min="0"
-                      step="0.01"
-                    >
-                      <template #leading>
-                        $
-                      </template>
-                    </UInput>
-                  </UFormField>
-
-                  <UFormField
-                    name="custom_package_credits"
-                    :label="t('package.credits')"
-                    required
-                  >
-                    <UInput
-                      v-model.number="form.custom_package_credits"
-                      type="number"
-                      class="w-full"
-                      :placeholder="t('package.creditsPlaceholder')"
-                      min="1"
-                    />
-                  </UFormField>
-                </div>
-              </div>
-            </div>
-
-            <!-- Custom Price Override (for existing packages) -->
-            <UFormField
-              v-if="form.package_type === 'existing' && selectedPackage"
-              name="custom_price"
-              :label="t('student.customPrice')"
-            >
-              <UInput
-                v-model.number="form.custom_price"
-                type="number"
-                class="w-full"
-                :placeholder="t('student.customPricePlaceholder')"
-                min="0"
-                step="0.01"
-              >
-                <template #leading>
-                  $
-                </template>
-              </UInput>
-              <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {{ t('student.originalPrice', { price: selectedPackage.price }) }}
-              </div>
-            </UFormField>
-
-            <!-- Package Preview -->
-            <div v-if="selectedPackage || form.package_type === 'custom'" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <h4 class="font-medium text-gray-900 dark:text-white mb-2">
-                {{ t('student.packagePreview') }}
-              </h4>
-              <div class="space-y-1 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">{{ t('package.name') }}:</span>
-                  <span class="font-medium">{{ form.package_type === 'existing' ? selectedPackage?.name : generatedPackageName }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">{{ t('package.price') }}:</span>
-                  <span class="font-medium">${{ form.package_type === 'existing' ? (form.custom_price || selectedPackage?.price) : form.custom_package_price }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">{{ t('package.credits') }}:</span>
-                  <span class="font-medium">{{ form.package_type === 'existing' ? selectedPackage?.credits : form.custom_package_credits }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">{{ t('package.durationDays') }}:</span>
-                  <span class="font-medium">{{ form.package_type === 'existing' ? selectedPackage?.duration_days : form.custom_package_duration }} {{ t('common.days') }}</span>
-                </div>
-                <div v-if="form.package_type === 'existing' && expiryDate" class="flex justify-between">
-                  <span class="text-gray-600 dark:text-gray-400">{{ t('student.expiryDate') }}:</span>
-                  <span class="font-medium">{{ expiryDate.toLocaleDateString() }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Notes -->
-            <UFormField
-              name="notes"
-              :label="t('student.notes')"
-            >
-              <UTextarea
-                v-model="form.notes"
-                class="w-full"
-                :placeholder="t('student.notesPlaceholder')"
-                :rows="3"
-              />
-            </UFormField>
-
-            <UAlert
-              v-if="error"
-              color="error"
-              variant="soft"
-              :title="t('common.error')"
-              :description="error"
-              icon="i-heroicons-exclamation-triangle"
-            />
-          </UForm>
+    <template #body>
+      <UForm :state="form" class="space-y-4" @submit="handleSubmit" ref="formRef">
+        <!-- Package Type Toggle -->
+        <div class="flex gap-4 mb-4">
+          <UButton
+            @click="form.package_type = 'existing'"
+            :variant="form.package_type === 'existing' ? 'solid' : 'ghost'"
+            size="sm"
+          >
+            {{ t('student.existingPackage') }}
+          </UButton>
+          <UButton
+            @click="form.package_type = 'custom'"
+            :variant="form.package_type === 'custom' ? 'solid' : 'ghost'"
+            size="sm"
+          >
+            {{ t('student.customPackage') }}
+          </UButton>
         </div>
 
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton
-              @click="handleCancel"
-              variant="ghost"
-            >
-              {{ t('common.cancel') }}
-            </UButton>
-            <UButton
-              @click="() => formRef?.submit()"
-              :loading="submitting"
-              color="primary"
-            >
-              {{ t('student.addPackage') }}
-            </UButton>
+        <!-- Existing Package Selection -->
+        <UFormField
+          v-if="form.package_type === 'existing'"
+          name="package_id"
+          :label="t('student.selectPackage')"
+          required
+        >
+          <USelect
+            v-model="form.package_id"
+            class="w-full"
+            :placeholder="t('student.selectPackagePlaceholder')"
+            :items="packageOptions"
+            :loading="packagesLoading"
+          />
+        </UFormField>
+
+        <!-- Custom Package Form -->
+        <div v-if="form.package_type === 'custom'" class="space-y-4">
+          <!-- Auto-generated package name preview -->
+          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+              {{ t('student.packageNamePreview') }}:
+            </div>
+            <div class="font-medium text-gray-900 dark:text-white">
+              {{ generatedPackageName }}
+            </div>
           </div>
-        </template>
-      </UCard>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <UFormField
+              name="custom_package_duration"
+              :label="t('package.durationDays')"
+              required
+            >
+              <UInput
+                v-model.number="form.custom_package_duration"
+                type="number"
+                class="w-full"
+                :placeholder="t('package.durationDaysPlaceholder')"
+                min="1"
+              />
+            </UFormField>
+
+            <div class="grid grid-cols-2 gap-4">
+              <UFormField
+                name="custom_package_price"
+                :label="t('package.price')"
+                required
+              >
+                <UInput
+                  v-model.number="form.custom_package_price"
+                  type="number"
+                  class="w-full"
+                  :placeholder="t('package.pricePlaceholder')"
+                  min="0"
+                  step="0.01"
+                >
+                  <template #leading>
+                    $
+                  </template>
+                </UInput>
+              </UFormField>
+
+              <UFormField
+                name="custom_package_credits"
+                :label="t('package.credits')"
+                required
+              >
+                <UInput
+                  v-model.number="form.custom_package_credits"
+                  type="number"
+                  class="w-full"
+                  :placeholder="t('package.creditsPlaceholder')"
+                  min="1"
+                />
+              </UFormField>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Price Override (for existing packages) -->
+        <UFormField
+          v-if="form.package_type === 'existing' && selectedPackage"
+          name="custom_price"
+          :label="t('student.customPrice')"
+        >
+          <UInput
+            v-model.number="form.custom_price"
+            type="number"
+            class="w-full"
+            :placeholder="t('student.customPricePlaceholder')"
+            min="0"
+            step="0.01"
+          >
+            <template #leading>
+              $
+            </template>
+          </UInput>
+          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {{ t('student.originalPrice', { price: selectedPackage.price }) }}
+          </div>
+        </UFormField>
+
+        <!-- Package Preview -->
+        <div v-if="selectedPackage || form.package_type === 'custom'" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <h4 class="font-medium text-gray-900 dark:text-white mb-2">
+            {{ t('student.packagePreview') }}
+          </h4>
+          <div class="space-y-1 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">{{ t('package.name') }}:</span>
+              <span class="font-medium">{{ form.package_type === 'existing' ? selectedPackage?.name : generatedPackageName }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">{{ t('package.price') }}:</span>
+              <span class="font-medium">${{ form.package_type === 'existing' ? (form.custom_price || selectedPackage?.price) : form.custom_package_price }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">{{ t('package.credits') }}:</span>
+              <span class="font-medium">{{ form.package_type === 'existing' ? selectedPackage?.credits : form.custom_package_credits }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">{{ t('package.durationDays') }}:</span>
+              <span class="font-medium">{{ form.package_type === 'existing' ? selectedPackage?.duration_days : form.custom_package_duration }} {{ t('common.days') }}</span>
+            </div>
+            <div v-if="form.package_type === 'existing' && expiryDate" class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">{{ t('student.expiryDate') }}:</span>
+              <span class="font-medium">{{ expiryDate.toLocaleDateString() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <UFormField
+          name="notes"
+          :label="t('student.notes')"
+        >
+          <UTextarea
+            v-model="form.notes"
+            class="w-full"
+            :placeholder="t('student.notesPlaceholder')"
+            :rows="3"
+          />
+        </UFormField>
+
+        <UAlert
+          v-if="error"
+          color="error"
+          variant="soft"
+          :title="t('common.error')"
+          :description="error"
+          icon="i-heroicons-exclamation-triangle"
+        />
+      </UForm>
+    </template>
+
+    <template #footer>
+      <div class="flex justify-end gap-3">
+        <UButton
+          @click="handleCancel"
+          variant="ghost"
+        >
+          {{ t('common.cancel') }}
+        </UButton>
+        <UButton
+          @click="() => formRef?.submit()"
+          :loading="submitting"
+          color="primary"
+        >
+          {{ t('student.addPackage') }}
+        </UButton>
+      </div>
     </template>
   </UModal>
 </template>
