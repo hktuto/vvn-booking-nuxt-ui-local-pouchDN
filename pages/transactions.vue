@@ -1,26 +1,26 @@
 <template>
-  <div class="p-6">
-    <!-- Page Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
+  <NuxtLayout name="default">
+    <template #header>
+      <div class="flex items-center justify-between w-full">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ $t('transactions.title') }}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-2">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {{ $t('transactions.description') }}
           </p>
         </div>
-        <div class="flex gap-3">
-          <UButton
-            @click="showTransactionModal = true"
-            icon="i-heroicons-plus"
-          >
-            {{ $t('transactions.addTransaction') }}
-          </UButton>
-        </div>
+        <UButton
+          @click="showTransactionModal = true"
+          icon="i-heroicons-plus"
+          size="sm"
+        >
+          {{ $t('transactions.addTransaction') }}
+        </UButton>
       </div>
-    </div>
+    </template>
+
+    <div class="p-6">
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -233,6 +233,7 @@
       @saved="onTransactionSaved"
     />
   </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">

@@ -1,23 +1,26 @@
 <template>
-  <div class="p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ $t('package.packages') }}
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400">
-          {{ $t('package.managePackages') }}
-        </p>
+  <NuxtLayout name="default">
+    <template #header>
+      <div class="flex items-center justify-between w-full">
+        <div>
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+            {{ $t('package.packages') }}
+          </h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {{ $t('package.managePackages') }}
+          </p>
+        </div>
+        <UButton
+          @click="addNewPackage"
+          icon="i-heroicons-plus"
+          size="sm"
+        >
+          {{ $t('package.addPackage') }}
+        </UButton>
       </div>
-      <UButton
-        @click="addNewPackage"
-        icon="i-heroicons-plus"
-        color="primary"
-      >
-        {{ $t('package.addPackage') }}
-      </UButton>
-    </div>
+    </template>
+
+    <div class="p-6">
 
     <!-- Search Bar -->
     <div class="mb-6">
@@ -86,6 +89,7 @@
       @saved="handlePackageSaved"
     />
   </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
