@@ -1,23 +1,27 @@
 <template>
-  <div class="space-y-6 p-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ t('student.detailTitle', { name: student?.name || '' }) }}
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400">
-          {{ t('student.detailSubtitle') }}
-        </p>
+  <NuxtLayout name="default">
+    <template #header>
+      <div class="flex items-center justify-between w-full">
+        <div>
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+            {{ t('student.detailTitle', { name: student?.name || '' }) }}
+          </h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {{ t('student.detailSubtitle') }}
+          </p>
+        </div>
+        <UButton
+          @click="navigateTo('/students')"
+          variant="ghost"
+          icon="i-heroicons-arrow-left"
+          size="sm"
+        >
+          {{ t('common.back') }}
+        </UButton>
       </div>
-      <UButton
-        @click="navigateTo('/students')"
-        variant="ghost"
-        icon="i-heroicons-arrow-left"
-      >
-        {{ t('common.back') }}
-      </UButton>
-    </div>
+    </template>
+
+    <div class="space-y-6 p-6">
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
@@ -261,6 +265,7 @@
       @saved="handleStudentUpdated"
     />
   </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">

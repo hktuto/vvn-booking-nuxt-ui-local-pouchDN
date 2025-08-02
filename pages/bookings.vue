@@ -1,33 +1,36 @@
 <template>
-  <div class="p-6">
-    <!-- Page Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
+  <NuxtLayout name="default">
+    <template #header>
+      <div class="flex items-center justify-between w-full">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ $t('bookings.title') }}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-2">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {{ $t('bookings.description') }}
           </p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-2">
           <UButton
             @click="showBulkBookingModal = true"
             variant="soft"
             icon="i-heroicons-plus"
+            size="sm"
           >
             {{ $t('bookings.bulkBooking') }}
           </UButton>
           <UButton
             @click="showBookingModal = true"
             icon="i-heroicons-plus"
+            size="sm"
           >
             {{ $t('bookings.addBooking') }}
           </UButton>
         </div>
       </div>
-    </div>
+    </template>
+
+    <div class="p-6">
 
     <!-- Filters -->
     <UCard class="mb-6">
@@ -168,6 +171,7 @@
       @saved="onBulkBookingSaved"
     />
   </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
