@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+
+# I18n setting
+This package use i18n to translate the text.
+The i18n translation file is in the i18n/locales folder.
