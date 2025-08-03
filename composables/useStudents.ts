@@ -17,12 +17,13 @@ const transformStudentDoc = (doc: StudentDocument) => ({
   updated_at: doc.updated_at
 })
 
+const useStudentsList = () => useState<ReturnType<typeof transformStudentDoc>[]>('students', () => [])
 export const useStudents = () => {
   const { students: studentsDB } = usePouchDB()
   const studentsCRUD = usePouchCRUD<StudentDocument>(studentsDB)
   
   // Reactive students list
-  const students = ref<ReturnType<typeof transformStudentDoc>[]>([])
+  const students = useStudentsList()
   const loading = ref(false)
   const error = ref<string | null>(null)
 

@@ -55,7 +55,6 @@ export const useBookings = () => {
   const updateBooking = async (id: string, updates: Partial<Omit<BookingDocument, '_id' | 'type' | 'created_at'>>) => {
     try {
       const updatedBooking = await bookingsCRUD.update(id, updates)
-      console.log('updatedBooking', updatedBooking)
       return updatedBooking
     } catch (err) {
       console.error('Error updating booking:', err)
@@ -99,7 +98,7 @@ export const useBookings = () => {
       
       const classId = parts[1]
       const date = parts[2].replace(/_/g, '-') // Handle dates with hyphens
-      console.log("try to get class by id split in virtual booking by id", classId, date, parts, classes.value)
+      
       // Find the class
       const class_ = await classesCRUD.findById(classId)
       if (!class_) {
@@ -129,7 +128,8 @@ export const useBookings = () => {
   // Get virtual bookings for a specific date (scheduled classes without actual bookings)
   const getVirtualBookingsForDate = async(date: string) => {
     const virtualBookings: any[] = []
-    
+    // return if date is before today
+    if (new Date(date) < new Date()) return virtualBookings
     for (const class_ of classes.value) {
       if (class_.status !== 'active') continue
       // Check if class is scheduled for this date
@@ -164,7 +164,6 @@ export const useBookings = () => {
             is_virtual: false
           }
         })
-        console.log('findExistingBooking', findExistingBooking.docs)
         if (!findExistingBooking.docs.length) {
           virtualBookings.push({
             id: `virtual-${class_.id}-${date.replace(/-/g, '_')}`,
@@ -199,7 +198,6 @@ export const useBookings = () => {
           }
         }
       }).then(result => {
-        console.log('Loaded bookings for date:', result.docs.length)
         return result.docs.map(doc => transformBookingDoc(doc as BookingDocument))
       })
       const virtualBookings = await getVirtualBookingsForDate(date)
@@ -283,7 +281,6 @@ export const useBookings = () => {
   // Remove student from booking
   const removeStudentFromBooking = async (bookingId: string, studentId: string) => {
     try {
-      console.log('removeStudentFromBooking', bookingId, studentId)
       const existingBooking = await bookingsCRUD.findById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
         
@@ -336,7 +333,7 @@ export const useBookings = () => {
         max_capacity: virtualBooking.max_capacity,
         is_virtual: false
       })
-      
+      console.log('realBooking', realBooking)
       return {
         success: true,
         newBookingId: realBooking._id,

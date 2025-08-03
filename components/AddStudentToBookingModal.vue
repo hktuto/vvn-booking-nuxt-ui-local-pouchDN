@@ -61,73 +61,31 @@
           </UFormField>
 
           <!-- Add Button -->
-          <UButton
-            @click="handleAddStudents"
-            :loading="submitting"
-            :disabled="!selectedStudents.length || !creditsUsed"
-            color="primary"
-            class="w-full"
-          >
-            {{ t('booking.addStudents') }}
-          </UButton>
-        </div>
-
-        <!-- Current Students Section -->
-        <div v-if="booking?.bookings?.length > 0" class="space-y-4">
-          <h5 class="font-medium text-gray-900 dark:text-white">
-            {{ t('booking.currentStudents') }}
-          </h5>
           
-          <div class="space-y-2">
-            <div
-              v-for="studentBooking in booking.bookings"
-              :key="studentBooking.student_id"
-              class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-            >
-              <div class="flex items-center gap-3">
-                <UIcon name="i-heroicons-user" class="w-4 h-4 text-gray-500" />
-                <div>
-                  <div class="font-medium text-gray-900 dark:text-white">
-                    {{ studentBooking.student_name }}
-                  </div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ studentBooking.credits_used }} {{ t('common.credits') }}
-                    <span class="mx-2">•</span>
-                    {{ t(`booking.status.${studentBooking.status}`) }}
-                  </div>
-                </div>
-              </div>
-              
-              <UButton
-                @click="handleRemoveStudent(studentBooking.student_id)"
-                variant="ghost"
-                size="sm"
-                icon="i-heroicons-x-mark"
-                color="error"
-                :aria-label="t('booking.removeStudent')"
-              />
-            </div>
-          </div>
         </div>
 
-        <!-- Empty State -->
-        <div v-else-if="!booking?.is_virtual" class="text-center py-6">
-          <UIcon name="i-heroicons-users" class="w-12 h-12 text-gray-400 mx-auto mb-2" />
-          <p class="text-gray-500 dark:text-gray-400">
-            {{ t('booking.noStudentsBooked') }}
-          </p>
-        </div>
+
+        
       </div>
     </template>
 
     <template #footer>
-      <div class="flex justify-end gap-3">
+      <div class="flex  gap-3">
         <UButton
           @click="handleCancel"
           variant="ghost"
         >
           {{ t('common.close') }}
         </UButton>
+        <UButton
+            @click="handleAddStudents"
+            :loading="submitting"
+            :disabled="!selectedStudents.length || !creditsUsed"
+            color="primary"
+            class="flex-1"
+          >
+            {{ t('booking.addStudents') }}
+          </UButton>
       </div>
     </template>
   </UModal>
@@ -153,7 +111,7 @@ const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
 const { students, loadStudents } = useStudents()
-const { classes } = useClasses()
+const { classes, loadClasses } = useClasses()
 
 const submitting = ref(false)
 const selectedStudents = ref<any[]>([])
@@ -263,4 +221,5 @@ watch(() => modelValue.value, (newValue) => {
     resetForm()
   }
 })
+loadClasses()
 </script> 

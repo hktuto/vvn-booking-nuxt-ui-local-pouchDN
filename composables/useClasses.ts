@@ -24,12 +24,12 @@ const transformClassDoc = (doc: ClassDocument) => ({
   created_at: doc.created_at,
   updated_at: doc.updated_at
 })
-
+const useClassesList = () => useState<ReturnType<typeof transformClassDoc>[]>('classes', () => [])
 export const useClasses = () => {
   const { classes: classesDB } = usePouchDB()
   const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
   
-  const classes = ref<ReturnType<typeof transformClassDoc>[]>([])
+  const classes = useClassesList()
   const loading = ref(false)
   const error = ref<string | null>(null)
 

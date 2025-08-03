@@ -7,9 +7,6 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
           {{ t('booking.bookingDetails') }}
         </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">
-          {{ formatDate(booking?.class_date) }} at {{ booking?.class_time }}
-        </p>
       </div>
       <UButton
         @click="navigateBack"
@@ -26,7 +23,7 @@
     </div>
 
     <!-- Booking Details -->
-    <div v-else-if="booking" class="space-y-6">
+    <div v-else-if="booking" class="space-y-2">
       <!-- Virtual Event Notice -->
       <div v-if="booking.is_virtual" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
         <div class="flex items-center gap-2">
@@ -49,14 +46,10 @@
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {{ getClassInfo(booking)?.name || 'Unknown Class' }}
             </h2>
-            <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <span class="flex items-center gap-1">
                 <UIcon name="i-heroicons-calendar" class="w-4 h-4" />
-                {{ formatDate(booking.class_date) }}
-              </span>
-              <span class="flex items-center gap-1">
-                <UIcon name="i-heroicons-clock" class="w-4 h-4" />
-                {{ booking.class_time }}
+                {{ formatDate(booking.class_date) }}@{{ booking.class_time }}
               </span>
               <span class="flex items-center gap-1">
                 <UIcon name="i-heroicons-academic-cap" class="w-4 h-4" />
@@ -69,6 +62,14 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
+            <UButton
+              v-if="!booking.is_virtual"
+              @click="showEditBookingModal = true"
+              variant="ghost"
+              size="sm"
+              icon="i-heroicons-pencil-square"
+              :aria-label="t('booking.editBooking')"
+            />
             <UBadge
               v-if="booking.is_virtual"
               color="primary"
@@ -176,12 +177,6 @@
       <!-- Actions -->
       <div class="flex justify-end gap-3">
         <UButton
-          @click="navigateBack"
-          variant="ghost"
-        >
-          {{ t('common.cancel') }}
-        </UButton>
-        <UButton
           v-if="!booking?.is_virtual"
           @click="handleDeleteBooking"
           color="error"
@@ -219,6 +214,13 @@
       @virtual-booking-conversion="handleVirtualBookingConversion"
       @refresh-needed="loadBooking"
     />
+
+    <!-- Edit Booking Modal -->
+    <EditBookingModal
+      v-model="showEditBookingModal"
+      :booking="booking"
+      @saved="handleBookingUpdated"
+    />
   </NuxtLayout>
 </template>
 
@@ -226,13 +228,14 @@
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { getBookingById, deleteBooking, addStudentToBooking, removeStudentFromBooking, convertVirtualBookingToReal } = useBookings()
+const { getBookingById, deleteBooking, addStudentToBooking, removeStudentFromBooking, convertVirtualBookingToReal, updateBooking } = useBookings()
 const { classes, loadClasses } = useClasses()
 
 // State
 const loading = ref(true)
 const booking = ref<any>(null)
 const showAddStudentModal = ref(false)
+const showEditBookingModal = ref(false)
 
 // Get booking ID from route
 const bookingId = route.params.id as string
@@ -257,13 +260,12 @@ const getClassInfo = (booking: any) => {
   if (booking?.class_info) return booking.class_info
   return classes.value.find(c => c.id === booking?.class_id)
 }
-
+const { locale } = useI18n()
 // Format date
 const formatDate = (dateString: string) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString(undefined, {
-    weekday: 'short',
+  return date.toLocaleDateString(locale.value, {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -292,7 +294,6 @@ const handleVirtualBookingConversion = async (virtualBookingId: string, studentI
       // Show success message
       const message = t('booking.virtualBookingConvertedMessage', { count: studentIds.length })
       // You can add a toast notification here if you have a notification system
-      console.log(t('booking.virtualBookingConverted'), message)
       
       // Navigate to the new real booking page
       await navigateTo(`/bookings/${result.newBookingId}`)
@@ -346,6 +347,16 @@ const handleRemoveStudent = async (studentId: string) => {
   }
 }
 
+// Handle booking updated
+const handleBookingUpdated = async (bookingId: string, updates: any) => {
+  try {
+    await updateBooking(bookingId, updates)
+    await loadBooking()
+  } catch (err) {
+    console.error('Error updating booking:', err)
+  }
+}
+
 // Handle delete booking
 const handleDeleteBooking = async () => {
   if (!booking.value) return
@@ -366,23 +377,9 @@ const handleDeleteBooking = async () => {
 
 // Navigate back
 const navigateBack = () => {
-  const { date, view } = route.query
-  console.log("navigateBack", date, view)
-  if(date && view){
-    router.push({
-      path: '/bookings',
-      query: { date, view }
+  router.push({
+      path: '/bookings'
     })
-  }else{
-    console.log("navigateBack", booking.value.class_date)
-    router.push({
-      path: '/bookings',
-      query: {
-        date : booking.value.class_date || new Date().toISOString().split('T')[0],
-        view : 'day'
-      }
-    })
-  }
 }
 
 // Load booking on mount

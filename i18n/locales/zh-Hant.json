@@ -337,6 +337,9 @@
     "classTime": {
       "required": "課程時間是必需的"
     },
+    "maxCapacity": {
+      "min": "最大容量必須至少為1"
+    },
     "bookings": {
       "min": "至少需要一個學生預約"
     },
@@ -570,6 +573,11 @@
     "addStudents": "新增學生",
     "currentStudents": "目前學生",
     "capacity": "容量",
+    "editBooking": "編輯預約",
+    "classDate": "課程日期",
+    "classTime": "課程時間",
+    "maxCapacity": "最大容量",
+    "minCapacityHelp": "最小容量：{min}（不能少於目前預約數）",
     "creditsUsed": "使用的學分",
     "requiredCredits": "所需學分",
     "notes": "備註",

@@ -36,7 +36,7 @@
         sm
         @view-change="onViewChange"
         @ready="onViewChange"
-        style="height: 100dvh;"
+        style="height: calc(100dvh - 120px);"
       />
     </div>
 
@@ -61,8 +61,8 @@ const route = useRoute()
 
 
 
-const initialDate = ref(route.query.date ? new Date(route.query.date as string) : new Date())
-const initialView = ref(route.query.view as string || 'day')
+const initialDate = useState('calendarDate', () => route.query.date ? new Date(route.query.date as string) : new Date())
+const initialView = useState('calendarView', () => route.query.view as string || 'day')
 // Calendar events
 const calendarEvents = ref<any[]>([])
 const loading = ref(false)
@@ -95,13 +95,8 @@ const updateQueryParams = async (view: any) => {
   try {
     const currentDate = view.start.format('YYYY-MM-DD')
     const currentView = view.id || 'day'
-    await router.push({
-      query: {
-        ...route.query,
-        date: currentDate,
-        view: currentView
-      }
-    })
+    initialView.value = currentView
+    initialDate.value = new Date(currentDate)
   } catch (err) {
     console.error('Error updating query params:', err)
   }

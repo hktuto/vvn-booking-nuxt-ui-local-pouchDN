@@ -372,6 +372,9 @@
     "classTime": {
       "required": "Class time is required"
     },
+    "maxCapacity": {
+      "min": "Maximum capacity must be at least 1"
+    },
     "bookings": {
       "min": "At least one student booking is required"
     },
@@ -582,6 +585,11 @@
     "addStudents": "Add Students",
     "currentStudents": "Current Students",
     "capacity": "Capacity",
+    "editBooking": "Edit Booking",
+    "classDate": "Class Date",
+    "classTime": "Class Time",
+    "maxCapacity": "Max Capacity",
+    "minCapacityHelp": "Minimum capacity: {min} (cannot be less than current bookings)",
     "creditsUsed": "Credits Used",
     "requiredCredits": "Required Credits",
     "notes": "Notes",
