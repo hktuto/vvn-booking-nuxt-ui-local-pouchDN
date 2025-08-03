@@ -1,6 +1,6 @@
 # PWA (Progressive Web App) Support
 
-This Nuxt.js application has been configured with full PWA support, including fullscreen display mode.
+This VVN Booking application has been configured with full PWA support, including fullscreen display mode for the student management system.
 
 ## Features
 
@@ -9,7 +9,7 @@ The app is configured to run in fullscreen mode when installed as a PWA, providi
 
 ### ✅ Offline Support
 - Service worker automatically caches app resources
-- Offline page available at `/offline`
+- PouchDB provides local-first offline functionality
 - Automatic updates when new versions are available
 
 ### ✅ Install Prompt
@@ -31,7 +31,10 @@ pwa: {
   registerType: 'autoUpdate',
   workbox: {
     navigateFallback: '/',
-    globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+    globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+    // Skip offline page since we use PouchDB for offline functionality
+    skipWaiting: true,
+    clientsClaim: true
   },
   client: {
     installPrompt: true,
@@ -44,15 +47,17 @@ pwa: {
     type: 'module'
   },
   manifest: {
-    name: 'Nuxt App',
-    short_name: 'NuxtApp',
-    description: 'A Progressive Web App built with Nuxt.js',
+    name: 'VVN Booking - Student Management',
+    short_name: 'VVN Booking',
+    description: 'Mobile-first student management app for teachers and fitness studios. Manage students, packages, classes, and bookings with local-first PouchDB storage.',
     theme_color: '#000000',
     background_color: '#ffffff',
     display: 'fullscreen',
     orientation: 'portrait-primary',
     scope: '/',
     start_url: '/',
+    categories: ['education', 'productivity', 'business'],
+    lang: 'en',
     icons: [
       {
         src: '/icon-192x192.png',
@@ -71,7 +76,6 @@ pwa: {
 
 ### Components
 - `PWAInstallButton.vue` - Shows install prompt when available
-- `pages/offline.vue` - Offline page with retry functionality
 
 ### Composables
 - `usePWA()` - Built-in composable from `@vite-pwa/nuxt` for PWA functionality
@@ -126,7 +130,7 @@ const installApp = async () => {
 ### PWA Testing Checklist
 - [ ] App can be installed
 - [ ] App runs in fullscreen mode
-- [ ] Offline functionality works
+- [ ] PouchDB offline functionality works
 - [ ] App updates automatically
 - [ ] Install prompt appears correctly
 - [ ] App icons display properly
@@ -148,11 +152,11 @@ manifest: {
 ```
 
 ### App Name
-Update the app name in `nuxt.config.ts`:
+The app is configured as "VVN Booking" with the full name "VVN Booking - Student Management". To update:
 ```typescript
 manifest: {
-  name: 'Your App Name',
-  short_name: 'YourApp'
+  name: 'VVN Booking - Student Management',
+  short_name: 'VVN Booking'
 }
 ```
 
@@ -169,4 +173,5 @@ PWA features are supported in:
 - The app uses `@vite-pwa/nuxt` module for PWA functionality
 - Service worker is automatically generated during build
 - Fullscreen mode provides the most immersive experience
-- Offline support ensures the app works without internet connection
+- PouchDB provides local-first offline functionality
+- No separate offline page needed due to PouchDB's offline capabilities

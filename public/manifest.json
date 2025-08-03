@@ -1,7 +1,7 @@
 {
-  "name": "Nuxt App",
-  "short_name": "NuxtApp",
-  "description": "A Progressive Web App built with Nuxt.js",
+  "name": "VVN Booking - Student Management",
+  "short_name": "VVN Booking",
+  "description": "Mobile-first student management app for teachers and fitness studios. Manage students, packages, classes, and bookings with local-first PouchDB storage.",
   "start_url": "/",
   "display": "fullscreen",
   "background_color": "#ffffff",
@@ -9,7 +9,7 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["productivity", "utilities"],
+  "categories": ["education", "productivity", "business"],
   "icons": [
     {
       "src": "/icon-192x192.png",

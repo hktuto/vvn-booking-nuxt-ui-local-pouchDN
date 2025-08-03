@@ -49,7 +49,10 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     workbox: {
       navigateFallback: '/',
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+      // Skip offline page since we use PouchDB for offline functionality
+      skipWaiting: true,
+      clientsClaim: true
     },
     client: {
       installPrompt: true,
@@ -62,15 +65,17 @@ export default defineNuxtConfig({
       type: 'module'
     },
     manifest: {
-      name: 'Nuxt App',
-      short_name: 'NuxtApp',
-      description: 'A Progressive Web App built with Nuxt.js',
+      name: 'VVN Booking - Student Management',
+      short_name: 'VVN Booking',
+      description: 'Mobile-first student management app for teachers and fitness studios. Manage students, packages, classes, and bookings with local-first PouchDB storage.',
       theme_color: '#000000',
       background_color: '#ffffff',
       display: 'fullscreen',
       orientation: 'portrait-primary',
       scope: '/',
       start_url: '/',
+      categories: ['education', 'productivity', 'business'],
+      lang: 'en',
       icons: [
         {
           src: '/icon-192x192.png',
