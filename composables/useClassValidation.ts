@@ -65,7 +65,11 @@ export const useClassValidation = () => {
     tags: z.array(z.string())
       .max(10, t('validation.tags.maxExceeded'))
       .optional()
-      .default([])
+      .default([]),
+    
+    color: z.string()
+      .min(1, t('validation.color.required'))
+      .default('#3B82F6')
   }).refine((data) => {
     // Validate that end_date is after start_date if provided
     if (data.end_date && data.start_date) {

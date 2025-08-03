@@ -35,10 +35,19 @@
             <span>${{ class_.price }}</span>
           </div>
 
-          <div class="flex items-center gap-2">
-            <UIcon name="i-heroicons-academic-cap" class="w-4 h-4" />
-            <span>{{ class_.credits }} {{ t('common.credits') }}</span>
-          </div>
+                <div class="flex items-center gap-2">
+        <UIcon name="i-heroicons-academic-cap" class="w-4 h-4" />
+        <span>{{ class_.credits }} {{ t('common.credits') }}</span>
+      </div>
+      
+      <!-- Color indicator -->
+      <div class="flex items-center gap-2">
+        <div 
+          class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600"
+          :style="{ backgroundColor: class_.color || '#3B82F6' }"
+        ></div>
+        <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('class.color') }}</span>
+      </div>
           
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-clock" class="w-4 h-4" />
@@ -117,6 +126,7 @@ interface Props {
     current_session?: number
     status: 'active' | 'inactive' | 'cancelled' | 'completed'
     tags: readonly string[]
+    color: string
     created_at: string
     updated_at: string
   }
@@ -180,11 +190,6 @@ const formatSchedule = (class_: Props['class_']) => {
 }
 
 const getClassActions = () => [
-  {
-    label: t('common.detail'),
-    icon: 'i-heroicons-eye',
-    onSelect: () => emit('view', props.class_)
-  },
   {
     label: t('common.edit'),
     icon: 'i-heroicons-pencil-square',

@@ -27,9 +27,16 @@
 <script setup lang="ts">
 const { auth } = useAuth()
 const { t } = useI18n()
-
+const { isDark, toggleDarkMode } = useDarkMode()
 // User profile dropdown items
 const userProfileItems = computed(() => [
+  [
+  {
+    label: t('common.toggleColorMode'),
+    icon: isDark.value ? 'i-heroicons-sun' : 'i-heroicons-moon',
+    onSelect: () => toggleDarkMode()
+  }
+  ],
   [
     {
       label: t('profile.settings'),

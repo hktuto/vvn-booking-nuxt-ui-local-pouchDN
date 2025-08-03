@@ -23,10 +23,7 @@ export default defineNuxtPlugin(async () => {
   try {
     // Users indexes
     await usersDB.createIndex({
-      index: { fields: ['type', 'username'] }
-    })
-    await usersDB.createIndex({
-      index: { fields: ['type', 'created_at'] }
+      index: { fields: ['type', 'username', 'created_at'] }
     })
 
     // Students indexes
@@ -78,14 +75,8 @@ export default defineNuxtPlugin(async () => {
     })
 
     // Bookings indexes
-    await bookingsDB.createIndex({
-      index: { fields: ['type', 'student_id'] }
-    })
-    await bookingsDB.createIndex({
-      index: { fields: ['type', 'class_id'] }
-    })
-    await bookingsDB.createIndex({
-      index: { fields: ['type', 'status', 'created_at'] }
+    const bookingsIndex = await bookingsDB.createIndex({
+      index: { fields: ['type', 'class_id', 'class_date', 'class_time'] }
     })
 
     // Transactions indexes
@@ -112,6 +103,22 @@ export default defineNuxtPlugin(async () => {
     })
 
     console.log('PouchDB indexes created successfully')
+    return {
+      provide: {
+        pouchdb: {
+          users: usersDB,
+          students: studentsDB,
+          packages: packagesDB,
+          studentPackages: studentPackagesDB,
+          classTypes: classTypesDB,
+          classes: classesDB,
+          bookings: bookingsDB,
+          transactions: transactionsDB,
+          locations: locationsDB,
+          schedules: schedulesDB
+        }
+      }
+    }
   } catch (error) {
     console.warn('Some PouchDB indexes already exist:', error)
   }
@@ -119,20 +126,5 @@ export default defineNuxtPlugin(async () => {
   // Note: Sample data seeding moved to user registration process
 
   // Provide databases globally
-  return {
-    provide: {
-      pouchdb: {
-        users: usersDB,
-        students: studentsDB,
-        packages: packagesDB,
-        studentPackages: studentPackagesDB,
-        classTypes: classTypesDB,
-        classes: classesDB,
-        bookings: bookingsDB,
-        transactions: transactionsDB,
-        locations: locationsDB,
-        schedules: schedulesDB
-      }
-    }
-  }
+  
 })

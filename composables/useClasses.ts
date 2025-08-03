@@ -20,6 +20,7 @@ const transformClassDoc = (doc: ClassDocument) => ({
   current_session: doc.current_session,
   status: doc.status, // 'active', 'inactive', 'cancelled', 'completed'
   tags: doc.tags || [],
+  color: doc.color || '#3B82F6', // Default blue color
   created_at: doc.created_at,
   updated_at: doc.updated_at
 })
@@ -40,8 +41,9 @@ export const useClasses = () => {
       const result = await classesDB.find({
         selector: { type: 'class' }
       })
-      
       classes.value = result.docs.map((doc: any) => transformClassDoc(doc))
+
+
     } catch (err) {
       console.error('Error loading classes:', err)
       error.value = 'Failed to load classes'
@@ -68,13 +70,15 @@ export const useClasses = () => {
     current_session?: number
     status: 'active' | 'inactive' | 'cancelled' | 'completed'
     tags: string[]
+    color?: string
   }) => {
     try {
       const doc = {
         ...classData,
         type: 'class' as const,
         current_session: classData.current_session || 1,
-        tags: classData.tags || []
+        tags: classData.tags || [],
+        color: classData.color || '#3B82F6' // Default blue color
       }
       
       const newClass = await classesCRUD.create(doc)

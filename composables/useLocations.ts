@@ -110,7 +110,7 @@ export const useLocations = () => {
     error.value = null
     
     try {
-      await locationsCRUD.delete(id)
+      await locationsCRUD.remove(id)
       
       // Remove from reactive array
       const index = locations.value.findIndex(l => l.id === id)
@@ -129,7 +129,8 @@ export const useLocations = () => {
   // Get location by ID
   const getLocationById = async (id: string) => {
     try {
-      const doc = await locationsCRUD.get(id)
+      const doc = await locationsCRUD.findById(id)
+      if(!doc) return null
       return transformLocationDoc(doc)
     } catch (err: any) {
       console.error('Error getting location:', err)

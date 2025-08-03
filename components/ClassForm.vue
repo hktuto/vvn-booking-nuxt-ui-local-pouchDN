@@ -201,6 +201,22 @@
           </UFormField>
         </div>
 
+        <!-- Color -->
+        <UFormField name="color" :label="t('class.color')">
+          <div class="flex items-center gap-3">
+            <input
+              v-model="form.color"
+              type="color"
+              class="w-12 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
+            />
+            <UInput
+              v-model="form.color"
+              :placeholder="t('class.colorPlaceholder')"
+              class="flex-1"
+            />
+          </div>
+        </UFormField>
+
         <!-- Tags -->
         <UFormField name="tags" :label="t('class.tags')">
           <div class="space-y-2">
@@ -297,6 +313,7 @@ const form = reactive<ClassForm>({
   end_date: '',
   start_time: '',
   end_time: '',
+  color: '#3B82F6',
   days_of_week: [],
   total_sessions: undefined,
   current_session: 1,
@@ -394,8 +411,9 @@ watch(() => modelValue.value, (newValue) => {
       form.total_sessions = props.class_.total_sessions
       form.current_session = props.class_.current_session || 1
       form.status = props.class_.status || 'active'
-      form.tags = props.class_.tags || []
-      selectedTag.value = [...form.tags]
+          form.color = props.class_.color || '#3B82F6'
+    form.tags = props.class_.tags || []
+    selectedTag.value = [...form.tags]
     }
   }
 })
@@ -417,8 +435,9 @@ const resetForm = () => {
   form.total_sessions = undefined
   form.current_session = 1
   form.status = 'active'
-  form.tags = []
-  selectedTag.value = []
+      form.color = '#3B82F6'
+    form.tags = []
+    selectedTag.value = []
   customTag.value = []
 }
 

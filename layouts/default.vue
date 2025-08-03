@@ -88,7 +88,7 @@
           </div>
           <nav class="px-4">
             <UNavigationMenu 
-            :items="navigationLinks"
+              :items="navigationLinks"
               orientation="vertical" />
           </nav>
         </div>
@@ -127,10 +127,8 @@ const route = useRoute()
 const navigation = [
   { to: '/', label: 'navigation.dashboard', icon: 'i-heroicons-home' },
   { to: '/students', label: 'navigation.students', icon: 'i-heroicons-users' },
-  { to: '/locations', label: 'navigation.locations', icon: 'i-heroicons-map-pin' },
-  { to: '/classes', label: 'navigation.classes', icon: 'i-heroicons-calendar-days' },
   { to: '/packages', label: 'navigation.packages', icon: 'i-heroicons-book-open' },
-  { to: '/bookings', label: 'navigation.bookings', icon: 'i-heroicons-clipboard-document-list' },
+  { to: '/classes', label: 'navigation.classes', icon: 'i-heroicons-calendar-days' },
   { to: '/transactions', label: 'navigation.transactions', icon: 'i-heroicons-banknotes' }
 ]
 

@@ -130,8 +130,6 @@
     "price": "Price",
     "pricePlaceholder": "Enter price",
     "credits": "Credits",
-    "creditsPlaceholder": "Enter credits needed",
-    "credits": "Credits",
     "creditsPlaceholder": "Enter number of credits",
     "durationDays": "Duration (Days)",
     "durationDaysPlaceholder": "Enter duration in days",
@@ -176,7 +174,6 @@
     "viewClasses": "View Classes",
     "name": "Name",
     "enterClassName": "Enter class name",
-    "description": "Description",
     "enterDescription": "Enter description",
     "defaultCreditCost": "Default Credit Cost",
     "enterCreditCost": "Enter credit cost",
@@ -196,7 +193,8 @@
     "enterAddress": "Enter address",
     "enterPhone": "Enter phone number",
     "enterEmail": "Enter email",
-    "enterWebsite": "Enter website URL"
+    "enterWebsite": "Enter website URL",
+    "credit" : "Credit"
   },
   "bookings": {
     "title": "Bookings",
@@ -213,7 +211,7 @@
     "recentBookings": "Recent Bookings",
     "student": "Student",
     "class": "Class",
-    "status": "Status",
+    "statusLabel": "Status",
     "credits": "Credits",
     "bookingTime": "Booking Time",
     "viewDetails": "View Details",
@@ -250,10 +248,10 @@
     "allMethods": "All Methods",
     "recentTransactions": "Recent Transactions",
     "student": "Student",
-    "type": "Type",
+    "typelabel": "Type",
     "amount": "Amount",
     "creditChange": "Credit Change",
-    "paymentMethod": "Payment Method",
+    "paymentMethodLabel": "Payment Method",
     "date": "Date",
     "viewDetails": "View Details",
     "editTransaction": "Edit Transaction",
@@ -313,10 +311,7 @@
       "required": "Address is required",
       "maxLength": "Address must be less than 500 characters"
     },
-    "credits": {
-      "negative": "Credits cannot be negative",
-      "maxExceeded": "Credits cannot exceed 99999"
-    },
+    
     "notes": {
       "maxLength": "Notes must be less than 1000 characters"
     },
@@ -332,33 +327,15 @@
       "min": "Credits must be at least 1",
       "maxExceeded": "Credits cannot exceed 99999"
     },
-    "duration": {
-      "min": "Duration must be at least 1 day",
-      "maxExceeded": "Duration cannot exceed 10 years"
-    },
+    
     "classType": {
       "required": "Class type is required"
     },
-    "location": {
-      "required": "Location is required"
-    },
+    
     "weeklyDays": {
       "required": "At least one day must be selected"
     },
-    "startTime": {
-      "required": "Start time is required",
-      "invalid": "Please enter a valid time"
-    },
-    "endTime": {
-      "required": "End time is required",
-      "invalid": "Please enter a valid time"
-    },
-    "startDate": {
-      "required": "Start date is required"
-    },
-    "endDate": {
-      "afterStart": "End date must be after or equal to start date"
-    },
+    
     "maxCapacity": {
       "min": "Maximum capacity must be at least 1",
       "maxExceeded": "Maximum capacity cannot exceed 1000"
@@ -370,6 +347,42 @@
     "credits": {
       "min": "Credits must be at least 1",
       "max": "Credits cannot exceed 100"
+    },
+    "student": {
+      "required": "Student is required"
+    },
+    "studentName": {
+      "required": "Student name is required"
+    },
+    "notes": {
+      "maxLength": "Notes cannot exceed 500 characters"
+    },
+    "bookedAt": {
+      "required": "Booking time is required"
+    },
+    "class": {
+      "required": "Class is required"
+    },
+    "classDate": {
+      "required": "Class date is required"
+    },
+    "classTime": {
+      "required": "Class time is required"
+    },
+    "bookings": {
+      "min": "At least one student booking is required"
+    },
+    "totalBooked": {
+      "min": "Total booked cannot be negative"
+    },
+    "maxCapacity": {
+      "min": "Maximum capacity must be at least 1"
+    },
+    "booking": {
+      "capacityExceeded": "Total booked cannot exceed maximum capacity"
+    },
+    "color": {
+      "required": "Color is required"
     },
     "className": {
       "required": "Class name is required",
@@ -385,10 +398,7 @@
       "min": "Duration must be at least 15 minutes",
       "maxExceeded": "Duration cannot exceed 8 hours"
     },
-    "maxStudents": {
-      "min": "Maximum students must be at least 1",
-      "maxExceeded": "Maximum students cannot exceed 50"
-    },
+    
     "website": {
       "invalid": "Please enter a valid URL"
     },
@@ -470,6 +480,7 @@
   },
   "common": {
     "save": "Save",
+    "close": "Close",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
@@ -507,7 +518,8 @@
     "saturday": "Saturday",
     "sunday": "Sunday",
     "days": "days",
-    "minutes": "minutes"
+    "minutes": "minutes",
+    "toggleColorMode": "Toggle Color Mode"
   },
   "location": {
     "locations": "Locations",
@@ -536,8 +548,50 @@
     "addFirstLocation": "Add First Location",
     "noLocationsDescription": "Create locations where your classes will be held"
   },
+  "booking": {
+    "bookings": "Bookings",
+    "addBooking": "Add Booking",
+    "editBooking": "Edit Booking",
+    "searchBookings": "Search bookings...",
+    "confirmedBookings": "Confirmed",
+    "todayBookings": "Today",
+    "completedBookings": "Completed",
+    "cancelledBookings": "Cancelled",
+    "comingSoon": "Coming Soon",
+    "comingSoonMessage": "Booking management system is under development.",
+    "addFirstBooking": "Add First Booking",
+    "today": "Today",
+    "virtual": "Virtual",
+    "booked": "Booked",
+    "students": "Students",
+    "noStudentsBooked": "No students booked yet",
+    "noStudents": "No students in this booking",
+    "addStudent": "Add Student",
+    "removeStudent": "Remove Student",
+    "viewDetails": "View Details",
+    "addStudentToClass": "Add Student to Class",
+    "manageStudents": "Manage Students",
+    "selectStudent": "Select Student",
+    "selectStudents": "Select Students",
+    "selectStudentPlaceholder": "Choose a student...",
+    "selectStudentsPlaceholder": "Choose students to add",
+    "addStudents": "Add Students",
+    "currentStudents": "Current Students",
+    "capacity": "Capacity",
+    "creditsUsed": "Credits Used",
+    "requiredCredits": "Required Credits",
+    "notes": "Notes",
+    "notesPlaceholder": "Add any notes about this booking...",
+    "status": {
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "no_show": "No Show"
+    }
+  },
   "class": {
     "classes": "Classes",
+    "credit": "Credit",
     "addClass": "Add Class",
     "editClass": "Edit Class",
     "manageClasses": "Manage your classes and schedules",
@@ -573,6 +627,8 @@
     "tags": "Tags",
     "selectTagPlaceholder": "Select or search for tags",
     "tagsHelp": "Add tags to organize classes (e.g., beginner, advanced, yoga, pilates)",
+    "color": "Color",
+    "colorPlaceholder": "Enter hex color code (e.g., #3B82F6)",
     "filterByTags": "Filter by Tags",
     "noTags": "No tags assigned",
     "scheduleInfo": "Schedule Information",

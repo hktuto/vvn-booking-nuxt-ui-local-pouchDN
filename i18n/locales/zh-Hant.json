@@ -63,7 +63,7 @@
     "emailPlaceholder": "請輸入電子郵件（選填）",
     "address": "地址",
     "addressPlaceholder": "請輸入地址（選填）",
-    "credits": "學分",
+    "credits": "格數",
     "notes": "備註",
     "notesPlaceholder": "請輸入備註（選填）",
     "searchPlaceholder": "搜尋學生姓名、電話、電子郵件、地址或備註",
@@ -131,7 +131,6 @@
     "pricePlaceholder": "請輸入價格",
     "credits": "格",
     "creditsPlaceholder": "輸入所需格數",
-    "creditsPlaceholder": "請輸入格數",
     "durationDays": "有效期（天）",
     "durationDaysPlaceholder": "請輸入有效期天數",
     "active": "啟用",
@@ -169,16 +168,15 @@
     "schedule": "時間表",
     "time": "時間",
     "capacity": "容量",
-    "creditCost": "學分費用",
+    "creditCost": "格數費用",
     "students": "學生",
-    "credits": "學分",
+    "credits": "格數",
     "viewClasses": "查看課程",
     "name": "名稱",
     "enterClassName": "請輸入課程名稱",
-    "description": "描述",
     "enterDescription": "請輸入描述",
-    "defaultCreditCost": "預設學分費用",
-    "enterCreditCost": "請輸入學分費用",
+    "defaultCreditCost": "預設格數費用",
+    "enterCreditCost": "請輸入格數費用",
     "noDescription": "無描述",
     "classType": "課程類型",
     "selectClassType": "選擇課程類型",
@@ -212,8 +210,8 @@
     "recentBookings": "最近預約",
     "student": "學生",
     "class": "課程",
-    "status": "狀態",
-    "credits": "學分",
+    "statusLabel": "狀態",
+    "credits": "格數",
     "bookingTime": "預約時間",
     "viewDetails": "查看詳情",
     "editBooking": "編輯預約",
@@ -229,11 +227,11 @@
   },
   "transactions": {
     "title": "交易記錄",
-    "description": "追蹤付款、學分和財務交易",
+    "description": "追蹤付款、格數和財務交易",
     "addTransaction": "新增交易",
     "totalRevenue": "總收入",
     "monthlyRevenue": "月收入",
-    "totalCredits": "總學分",
+    "totalCredits": "總格數",
     "pendingPayments": "待收付款",
     "allTime": "總計",
     "thisMonth": "本月",
@@ -249,17 +247,17 @@
     "allMethods": "所有方式",
     "recentTransactions": "最近交易",
     "student": "學生",
-    "type": "類型",
+    "typeLabel": "類型",
     "amount": "金額",
-    "creditChange": "學分變更",
-    "paymentMethod": "付款方式",
+    "creditChange": "格數變更",
+    "paymentMethodLabel": "付款方式",
     "date": "日期",
     "viewDetails": "查看詳情",
     "editTransaction": "編輯交易",
     "printReceipt": "列印收據",
     "type": {
       "package_purchase": "套票購買",
-      "class_credit": "課程學分",
+      "class_credit": "課程格數",
       "manual_adjustment": "手動調整"
     },
     "paymentMethod": {
@@ -313,8 +311,40 @@
       "maxLength": "地址不能超過500個字符"
     },
     "credits": {
-      "negative": "學分不能為負數",
-      "maxExceeded": "學分不能超過99999"
+      "negative": "格數不能為負數",
+      "maxExceeded": "格數不能超過99999",
+      "min": "學分至少為 1",
+      "max": "學分不能超過 100"
+    },
+    "student": {
+      "required": "學生是必需的"
+    },
+    "studentName": {
+      "required": "學生姓名是必需的"
+    },
+    "bookedAt": {
+      "required": "預約時間是必需的"
+    },
+    "class": {
+      "required": "課程是必需的"
+    },
+    "classDate": {
+      "required": "課程日期是必需的"
+    },
+    "classTime": {
+      "required": "課程時間是必需的"
+    },
+    "bookings": {
+      "min": "至少需要一個學生預約"
+    },
+    "totalBooked": {
+      "min": "總預約數不能為負數"
+    },
+    "booking": {
+      "capacityExceeded": "總預約數不能超過最大容量"
+    },
+    "color": {
+      "required": "顏色是必需的"
     },
     "notes": {
       "maxLength": "備註不能超過1000個字符"
@@ -328,47 +358,20 @@
       "maxExceededSimple": "價格不能超過99999"
     },
     "packageCredits": {
-      "min": "學分至少需要1個",
-      "maxExceeded": "學分不能超過99999"
+      "min": "格數至少需要1個",
+      "maxExceeded": "格數不能超過99999"
     },
-    "duration": {
-      "min": "期限至少需要1天",
-      "maxExceeded": "期限不能超過10年"
-    },
-    "classType": {
-      "required": "課程類型為必填項"
-    },
-    "location": {
-      "required": "地點為必填項"
-    },
+    
     "weeklyDays": {
       "required": "至少需要選擇一天"
-    },
-    "startTime": {
-      "required": "開始時間為必填項",
-      "invalid": "請輸入有效的時間"
-    },
-    "endTime": {
-      "required": "結束時間為必填項",
-      "invalid": "請輸入有效的時間"
-    },
-    "startDate": {
-      "required": "開始日期為必填項"
-    },
-    "endDate": {
-      "afterStart": "結束日期必須在開始日期之後或相等"
     },
     "maxCapacity": {
       "min": "最大容量至少需要1",
       "maxExceeded": "最大容量不能超過1000"
     },
     "creditCost": {
-      "negative": "學分成本不能為負數",
-      "maxExceeded": "學分成本不能超過1000"
-    },
-    "credits": {
-      "min": "學分至少需要1個",
-      "max": "學分不能超過100個"
+      "negative": "格數成本不能為負數",
+      "maxExceeded": "格數成本不能超過1000"
     },
     "className": {
       "required": "課程名稱為必填項",
@@ -383,10 +386,6 @@
     "durationMinutes": {
       "min": "時長至少需要15分鐘",
       "maxExceeded": "時長不能超過8小時"
-    },
-    "maxStudents": {
-      "min": "最大學生數至少需要1",
-      "maxExceeded": "最大學生數不能超過50"
     },
     "website": {
       "invalid": "請輸入有效的網址"
@@ -403,9 +402,9 @@
       "required": "自定義套票需要價格"
     },
     "customCredits": {
-      "min": "學分至少需要1個",
-      "maxExceeded": "學分不能超過99999",
-      "required": "自定義套票需要學分"
+      "min": "格數至少需要1個",
+      "maxExceeded": "格數不能超過99999",
+      "required": "自定義套票需要格數"
     },
     "customDuration": {
       "min": "期限至少需要1天",
@@ -413,8 +412,8 @@
       "required": "自定義套票需要期限"
     },
     "defaultCreditCost": {
-      "negative": "預設學分成本不能為負數",
-      "maxExceeded": "預設學分成本不能超過1000"
+      "negative": "預設格數成本不能為負數",
+      "maxExceeded": "預設格數成本不能超過1000"
     },
     "tags": {
       "maxExceeded": "最多允許10個標籤"
@@ -469,6 +468,7 @@
   },
   "common": {
     "save": "儲存",
+    "close": "關閉",
     "cancel": "取消",
     "delete": "刪除",
     "edit": "編輯",
@@ -496,7 +496,7 @@
     "packages": "套票",
     "bookings": "預約",
     "transactions": "交易",
-    "credits": "學分",
+    "credits": "格數",
     "export": "匯出",
     "monday": "星期一",
     "tuesday": "星期二",
@@ -506,7 +506,8 @@
     "saturday": "星期六",
     "sunday": "星期日",
     "days": "天",
-    "minutes": "分鐘"
+    "minutes": "分鐘",
+    "toggleColorMode": "切換顏色模式"
   },
   "location": {
     "locations": "場地",
@@ -535,8 +536,50 @@
     "addFirstLocation": "新增第一個場地",
     "noLocationsDescription": "建立課程舉辦的場地"
   },
+  "booking": {
+    "bookings": "預約",
+    "addBooking": "新增預約",
+    "editBooking": "編輯預約",
+    "searchBookings": "搜尋預約...",
+    "confirmedBookings": "已確認",
+    "todayBookings": "今日",
+    "completedBookings": "已完成",
+    "cancelledBookings": "已取消",
+    "comingSoon": "即將推出",
+    "comingSoonMessage": "預約管理系統正在開發中。",
+    "addFirstBooking": "新增第一個預約",
+    "today": "今天",
+    "virtual": "虛擬",
+    "booked": "已預約",
+    "students": "學生",
+    "noStudentsBooked": "尚未有學生預約",
+    "noStudents": "此預約中沒有學生",
+    "addStudent": "新增學生",
+    "removeStudent": "移除學生",
+    "viewDetails": "查看詳情",
+    "addStudentToClass": "新增學生到課程",
+    "manageStudents": "管理學生",
+    "selectStudent": "選擇學生",
+    "selectStudents": "選擇學生",
+    "selectStudentPlaceholder": "選擇學生...",
+    "selectStudentsPlaceholder": "選擇要新增的學生",
+    "addStudents": "新增學生",
+    "currentStudents": "目前學生",
+    "capacity": "容量",
+    "creditsUsed": "使用的學分",
+    "requiredCredits": "所需學分",
+    "notes": "備註",
+    "notesPlaceholder": "新增關於此預約的備註...",
+    "status": {
+      "confirmed": "已確認",
+      "cancelled": "已取消",
+      "completed": "已完成",
+      "no_show": "未出席"
+    }
+  },
   "class": {
     "classes": "課程",
+    "credit": "格數",
     "addClass": "新增課程",
     "editClass": "編輯課程",
     "manageClasses": "管理您的課程和時間表",
@@ -572,6 +615,8 @@
     "tags": "標籤",
     "selectTagPlaceholder": "選擇或搜尋標籤",
     "tagsHelp": "新增標籤來組織課程（例如：初學者、進階、瑜伽、普拉提）",
+    "color": "顏色",
+    "colorPlaceholder": "輸入十六進制顏色代碼（例如：#3B82F6）",
     "filterByTags": "按標籤篩選",
     "noTags": "未分配標籤",
     "scheduleInfo": "時間表資訊",

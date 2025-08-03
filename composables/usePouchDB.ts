@@ -43,11 +43,20 @@ export interface ClassTypeDocument extends PouchDocument {
 
 export interface BookingDocument extends PouchDocument {
   type: 'booking'
-  student_id: string
   class_id: string
-  status: 'confirmed' | 'cancelled' | 'completed' | 'no_show'
-  credits_used: number
-  notes: string
+  class_date: string // The actual date of the class (for recurring/series classes)
+  class_time: string // The actual time of the class
+  bookings: {
+    student_id: string
+    student_name: string
+    status: 'confirmed' | 'cancelled' | 'completed' | 'no_show'
+    credits_used: number
+    notes: string
+    booked_at: string
+  }[]
+  total_booked: number
+  max_capacity: number
+  is_virtual: boolean // true for scheduled classes without bookings, false for actual bookings
 }
 
 export interface StudentPackageDocument extends PouchDocument {
@@ -102,6 +111,7 @@ export interface ClassDocument extends PouchDocument {
   current_session: number
   status: 'active' | 'inactive' | 'cancelled' | 'completed'
   tags: string[]
+  color: string // Added for calendar display
 }
 
 export interface ScheduleDocument extends PouchDocument {
