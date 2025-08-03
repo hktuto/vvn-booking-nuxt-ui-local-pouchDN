@@ -17,7 +17,7 @@
         :time-to="23 * 60"
         :time-step="60"
         :views="['day', 'week', 'month']"
-        view="week"
+        view="day"
         :events="calendarEvents"
         :locale="locale === 'zh-Hant' ? 'zh-hk' : 'en-us'"
         :time-format="'HH:mm'"
@@ -49,11 +49,10 @@ addDatePrototypes()
 import 'vue-cal/style'
 const { isDark } = useDarkMode()
 const { t } = useI18n()
-const { getBookingsForDate, addStudentToBooking, removeStudentFromBooking, addBooking } = useBookings()
-const { students } = useStudents()
+const { getBookingsForDate } = useBookings()
+
 
 // Date management
-const selectedDate = ref(new Date().toISOString().split('T')[0])
 const showAddStudentModal = ref(false)
 const selectedBooking = ref<any>(null)
 const { locale } = useI18n()
@@ -62,7 +61,7 @@ const { locale } = useI18n()
 const calendarEvents = ref<any[]>([])
 const loading = ref(false)
 const vuecalRef = ref<any>(null)
-
+const router = useRouter()
 
 async function onViewChange(view: any) {
   let _view;
@@ -125,62 +124,13 @@ const getClassInfo = (booking: any) => {
 
 // Event handlers
 const onEventClick = ({event}: any) => {
-  console.log(event)
+
   const booking = event.customData?.booking
   if (booking) {
-    selectedBooking.value = booking
-    showAddStudentModal.value = true
+    router.push(`/bookings/${booking.id}`)
   }
 }
 
-
-// Handle student added
-const handleStudentAdded = async (bookingId: string, studentId: string, creditsUsed: number, notes: string) => {
-  try {
-    // Check if this is a virtual booking
-    const booking = calendarEvents.value.find(event => event.id === bookingId)
-    if (booking?.customData?.isVirtual) {
-      // For virtual bookings, we need to create the booking first
-      const virtualBooking = booking.customData.booking
-      const newBooking = await addBooking({
-        class_id: virtualBooking.class_id,
-        class_date: virtualBooking.class_date,
-        class_time: virtualBooking.class_time,
-        bookings: [{
-          student_id: studentId,
-          student_name: students.value.find((s: any) => s.id === studentId)?.name || 'Unknown Student',
-          status: 'confirmed',
-          credits_used: creditsUsed,
-          notes,
-          booked_at: new Date().toISOString()
-        }],
-        total_booked: 1,
-        max_capacity: virtualBooking.max_capacity,
-        is_virtual: false
-      })
-    } else {
-      // For real bookings, just add the student
-      await addStudentToBooking(bookingId, studentId, creditsUsed, notes)
-    }
-    
-    // Refresh the calendar
-    await refreshCalendar()
-  } catch (err) {
-    console.error('Error adding student:', err)
-  }
-}
-
-// Handle student removed
-const handleStudentRemoved = async (bookingId: string, studentId: string) => {
-  try {
-    await removeStudentFromBooking(bookingId, studentId)
-    
-    // Refresh the calendar
-    await refreshCalendar()
-  } catch (err) {
-    console.error('Error removing student:', err)
-  }
-}
 
 // Refresh calendar data
 const refreshCalendar = async () => {
@@ -222,14 +172,6 @@ const refreshCalendar = async () => {
   }
 }
 
-// Handle modal close
-const handleModalClose = async (isOpen: boolean) => {
-  // Refresh calendar when modal closes
-  if (!isOpen) {
-    await refreshCalendar()
-  }
-}
-
 // Watch for modal state changes
 watch(showAddStudentModal, async (newValue, oldValue) => {
   // Refresh calendar when modal closes
@@ -250,8 +192,8 @@ defineExpose({
 /* Custom styles for Vue-Cal */
 .vuecal{
 --vuecal-primary-color:var(--ui-primary);
---vuecal-secondary-color:var(--ui-color-secondary-500);
---vuecal-base-color:#ffffff;
+--vuecal-secondary-color:var(--color-gray-150);
+--vuecal-base-color:var(--color-gray-1000);
 --vuecal-contrast-color:#000000;
 --vuecal-border-color:color-mix(in srgb, var(--vuecal-base-color) 8%, transparent);
 --vuecal-header-color:var(--vuecal-base-color);

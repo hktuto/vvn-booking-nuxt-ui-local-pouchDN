@@ -103,6 +103,11 @@ export default defineNuxtPlugin(async () => {
     })
 
     console.log('PouchDB indexes created successfully')
+    
+  } catch (error) {
+    console.warn('Some PouchDB indexes already exist:', error)
+  }
+   finally{
     return {
       provide: {
         pouchdb: {
@@ -119,8 +124,6 @@ export default defineNuxtPlugin(async () => {
         }
       }
     }
-  } catch (error) {
-    console.warn('Some PouchDB indexes already exist:', error)
   }
 
   // Note: Sample data seeding moved to user registration process
