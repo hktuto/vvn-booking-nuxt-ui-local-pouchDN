@@ -23,11 +23,20 @@ const {
 } = useTransactionFilters()
 ```
 
+**Note**: The `filters` object is a Nuxt `useState` ref, so you can access properties directly without `.value`:
+```typescript
+// ✅ Correct - direct access
+console.log(filters.startDate)
+
+// ❌ Incorrect - no .value needed
+console.log(filters.value.startDate)
+```
+
 ## API Reference
 
 ### State
 
-- `filters: Ref<TransactionFilters>` - The current filter state (readonly)
+- `filters: Ref<TransactionFilters>` - The current filter state (Nuxt useState)
 - `hasActiveFilters: ComputedRef<boolean>` - Whether any filters are active
 - `isDefaultDateRange: ComputedRef<boolean>` - Whether using default date range
 
@@ -82,8 +91,8 @@ clearFilters()
 const { filters, hasActiveFilters } = useTransactionFilters()
 
 // Check if specific filters are set
-if (filters.value.studentId) {
-  console.log('Filtering by student:', filters.value.studentId)
+if (filters.studentId) {
+  console.log('Filtering by student:', filters.studentId)
 }
 
 // Check if any filters are active
@@ -114,7 +123,7 @@ const setLastWeek = () => {
 
 The transactions page (`/pages/transactions.vue`) automatically uses this composable:
 
-1. **Template Binding**: Uses `filters.value` for v-model bindings
+1. **Template Binding**: Uses `filters` directly for v-model bindings (no `.value` needed)
 2. **Watchers**: Automatically reloads data when filters change
 3. **Clear Function**: Uses the composable's `clearFilters` method
 
@@ -134,8 +143,10 @@ Visit `/filter-demo` to see a demonstration of how to use the composable from ot
 
 The old implementation used a local `reactive` object. The new composable:
 
+- ✅ Uses Nuxt `useState` for proper state management
 - ✅ Persists state across navigation
 - ✅ Provides default values
 - ✅ Is reusable across pages
 - ✅ Has better TypeScript support
 - ✅ Includes helper methods for common operations
+- ✅ No `.value` needed when accessing filter properties

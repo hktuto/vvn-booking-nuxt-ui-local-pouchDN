@@ -1,4 +1,4 @@
-import { ref, computed, readonly } from 'vue'
+import { computed } from 'vue'
 
 export interface TransactionFilters {
   startDate: string
@@ -22,13 +22,13 @@ export const useTransactionFilters = () => {
 
   const { startDate: defaultStartDate, endDate: defaultEndDate } = getCurrentMonthDates()
 
-  // Filter state
-  const filters = ref<TransactionFilters>({
+  // Filter state using useState for Nuxt state management
+  const filters = useState<TransactionFilters>('transaction-filters', () => ({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
     transactionType: '',
     studentId: ''
-  })
+  }))
 
   // Computed properties
   const hasActiveFilters = computed(() => {
@@ -77,7 +77,7 @@ export const useTransactionFilters = () => {
 
   return {
     // State
-    filters: readonly(filters),
+    filters,
     
     // Computed
     hasActiveFilters,

@@ -31,8 +31,8 @@
             {{ t('transactions.dateRange') }}
           </label>
           <div class="flex gap-2">
-            <UiDatePicker v-model="filters.value.startDate" class="flex-1" />
-            <UiDatePicker v-model="filters.value.endDate" class="flex-1" />
+            <UiDatePicker v-model="filters.startDate" class="flex-1" />
+            <UiDatePicker v-model="filters.endDate" class="flex-1" />
           </div>
         </div>
 
@@ -44,7 +44,7 @@
             {{ t('transactions.transactionType') }}
           </label>
           <USelect
-            v-model="filters.value.transactionType"
+            v-model="filters.transactionType"
             :items="transactionTypeOptions"
             :placeholder="t('transactions.allTypes')"
             class="w-full"
@@ -57,7 +57,7 @@
             {{ t('transactions.student') }}
           </label>
             <USelect
-              v-model="filters.value.studentId"
+              v-model="filters.studentId"
               :items="studentOptions"
               :placeholder="t('transactions.allStudents')"
               class="w-full"
@@ -350,17 +350,17 @@ const loadTransactions = async () => {
     // Load transactions based on filters
     let transactionsData: any[] = []
     
-    if (filters.value.studentId) {
-      transactionsData = await getTransactionsByStudent(filters.value.studentId)
-    } else if (filters.value.startDate && filters.value.endDate) {
-      transactionsData = await getTransactionsByDateRange(filters.value.startDate, filters.value.endDate)
+    if (filters.studentId) {
+      transactionsData = await getTransactionsByStudent(filters.studentId)
+    } else if (filters.startDate && filters.endDate) {
+      transactionsData = await getTransactionsByDateRange(filters.startDate, filters.endDate)
     } else {
       transactionsData = await getRecentTransactions(100)
     }
     
     // Filter by transaction type if specified
-    if (filters.value.transactionType) {
-      transactionsData = transactionsData.filter(t => t.transaction_type === filters.value.transactionType)
+    if (filters.transactionType) {
+      transactionsData = transactionsData.filter(t => t.transaction_type === filters.transactionType)
     }
     
     // Sort transactions
@@ -369,7 +369,7 @@ const loadTransactions = async () => {
     transactions.value = transactionsData
     
     // Load statistics
-    const statsData = await getTransactionStats(filters.value.startDate, filters.value.endDate)
+    const statsData = await getTransactionStats(filters.startDate, filters.endDate)
     stats.value = statsData
   } catch (error) {
     console.error('Error loading transactions:', error)
