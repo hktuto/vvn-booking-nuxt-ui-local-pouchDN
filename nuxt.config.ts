@@ -24,7 +24,8 @@ export default defineNuxtConfig({
         langDir: 'locales/',
         strategy: 'no_prefix'
       }
-    ]
+    ],
+    '@vite-pwa/nuxt'
   ],
   
   // Color mode configuration
@@ -41,5 +42,47 @@ export default defineNuxtConfig({
   
   css: [
     '~/assets/css/main.css'
-  ]
+  ],
+
+  // PWA Configuration
+  pwa: {
+    registerType: 'autoUpdate',
+    workbox: {
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+    },
+    client: {
+      installPrompt: true,
+      periodicSyncForUpdates: 20
+    },
+    devOptions: {
+      enabled: true,
+      suppressWarnings: true,
+      navigateFallbackAllowlist: [/^\/$/],
+      type: 'module'
+    },
+    manifest: {
+      name: 'Nuxt App',
+      short_name: 'NuxtApp',
+      description: 'A Progressive Web App built with Nuxt.js',
+      theme_color: '#000000',
+      background_color: '#ffffff',
+      display: 'fullscreen',
+      orientation: 'portrait-primary',
+      scope: '/',
+      start_url: '/',
+      icons: [
+        {
+          src: '/icon-192x192.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: '/icon-512x512.png',
+          sizes: '512x512',
+          type: 'image/png'
+        }
+      ]
+    }
+  }
 })

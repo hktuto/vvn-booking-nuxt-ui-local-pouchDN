@@ -1,6 +1,7 @@
 <template>
   <UApp>
     <NuxtPage />
+    <PWAInstallButton />
   </UApp>
 </template>
 
