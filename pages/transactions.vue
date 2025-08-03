@@ -262,6 +262,7 @@ import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalize
 const { t, locale } = useI18n()
 const { getRecentTransactions, getTransactionStats, getTransactionsByStudent, getTransactionsByDateRange } = useTransactions()
 const { students, loadStudents } = useStudents()
+const { filters, hasActiveFilters, clearFilters: clearFiltersComposable } = useTransactionFilters()
 
 const df = new DateFormatter(locale.value === 'zh-Hant' ? 'zh-HK' : 'en-US', {
   dateStyle: 'medium'
@@ -278,21 +279,8 @@ const stats = ref({
   totalTransactions: 0
 })
 
-// Filters
-const filters = reactive({
-  startDate: '',
-  endDate: '',
-  transactionType: '',
-  studentId: ''
-})
-
 // Sort
 const sortBy = ref('date-desc')
-
-// Computed
-const hasActiveFilters = computed(() => {
-  return filters.startDate || filters.endDate || filters.transactionType || filters.studentId
-})
 
 const transactionTypeOptions = [
   { label: t('transactions.types.package_purchase'), value: 'package_purchase' },
@@ -408,10 +396,7 @@ const sortTransactions = (data: any[], sortBy: string) => {
 }
 
 const clearFilters = () => {
-  filters.startDate = ''
-  filters.endDate = ''
-  filters.transactionType = ''
-  filters.studentId = ''
+  clearFiltersComposable()
   loadTransactions()
 }
 
