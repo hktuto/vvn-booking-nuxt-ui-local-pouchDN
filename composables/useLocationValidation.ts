@@ -10,21 +10,31 @@ export const useLocationValidation = () => {
       .min(1, t('validation.name.required'))
       .max(100, t('validation.name.maxLength')),
     address: z.string()
-      .min(1, t('validation.address.required'))
-      .max(500, t('validation.address.maxLength')),
+      .max(500, t('validation.address.maxLength'))
+      .optional()
+      .or(z.literal(''))
+      .transform(val => val || ''),
     phone: z.string()
-      .min(1, t('validation.phone.required'))
-      .regex(/^[0-9+\-\s()]+$/, t('validation.phone.invalid')),
+      .optional()
+      .or(z.literal(''))
+      .transform(val => val || '')
+      .refine((val) => !val || /^[0-9+\-\s()]+$/.test(val), {
+        message: t('validation.phone.invalid')
+      }),
     email: z.string()
-      .email(t('validation.email.invalid'))
       .optional()
       .or(z.literal(''))
-      .transform(val => val || ''),
+      .transform(val => val || '')
+      .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+        message: t('validation.email.invalid')
+      }),
     website: z.string()
-      .url(t('validation.website.invalid'))
       .optional()
       .or(z.literal(''))
-      .transform(val => val || ''),
+      .transform(val => val || '')
+      .refine((val) => !val || /^https?:\/\/.+/.test(val), {
+        message: t('validation.website.invalid')
+      }),
     active: z.boolean()
   })
 

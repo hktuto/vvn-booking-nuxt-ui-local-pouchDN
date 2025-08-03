@@ -7,7 +7,7 @@
     </template>
 
     <template #body>
-      <UForm :state="form" :schema="classSchema" class="space-y-6" ref="formRef" @submit="handleSubmit">
+      <UForm :state="form" :schema="classSchema" class="space-y-6" ref="formRef" >
         <!-- Basic Information -->
         <div class="space-y-4">
           <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -266,6 +266,8 @@
           type="submit"
           :loading="submitting"
           color="primary"
+          @click="handleSubmit"
+          
         >
           {{ isEditing ? t('common.save') : t('common.add') }}
         </UButton>
@@ -500,13 +502,13 @@ const updateDurationFromTimes = () => {
   }
 }
 
-const handleSubmit = async (event: FormSubmitEvent<ClassForm>) => {
+const handleSubmit = async () => {
   submitting.value = true
-  
+  const data = JSON.parse(JSON.stringify(form))
   try {
-    console.log('Form submitted with data:', event.data)
+    console.log('Form submitted with data:', data)
     // Emit the validated data to parent
-    emit('saved', event.data)
+    emit('saved', data)
     
     // Close modal
     modelValue.value = false

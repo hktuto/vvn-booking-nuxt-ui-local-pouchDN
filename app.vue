@@ -2,8 +2,8 @@
   <UApp>
     <NuxtPwaManifest />
     <NuxtLoadingIndicator />
-    <NuxtPage />
     <PWAInstallButton />
+    <NuxtPage />
   </UApp>
 </template>
 

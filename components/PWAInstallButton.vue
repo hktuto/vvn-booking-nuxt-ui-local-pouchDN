@@ -20,6 +20,7 @@
 <script setup lang="ts">
 const { isPWAInstalled, showInstallPrompt, install, cancelInstall } = usePWA()
 
+
 const handleInstall = async () => {
   try {
     const result = await install()

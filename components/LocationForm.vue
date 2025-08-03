@@ -23,7 +23,6 @@
         <UFormField
           name="address"
           :label="t('location.address')"
-          required
         >
           <UTextarea
             v-model="form.address"
@@ -36,7 +35,6 @@
         <UFormField
           name="phone"
           :label="t('location.phone')"
-          required
         >
           <UInput
             v-model="form.phone"
@@ -176,8 +174,8 @@ const handleSubmit = async (event: FormSubmitEvent<LocationForm>) => {
   try {
     const locationData = {
       name: event.data.name,
-      address: event.data.address,
-      phone: event.data.phone,
+      address: event.data.address || '',
+      phone: event.data.phone || '',
       email: event.data.email || '',
       website: event.data.website || '',
       active: event.data.active
