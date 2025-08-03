@@ -1,5 +1,7 @@
 <template>
   <UApp>
+    <NuxtPwaManifest />
+    <NuxtLoadingIndicator />
     <NuxtPage />
     <PWAInstallButton />
   </UApp>
