@@ -129,6 +129,8 @@ const navigation = [
   { to: '/students', label: 'navigation.students', icon: 'i-heroicons-users' },
   { to: '/packages', label: 'navigation.packages', icon: 'i-heroicons-book-open' },
   { to: '/classes', label: 'navigation.classes', icon: 'i-heroicons-calendar-days' },
+  { to: '/bookings', label: 'navigation.bookings', icon: 'i-heroicons-calendar' },
+  { to: '/locations', label: 'navigation.locations', icon: 'i-heroicons-map-pin' },
   { to: '/transactions', label: 'navigation.transactions', icon: 'i-heroicons-banknotes' }
 ]
 
