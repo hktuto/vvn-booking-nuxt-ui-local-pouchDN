@@ -50,7 +50,6 @@ export default defineNuxtConfig({
     workbox: {
       navigateFallback: '/',
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      // Skip offline page since we use PouchDB for offline functionality
       skipWaiting: true,
       clientsClaim: true
     },
@@ -61,6 +60,7 @@ export default defineNuxtConfig({
     devOptions: {
       enabled: true,
       suppressWarnings: true,
+      navigateFallback: '/',
       navigateFallbackAllowlist: [/^\/$/],
       type: 'module'
     },
@@ -80,12 +80,14 @@ export default defineNuxtConfig({
         {
           src: '/icon-192x192.png',
           sizes: '192x192',
-          type: 'image/png'
+          type: 'image/png',
+          purpose: 'maskable any'
         },
         {
           src: '/icon-512x512.png',
           sizes: '512x512',
-          type: 'image/png'
+          type: 'image/png',
+          purpose: 'maskable any'
         }
       ]
     }
