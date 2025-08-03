@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 const { t } = useI18n()
-const { locations, loading, error, loadLocations, deleteLocation } = useLocations()
+const { locations, loading, error, loadLocations, addLocation, updateLocation, deleteLocation } = useLocations()
 
 // Reactive state
 const searchQuery = ref('')
@@ -103,7 +103,16 @@ const confirmDelete = async (location: any) => {
 }
 
 const handleLocationSaved = async (locationData: any) => {
-  await loadLocations()
+  try {
+    if (editingLocation.value) {
+      await updateLocation(editingLocation.value.id, locationData)
+      editingLocation.value = null
+    } else {
+      await addLocation(locationData)
+    }
+  } catch (error) {
+    console.error('Error saving location:', error)
+  }
 }
 
 // Load locations on mount
