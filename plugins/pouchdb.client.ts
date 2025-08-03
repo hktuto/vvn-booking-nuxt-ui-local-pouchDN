@@ -84,7 +84,16 @@ export default defineNuxtPlugin(async () => {
       index: { fields: ['type', 'student_id'] }
     })
     await transactionsDB.createIndex({
-      index: { fields: ['type', 'transaction_date', 'created_at'] }
+      index: { fields: ['type', 'transaction_type'] }
+    })
+    await transactionsDB.createIndex({
+      index: { fields: ['type', 'created_at'] }
+    })
+    await transactionsDB.createIndex({
+      index: { fields: ['type', 'class_id'] }
+    })
+    await transactionsDB.createIndex({
+      index: { fields: ['type', 'package_id'] }
     })
 
     // Class Types indexes

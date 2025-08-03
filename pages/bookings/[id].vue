@@ -143,6 +143,16 @@
                   {{ t(`booking.status.${studentBooking.status}`) }}
                 </UBadge>
                 <UButton
+                  @click="handleRedeem(studentBooking)"
+                  variant="ghost"
+                  size="sm"
+                  icon="i-heroicons-credit-card"
+                  color="primary"
+                  :aria-label="t('validation.booking.redeem.title')"
+                >
+                  {{ t('validation.booking.redeem.title') }}
+                </UButton>
+                <UButton
                   @click="handleRemoveStudent(studentBooking.student_id)"
                   variant="ghost"
                   size="sm"
@@ -221,6 +231,16 @@
       :booking="booking"
       @saved="handleBookingUpdated"
     />
+
+    <!-- Redeem Modal -->
+    <RedeemModal
+      v-model="showRedeemModal"
+      :student="selectedStudent"
+      :class-info="getClassInfo(booking)"
+      :booking-id="booking?.id"
+      @redeem-completed="handleRedeemCompleted"
+      @package-purchased="handlePackagePurchased"
+    />
   </NuxtLayout>
 </template>
 
@@ -236,6 +256,8 @@ const loading = ref(true)
 const booking = ref<any>(null)
 const showAddStudentModal = ref(false)
 const showEditBookingModal = ref(false)
+const showRedeemModal = ref(false)
+const selectedStudent = ref<any>(null)
 
 // Get booking ID from route
 const bookingId = route.params.id as string
@@ -373,6 +395,40 @@ const handleDeleteBooking = async () => {
   } catch (err) {
     console.error('Error deleting booking:', err)
   }
+}
+
+// Handle redeem
+const handleRedeem = (studentBooking: any) => {
+  console.log("handleRedeem", studentBooking)
+  // Find the student data
+  const student = {
+    id: studentBooking.student_id,
+    name: studentBooking.student_name,
+    phone: studentBooking.student_phone || ''
+  }
+  selectedStudent.value = student
+  showRedeemModal.value = true
+}
+
+// Handle redeem completed
+const handleRedeemCompleted = async (data: any) => {
+  showRedeemModal.value = false
+  selectedStudent.value = null
+  
+  // Show success message
+  const message = t('booking.redeem.success', { 
+    method: data.paymentMethod === 'credit' ? t('booking.redeem.credit') : t('booking.redeem.cash'),
+    amount: data.amount
+  })
+  
+  // Reload booking to refresh data
+  await loadBooking()
+}
+
+// Handle package purchased
+const handlePackagePurchased = async (studentPackage: any) => {
+  // Package was purchased, modal will handle the rest
+  console.log('Package purchased:', studentPackage)
 }
 
 // Navigate back

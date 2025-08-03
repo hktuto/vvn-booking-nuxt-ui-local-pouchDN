@@ -292,9 +292,6 @@
     "email": {
       "invalid": "請輸入有效的電子郵件地址"
     },
-    "website": {
-      "invalid": "請輸入有效的網站網址"
-    },
     "countryCode": {
       "required": "國家代碼為必填項"
     },
@@ -340,6 +337,21 @@
     "maxCapacity": {
       "min": "最大容量必須至少為1"
     },
+    "amount": {
+      "min": "金額必須至少為0.01"
+    },
+    "refund": {
+      "originalTransactionRequired": "退款需要原始交易記錄"
+    },
+    "refundAmount": {
+      "min": "退款金額必須至少為0.01"
+    },
+    "originalTransaction": {
+      "required": "需要原始交易記錄"
+    },
+    "packagePurchase": {
+      "packageRequired": "購買套票需要選擇套票"
+    },
     "bookings": {
       "min": "至少需要一個學生預約"
     },
@@ -347,7 +359,31 @@
       "min": "總預約數不能為負數"
     },
     "booking": {
-      "capacityExceeded": "總預約數不能超過最大容量"
+      "capacityExceeded": "總預約數不能超過最大容量",
+      "redeem": {
+        "title": "兌換付款",
+        "paymentMethod": "付款方式",
+        "credit": "學分",
+        "cash": "現金",
+        "selectPackage": "選擇套票",
+        "remainingCredits": "剩餘 {credits} 格",
+        "noActivePackages": "沒有有效套票",
+        "buyPackagePrompt": "此學生沒有有效套票。是否要先購買套票？",
+        "buyPackage": "購買套票",
+        "creditsToUse": "使用學分",
+        "enterCredits": "輸入要使用的學分",
+        "availableCredits": "可用：{credits} 格",
+        "cashAmount": "現金金額",
+        "enterAmount": "輸入金額",
+        "selectPaymentMethod": "選擇付款方式",
+        "notesPlaceholder": "為此付款添加備註",
+        "confirm": "確認付款",
+        "buyPackageDescription": "在兌換學分前為此學生選擇要購買的套票。",
+        "selectPackageToBuy": "選擇要購買的套票",
+        "selectPackage": "選擇套票",
+        "buyAndRedeem": "購買並兌換",
+        "success": "付款成功完成，使用{method}（{amount}）"
+      }
     },
     "color": {
       "required": "顏色是必需的"
@@ -370,10 +406,6 @@
     
     "weeklyDays": {
       "required": "至少需要選擇一天"
-    },
-    "maxCapacity": {
-      "min": "最大容量至少需要1",
-      "maxExceeded": "最大容量不能超過1000"
     },
     "creditCost": {
       "negative": "格數成本不能為負數",
@@ -515,6 +547,14 @@
     "minutes": "分鐘",
     "toggleColorMode": "切換顏色模式"
   },
+  "payment": {
+    "cash": "現金",
+    "payme": "PayMe",
+    "wechat": "微信支付",
+    "alipay": "支付寶",
+    "fps": "FPS",
+    "creditCard": "信用卡"
+  },
   "location": {
     "locations": "場地",
     "addLocation": "新增場地",
@@ -545,7 +585,6 @@
   "booking": {
     "bookings": "預約",
     "addBooking": "新增預約",
-    "editBooking": "編輯預約",
     "searchBookings": "搜尋預約...",
     "confirmedBookings": "已確認",
     "todayBookings": "今日",

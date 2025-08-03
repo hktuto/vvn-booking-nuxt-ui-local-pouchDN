@@ -132,6 +132,20 @@ export const useStudentPackages = () => {
         updated_at: new Date().toISOString()
       })
 
+      // Create transaction for package purchase
+      const { createTransaction } = useTransactions()
+      await createTransaction({
+        student_id: studentId,
+        transaction_type: 'package_purchase',
+        status: 'completed',
+        amount: customPrice || packageDoc.price,
+        currency: 'HKD',
+        package_id: packageId,
+        description: `Package purchase: ${packageDoc.name} (${packageDoc.credits} credits)`,
+        payment_method: 'cash', // Default, can be updated later
+        notes: notes || ''
+      })
+
       const studentPackage = await transformStudentPackageDoc(studentPackageDoc, packagesDB)
       studentPackages.value.unshift(studentPackage) // Add to beginning for newest first
       
@@ -226,6 +240,51 @@ export const useStudentPackages = () => {
     )
   }
 
+  // Use credits from student packages
+  const useCreditsFromPackages = async (studentId: string, creditsToUse: number, packageIds: string[]) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      let remainingCredits = creditsToUse
+      const updatedPackages = []
+
+      // Sort packages by expiry date (earliest first) to use oldest credits first
+      const packagesToUpdate = studentPackages.value
+        .filter(sp => packageIds.includes(sp.id) && sp.student_id === studentId)
+        .sort((a, b) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime())
+
+      for (const studentPackage of packagesToUpdate) {
+        if (remainingCredits <= 0) break
+
+        const creditsFromThisPackage = Math.min(remainingCredits, studentPackage.credits_remaining)
+        const newRemainingCredits = studentPackage.credits_remaining - creditsFromThisPackage
+        const newStatus = newRemainingCredits === 0 ? 'completed' : 'active'
+
+        // Update the student package
+        const updatedPackage = await updateStudentPackage(studentPackage.id, {
+          credits_remaining: newRemainingCredits,
+          status: newStatus
+        })
+
+        updatedPackages.push(updatedPackage)
+        remainingCredits -= creditsFromThisPackage
+      }
+
+      if (remainingCredits > 0) {
+        throw new Error(`Not enough credits available. Need ${creditsToUse} but only have ${creditsToUse - remainingCredits}`)
+      }
+
+      return updatedPackages
+    } catch (err: any) {
+      error.value = err.message || 'Failed to use credits from packages'
+      console.error('Error using credits from packages:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     studentPackages: readonly(studentPackages),
     loading: readonly(loading),
@@ -237,6 +296,7 @@ export const useStudentPackages = () => {
     deleteStudentPackage,
     getStudentPackageById,
     isPackageExpired,
-    getActivePackagesForStudent
+    getActivePackagesForStudent,
+    useCreditsFromPackages
   }
 } 

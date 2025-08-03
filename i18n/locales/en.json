@@ -293,9 +293,6 @@
     "email": {
       "invalid": "Please enter a valid email address"
     },
-    "website": {
-      "invalid": "Please enter a valid website URL"
-    },
     "countryCode": {
       "required": "Country code is required"
     },
@@ -313,10 +310,6 @@
     "address": {
       "required": "Address is required",
       "maxLength": "Address must be less than 500 characters"
-    },
-    
-    "notes": {
-      "maxLength": "Notes must be less than 1000 characters"
     },
     "description": {
       "maxLength": "Description must be less than 500 characters"
@@ -338,11 +331,7 @@
     "weeklyDays": {
       "required": "At least one day must be selected"
     },
-    
-    "maxCapacity": {
-      "min": "Maximum capacity must be at least 1",
-      "maxExceeded": "Maximum capacity cannot exceed 1000"
-    },
+
     "creditCost": {
       "negative": "Credit cost cannot be negative",
       "maxExceeded": "Credit cost cannot exceed 1000"
@@ -372,8 +361,21 @@
     "classTime": {
       "required": "Class time is required"
     },
-    "maxCapacity": {
-      "min": "Maximum capacity must be at least 1"
+    
+    "amount": {
+      "min": "Amount must be at least 0.01"
+    },
+    "refund": {
+      "originalTransactionRequired": "Original transaction is required for refunds"
+    },
+    "refundAmount": {
+      "min": "Refund amount must be at least 0.01"
+    },
+    "originalTransaction": {
+      "required": "Original transaction is required"
+    },
+    "packagePurchase": {
+      "packageRequired": "Package is required for package purchases"
     },
     "bookings": {
       "min": "At least one student booking is required"
@@ -385,7 +387,30 @@
       "min": "Maximum capacity must be at least 1"
     },
     "booking": {
-      "capacityExceeded": "Total booked cannot exceed maximum capacity"
+      "capacityExceeded": "Total booked cannot exceed maximum capacity",
+      "redeem": {
+        "title": "Redeem Payment",
+        "paymentMethod": "Payment Method",
+        "credit": "Credit",
+        "cash": "Cash",
+        "remainingCredits": "{credits} credits remaining",
+        "noActivePackages": "No Active Packages",
+        "buyPackagePrompt": "This student has no active packages. Would you like to buy a package first?",
+        "buyPackage": "Buy Package",
+        "creditsToUse": "Credits to Use",
+        "enterCredits": "Enter credits to use",
+        "availableCredits": "Available: {credits} credits",
+        "cashAmount": "Cash Amount",
+        "enterAmount": "Enter amount",
+        "selectPaymentMethod": "Select payment method",
+        "notesPlaceholder": "Add notes for this payment",
+        "confirm": "Confirm Payment",
+        "buyPackageDescription": "Select a package to purchase for this student before redeeming credits.",
+        "selectPackageToBuy": "Select Package to Buy",
+        "selectPackage": "Select a package",
+        "buyAndRedeem": "Buy & Redeem",
+        "success": "Payment completed successfully using {method} ({amount})"
+      }
     },
     "color": {
       "required": "Color is required"
@@ -527,6 +552,14 @@
     "minutes": "minutes",
     "toggleColorMode": "Toggle Color Mode"
   },
+  "payment": {
+    "cash": "Cash",
+    "payme": "PayMe",
+    "wechat": "WeChat Pay",
+    "alipay": "Alipay",
+    "fps": "FPS",
+    "creditCard": "Credit Card"
+  },
   "location": {
     "locations": "Locations",
     "addLocation": "Add Location",
@@ -557,7 +590,6 @@
   "booking": {
     "bookings": "Bookings",
     "addBooking": "Add Booking",
-    "editBooking": "Edit Booking",
     "searchBookings": "Search bookings...",
     "confirmedBookings": "Confirmed",
     "todayBookings": "Today",

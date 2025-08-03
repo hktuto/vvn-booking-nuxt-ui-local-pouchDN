@@ -75,11 +75,25 @@ export interface StudentPackageDocument extends PouchDocument {
 export interface TransactionDocument extends PouchDocument {
   type: 'transaction'
   student_id: string
+  transaction_type: 'package_purchase' | 'credit_usage' | 'cash_payment' | 'refund'
+  status: 'completed' | 'refunded' | 'pending' | 'cancelled'
   amount: number
-  transaction_type: 'payment' | 'refund' | 'credit_purchase' | 'credit_usage'
-  payment_method: 'cash' | 'bank_transfer' | 'credit'
-  transaction_date: string
+  currency: string
+  
+  // Optional fields based on transaction type
+  class_id?: string
+  package_id?: string
+  booking_id?: string
+  original_transaction_id?: string
+  
+  // Additional metadata
   description: string
+  payment_method?: 'cash' | 'payme' | 'wechat' | 'alipay' | 'fps' | 'credit_card'
+  notes?: string
+  
+  // Timestamps
+  created_at: string
+  updated_at: string
 }
 
 export interface LocationDocument extends PouchDocument {
