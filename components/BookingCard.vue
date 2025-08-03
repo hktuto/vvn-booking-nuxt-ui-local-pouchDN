@@ -1,11 +1,12 @@
 <template>
   <div 
-    class="p-3 rounded-lg border transition-all duration-200 hover:shadow-md"
+    class="p-3 rounded-lg border transition-all duration-200 hover:shadow-md cursor-pointer"
     :class="{
       'border-blue-200 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/20': booking.is_virtual,
       'border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-900/20': !booking.is_virtual && booking.total_booked > 0,
       'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800': !booking.is_virtual && booking.total_booked === 0
     }"
+    @click="$emit('view-details', booking)"
   >
     <!-- Class Header -->
     <div class="flex items-start justify-between mb-2">
@@ -48,30 +49,26 @@
         </div>
       </div>
       
-      <!-- Actions -->
-      <UDropdownMenu :items="getBookingActions()">
-        <UButton
-          variant="ghost"
-          size="sm"
-          icon="i-heroicons-ellipsis-vertical"
-          :aria-label="t('common.actions')"
-        />
-      </UDropdownMenu>
+      <!-- View Details Icon -->
+      <UIcon 
+        name="i-heroicons-arrow-right" 
+        class="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" 
+      />
     </div>
 
-    <!-- Student List -->
+    <!-- Student List Preview -->
     <div v-if="booking.bookings && booking.bookings.length > 0" class="space-y-1">
       <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
         {{ t('booking.students') }}:
       </div>
-      <div
-        v-for="studentBooking in booking.bookings"
-        :key="studentBooking.student_id"
-        class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border"
-      >
-        <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-user" class="w-4 h-4 text-gray-500" />
-          <span class="text-sm font-medium">{{ studentBooking.student_name }}</span>
+      <div class="space-y-1">
+        <div
+          v-for="(studentBooking, index) in booking.bookings.slice(0, 3)"
+          :key="studentBooking.student_id"
+          class="flex items-center gap-2 text-sm"
+        >
+          <UIcon name="i-heroicons-user" class="w-3 h-3 text-gray-500" />
+          <span class="text-gray-700 dark:text-gray-300">{{ studentBooking.student_name }}</span>
           <UBadge
             :color="getStatusColor(studentBooking.status)"
             variant="soft"
@@ -80,36 +77,17 @@
             {{ t(`booking.status.${studentBooking.status}`) }}
           </UBadge>
         </div>
-        
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-gray-500">
-            {{ studentBooking.credits_used }} {{ t('common.credits') }}
-          </span>
-          <UButton
-            @click="$emit('remove-student', booking.id, studentBooking.student_id)"
-            variant="ghost"
-            size="xs"
-            icon="i-heroicons-x-mark"
-            color="red"
-            :aria-label="t('booking.removeStudent')"
-          />
+        <div v-if="booking.bookings.length > 3" class="text-xs text-gray-500 dark:text-gray-400 pl-5">
+          +{{ booking.bookings.length - 3 }} {{ t('booking.moreStudents') }}
         </div>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div v-else class="text-center py-3">
-      <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+    <div v-else class="text-center py-2">
+      <div class="text-sm text-gray-500 dark:text-gray-400">
         {{ booking.is_virtual ? t('booking.noStudentsBooked') : t('booking.noStudents') }}
       </div>
-      <UButton
-        @click="$emit('add-student', booking)"
-        size="sm"
-        color="primary"
-        variant="soft"
-      >
-        {{ t('booking.addStudent') }}
-      </UButton>
     </div>
   </div>
 </template>
@@ -124,8 +102,7 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'add-student', booking: any): void
-  (e: 'remove-student', bookingId: string, studentId: string): void
+  (e: 'view-details', booking: any): void
 }
 
 const props = defineProps<Props>()
@@ -147,21 +124,4 @@ const getStatusColor = (status: string) => {
     default: return 'gray'
   }
 }
-
-// Get booking actions
-const getBookingActions = () => [
-  {
-    label: t('booking.addStudent'),
-    icon: 'i-heroicons-plus',
-    click: () => emit('add-student', props.booking)
-  },
-  {
-    label: t('booking.viewDetails'),
-    icon: 'i-heroicons-eye',
-    click: () => {
-      // Navigate to booking details
-      navigateTo(`/bookings/${props.booking.id}`)
-    }
-  }
-]
 </script> 
