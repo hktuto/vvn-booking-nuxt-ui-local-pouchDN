@@ -7,7 +7,7 @@
     </template>
 
     <template #body>
-      <UForm :state="form" :schema="classSchema" class="space-y-6"  ref="formRef">
+      <UForm :state="form" :schema="classSchema" class="space-y-6" ref="formRef" @submit="handleSubmit">
         <!-- Basic Information -->
         <div class="space-y-4">
           <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -263,7 +263,7 @@
           {{ t('common.cancel') }}
         </UButton>
         <UButton
-          @click="handleSubmit"
+          type="submit"
           :loading="submitting"
           color="primary"
         >
@@ -419,6 +419,10 @@ watch(() => modelValue.value, (newValue) => {
 })
 
 const resetForm = () => {
+  const today = new Date()
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  
   form.name = ''
   form.description = ''
   form.location_id = ''
@@ -427,17 +431,17 @@ const resetForm = () => {
   form.credits = 1
   form.duration_minutes = 60
   form.schedule_type = 'one-time'
-  form.start_date = ''
+  form.start_date = tomorrow.toISOString().split('T')[0] // Tomorrow's date
   form.end_date = ''
-  form.start_time = ''
-  form.end_time = ''
+  form.start_time = '09:00'
+  form.end_time = '10:00'
   form.days_of_week = []
   form.total_sessions = undefined
   form.current_session = 1
   form.status = 'active'
-      form.color = '#3B82F6'
-    form.tags = []
-    selectedTag.value = []
+  form.color = '#3B82F6'
+  form.tags = []
+  selectedTag.value = []
   customTag.value = []
 }
 
@@ -500,9 +504,9 @@ const handleSubmit = async (event: FormSubmitEvent<ClassForm>) => {
   submitting.value = true
   
   try {
-    console.log(form)
+    console.log('Form submitted with data:', event.data)
     // Emit the validated data to parent
-    emit('saved', JSON.parse(JSON.stringify(form)))
+    emit('saved', event.data)
     
     // Close modal
     modelValue.value = false
