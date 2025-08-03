@@ -1,462 +1,491 @@
 <template>
-  <NuxtLayout name="default">
+  <NuxtLayout>
+    <!-- Header -->
     <template #header>
       <div class="flex items-center justify-between w-full">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
-            {{ $t('transactions.title') }}
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+            {{ t('transactions.title') }}
           </h1>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {{ $t('transactions.description') }}
+          <p class="text-gray-600 dark:text-gray-400">
+            {{ t('transactions.description') }}
           </p>
         </div>
         <UButton
-          @click="showTransactionModal = true"
-          icon="i-heroicons-plus"
-          size="sm"
+          @click="exportTransactions"
+          variant="outline"
+          icon="i-heroicons-arrow-down-tray"
+          :loading="exporting"
         >
-          {{ $t('transactions.addTransaction') }}
+          {{ t('transactions.export') }}
         </UButton>
       </div>
     </template>
 
-    <div class="p-6">
-
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-              {{ $t('transactions.totalRevenue') }}
-            </h3>
-            <UIcon name="i-heroicons-banknotes" class="h-6 w-6 text-green-500" />
+    <!-- Filters Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+      <div class="flex flex-col lg:flex-row gap-4">
+        <!-- Date Range Filter -->
+        <div class="flex-1">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+            {{ t('transactions.dateRange') }}
+          </label>
+          <div class="flex gap-2">
+            <UiDatePicker v-model="filters.startDate" class="flex-1" />
+            <UiDatePicker v-model="filters.endDate" class="flex-1" />
           </div>
-        </template>
-        <div>
-          <p class="text-3xl font-bold text-green-600">${{ totalRevenue.toFixed(2) }}</p>
-          <p class="text-sm text-gray-500 mt-1">
-            {{ $t('transactions.allTime') }}
-          </p>
+        </div>
+
+        <!-- Transaction Type Filter -->
+        <!-- add a row to wrap transaction type and student filter -->
+        <div class="flex flex-row gap-2">
+        <div class="flex-1">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+            {{ t('transactions.transactionType') }}
+          </label>
+          <USelect
+            v-model="filters.transactionType"
+            :items="transactionTypeOptions"
+            :placeholder="t('transactions.allTypes')"
+            class="w-full"
+          />
+        </div>
+
+        <!-- Student Filter -->
+        <div class="flex-1">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+            {{ t('transactions.student') }}
+          </label>
+            <USelect
+              v-model="filters.studentId"
+              :items="studentOptions"
+              :placeholder="t('transactions.allStudents')"
+              class="w-full"
+            />
+        </div>
+        </div>
+
+        <!-- Clear Filters -->
+        <div class="flex items-end">
+          <UButton
+            @click="clearFilters"
+            variant="ghost"
+            icon="i-heroicons-x-mark"
+            :disabled="!hasActiveFilters"
+          >
+            {{ t('transactions.clearFilters') }}
+          </UButton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
+      <UCard>
+        <div class="flex items-center">
+          <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+            <UIcon name="i-heroicons-arrow-up" class="w-6 h-6 text-green-600 dark:text-green-400" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {{ t('transactions.totalRevenue') }}
+            </p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              ${{ stats.totalRevenue.toFixed(2) }}
+            </p>
+          </div>
         </div>
       </UCard>
 
       <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-              {{ $t('transactions.monthlyRevenue') }}
-            </h3>
-            <UIcon name="i-heroicons-calendar" class="h-6 w-6 text-blue-500" />
+        <div class="flex items-center">
+          <div class="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+            <UIcon name="i-heroicons-arrow-down" class="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-        </template>
-        <div>
-          <p class="text-3xl font-bold text-blue-600">${{ monthlyRevenue.toFixed(2) }}</p>
-          <p class="text-sm text-gray-500 mt-1">
-            {{ $t('transactions.thisMonth') }}
-          </p>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {{ t('transactions.totalRefunds') }}
+            </p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              ${{ stats.totalRefunds.toFixed(2) }}
+            </p>
+          </div>
         </div>
       </UCard>
 
       <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-              {{ $t('transactions.totalCredits') }}
-            </h3>
-            <UIcon name="i-heroicons-star" class="h-6 w-6 text-yellow-500" />
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+            <UIcon name="i-heroicons-currency-dollar" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
-        </template>
-        <div>
-          <p class="text-3xl font-bold text-yellow-600">{{ totalCredits }}</p>
-          <p class="text-sm text-gray-500 mt-1">
-            {{ $t('transactions.sold') }}
-          </p>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {{ t('transactions.netRevenue') }}
+            </p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              ${{ stats.netRevenue.toFixed(2) }}
+            </p>
+          </div>
         </div>
       </UCard>
 
       <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-              {{ $t('transactions.pendingPayments') }}
-            </h3>
-            <UIcon name="i-heroicons-clock" class="h-6 w-6 text-orange-500" />
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+            <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
           </div>
-        </template>
-        <div>
-          <p class="text-3xl font-bold text-orange-600">${{ pendingPayments.toFixed(2) }}</p>
-          <p class="text-sm text-gray-500 mt-1">
-            {{ $t('transactions.toCollect') }}
-          </p>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {{ t('transactions.totalTransactions') }}
+            </p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ stats.totalTransactions }}
+            </p>
+          </div>
         </div>
       </UCard>
     </div>
 
-    <!-- Filters -->
-    <UCard class="mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <UFormGroup :label="$t('transactions.filterByType')">
-          <USelect
-            v-model="filters.type"
-            :options="typeOptions"
-            option-attribute="label"
-            value-attribute="value"
-            :placeholder="$t('transactions.allTypes')"
-            clearable
-          />
-        </UFormGroup>
-        
-        <UFormGroup :label="$t('transactions.filterByStudent')">
-          <USelect
-            v-model="filters.student_id"
-            :options="studentOptions"
-            option-attribute="label"
-            value-attribute="value"
-            :placeholder="$t('transactions.allStudents')"
-            clearable
-          />
-        </UFormGroup>
-        
-        <UFormGroup :label="$t('transactions.filterByPaymentMethod')">
-          <USelect
-            v-model="filters.payment_method"
-            :options="paymentMethodOptions"
-            option-attribute="label"
-            value-attribute="value"
-            :placeholder="$t('transactions.allMethods')"
-            clearable
-          />
-        </UFormGroup>
-        
-        <UFormGroup :label="$t('transactions.filterByDateFrom')">
-          <UInput
-            v-model="filters.date_from"
-            type="date"
-            clearable
-          />
-        </UFormGroup>
-        
-        <UFormGroup :label="$t('transactions.filterByDateTo')">
-          <UInput
-            v-model="filters.date_to"
-            type="date"
-            clearable
-          />
-        </UFormGroup>
-      </div>
-    </UCard>
-
-    <!-- Transactions Table -->
-    <UCard>
-      <template #header>
+    <!-- Transactions List -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ $t('transactions.recentTransactions') }}
-          </h3>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+            {{ t('transactions.recentTransactions') }}
+          </h2>
           <div class="flex items-center gap-2">
-            <UButton
-              @click="exportTransactions"
-              variant="soft"
-              icon="i-heroicons-arrow-down-tray"
-              size="sm"
-            >
-              {{ $t('common.export') }}
-            </UButton>
-          </div>
-        </div>
-      </template>
-
-      <UTable
-        :rows="filteredTransactions"
-        :columns="columns"
-        :loading="loading"
-      >
-        <template #student-data="{ row }">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-              <span class="text-sm font-medium text-primary-700 dark:text-primary-300">
-                {{ row.student?.name?.charAt(0) }}
-              </span>
-            </div>
-            <div>
-              <p class="font-medium text-gray-900 dark:text-white">
-                {{ row.student?.name }}
-              </p>
-              <p class="text-sm text-gray-500">
-                {{ row.student?.phone }}
-              </p>
-            </div>
-          </div>
-        </template>
-
-        <template #type-data="{ row }">
-          <UBadge :color="getTypeColor(row.type)">
-            {{ $t(`transactions.type.${row.type}`) }}
-          </UBadge>
-        </template>
-
-        <template #amount-data="{ row }">
-          <span class="font-medium text-gray-900 dark:text-white">
-            ${{ row.amount.toFixed(2) }}
-          </span>
-        </template>
-
-        <template #credit-change-data="{ row }">
-          <span :class="row.credit_change >= 0 ? 'text-green-600' : 'text-red-600'" class="font-medium">
-            {{ row.credit_change >= 0 ? '+' : '' }}{{ row.credit_change }} {{ $t('common.credits') }}
-          </span>
-        </template>
-
-        <template #payment_method-data="{ row }">
-          <UBadge :color="getPaymentMethodColor(row.payment_method)">
-            {{ $t(`transactions.paymentMethod.${row.payment_method}`) }}
-          </UBadge>
-        </template>
-
-        <template #actions-data="{ row }">
-          <UDropdown :items="getActionItems(row)">
-            <UButton
-              variant="ghost"
-              icon="i-heroicons-ellipsis-vertical"
+            <USelect
+              v-model="sortBy"
+              :items="sortOptions"
               size="sm"
             />
-          </UDropdown>
-        </template>
-      </UTable>
-    </UCard>
+            <UButton
+              @click="refreshTransactions"
+              variant="ghost"
+              icon="i-heroicons-arrow-path"
+              :loading="loading"
+              size="sm"
+            />
+          </div>
+        </div>
+      </div>
 
-    <!-- Modals -->
-    <TransactionModal 
-      v-model:open="showTransactionModal"
-      :transaction="editingTransaction"
-      @saved="onTransactionSaved"
-    />
-  </div>
+      <!-- Loading State -->
+      <div v-if="loading" class="p-12 text-center">
+        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
+        <p class="text-gray-600 dark:text-gray-400">{{ t('common.loading') }}</p>
+      </div>
+
+      <!-- Transactions Table -->
+      <div v-else-if="transactions.length > 0" class="overflow-x-auto">
+        <table class="w-full table-fixed">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {{ t('transactions.date') }}
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {{ t('transactions.student') }}
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {{ t('transactions.type') }}
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {{ t('transactions.description') }}
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {{ t('transactions.amount') }}
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {{ t('transactions.status') }}
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {{ t('transactions.actions') }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                {{ formatDate(transaction.created_at) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+                    <UIcon name="i-heroicons-user" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  </div>
+                  <div class="ml-3">
+                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                      {{ getStudentName(transaction.student_id) }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <UBadge
+                  :color="getTransactionTypeColor(transaction.transaction_type)"
+                  variant="soft"
+                >
+                  {{ t(`transactions.types.${transaction.transaction_type}`) }}
+                </UBadge>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                <div class="max-w-xs truncate" :title="transaction.description">
+                  {{ transaction.description }}
+                </div>
+                <div v-if="transaction.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {{ transaction.notes }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <span :class="transaction.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                  {{ transaction.amount >= 0 ? '+' : '' }}${{ transaction.amount.toFixed(2) }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <UBadge
+                  :color="getStatusColor(transaction.status)"
+                  variant="soft"
+                >
+                  {{ t(`transactions.status.${transaction.status}`) }}
+                </UBadge>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <UButton
+                  @click="viewTransactionDetails(transaction)"
+                  variant="ghost"
+                  size="sm"
+                  icon="i-heroicons-eye"
+                >
+                  {{ t('transactions.view') }}
+                </UButton>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="p-12 text-center">
+        <UIcon name="i-heroicons-document-text" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          {{ t('transactions.noTransactions') }}
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          {{ t('transactions.noTransactionsDescription') }}
+        </p>
+      </div>
+    </div>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-const { t } = useI18n()
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
+const { t, locale } = useI18n()
+const { getRecentTransactions, getTransactionStats, getTransactionsByStudent, getTransactionsByDateRange } = useTransactions()
+const { students, loadStudents } = useStudents()
 
-// Mock data - replace with real composables
-const transactions = ref([
-  {
-    id: '1',
-    student: { name: 'John Doe', phone: '+1 234 567 8900' },
-    type: 'package_purchase',
-    amount: 50.00,
-    credit_change: 10,
-    payment_method: 'cash',
-    payment_note: 'Payment received',
-    reference_number: 'REF001',
-    created_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    student: { name: 'Jane Smith', phone: '+1 234 567 8901' },
-    type: 'class_credit',
-    amount: 0,
-    credit_change: -2,
-    payment_method: 'other',
-    payment_note: 'Class attendance',
-    reference_number: null,
-    created_at: '2024-01-16T09:00:00Z'
-  }
-])
-
-const students = ref([
-  { id: '1', name: 'John Doe', phone: '+1 234 567 8900' },
-  { id: '2', name: 'Jane Smith', phone: '+1 234 567 8901' }
-])
+const df = new DateFormatter(locale.value === 'zh-Hant' ? 'zh-HK' : 'en-US', {
+  dateStyle: 'medium'
+})
 
 // State
 const loading = ref(false)
-const showTransactionModal = ref(false)
-const editingTransaction = ref(null)
-
-const filters = ref({
-  type: '',
-  student_id: '',
-  payment_method: '',
-  date_from: '',
-  date_to: ''
+const exporting = ref(false)
+const transactions = ref<any[]>([])
+const stats = ref({
+  totalRevenue: 0,
+  totalRefunds: 0,
+  netRevenue: 0,
+  totalTransactions: 0
 })
+
+// Filters
+const filters = reactive({
+  startDate: '',
+  endDate: '',
+  transactionType: '',
+  studentId: ''
+})
+
+// Sort
+const sortBy = ref('date-desc')
 
 // Computed
-const typeOptions = computed(() => [
-  { label: t('transactions.type.package_purchase'), value: 'package_purchase' },
-  { label: t('transactions.type.class_credit'), value: 'class_credit' },
-  { label: t('transactions.type.manual_adjustment'), value: 'manual_adjustment' }
-])
-
-const studentOptions = computed(() => 
-  students.value.map(s => ({
-    label: `${s.name} (${s.phone})`,
-    value: s.id
-  }))
-)
-
-const paymentMethodOptions = computed(() => [
-  { label: t('transactions.paymentMethod.cash'), value: 'cash' },
-  { label: t('transactions.paymentMethod.bank_transfer'), value: 'bank_transfer' },
-  { label: t('transactions.paymentMethod.other'), value: 'other' }
-])
-
-const filteredTransactions = computed(() => {
-  let filtered = transactions.value
-
-  if (filters.value.type) {
-    filtered = filtered.filter(t => t.type === filters.value.type)
-  }
-
-  if (filters.value.student_id) {
-    filtered = filtered.filter(t => t.student?.id === filters.value.student_id)
-  }
-
-  if (filters.value.payment_method) {
-    filtered = filtered.filter(t => t.payment_method === filters.value.payment_method)
-  }
-
-  if (filters.value.date_from) {
-    filtered = filtered.filter(t => t.created_at >= filters.value.date_from)
-  }
-
-  if (filters.value.date_to) {
-    filtered = filtered.filter(t => t.created_at <= filters.value.date_to)
-  }
-
-  return filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+const hasActiveFilters = computed(() => {
+  return filters.startDate || filters.endDate || filters.transactionType || filters.studentId
 })
 
-const totalRevenue = computed(() => 
-  transactions.value
-    .filter(t => t.type === 'package_purchase')
-    .reduce((sum, t) => sum + t.amount, 0)
-)
-
-const monthlyRevenue = computed(() => {
-  const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  
-  return transactions.value
-    .filter(t => t.type === 'package_purchase' && new Date(t.created_at) >= startOfMonth)
-    .reduce((sum, t) => sum + t.amount, 0)
-})
-
-const totalCredits = computed(() => 
-  transactions.value
-    .filter(t => t.type === 'package_purchase')
-    .reduce((sum, t) => sum + t.credit_change, 0)
-)
-
-const pendingPayments = computed(() => 
-  transactions.value
-    .filter(t => t.type === 'package_purchase' && t.payment_method === 'other')
-    .reduce((sum, t) => sum + t.amount, 0)
-)
-
-const columns = computed(() => [
-  {
-    key: 'student',
-    label: t('transactions.student'),
-    sortable: true
-  },
-  {
-    key: 'type',
-    label: t('transactions.type'),
-    sortable: true
-  },
-  {
-    key: 'amount',
-    label: t('transactions.amount'),
-    sortable: true
-  },
-  {
-    key: 'credit_change',
-    label: t('transactions.creditChange'),
-    sortable: true
-  },
-  {
-    key: 'payment_method',
-    label: t('transactions.paymentMethod'),
-    sortable: true
-  },
-  {
-    key: 'created_at',
-    label: t('transactions.date'),
-    sortable: true
-  },
-  {
-    key: 'actions',
-    label: t('common.actions')
-  }
-])
-
-// Methods
-const getTypeColor = (type: string) => {
-  const colors = {
-    package_purchase: 'green',
-    class_credit: 'blue',
-    manual_adjustment: 'yellow'
-  }
-  return colors[type] || 'gray'
-}
-
-const getPaymentMethodColor = (method: string) => {
-  const colors = {
-    cash: 'green',
-    bank_transfer: 'blue',
-    other: 'orange'
-  }
-  return colors[method] || 'gray'
-}
-
-const getActionItems = (transaction: any) => [
-  {
-    label: t('transactions.viewDetails'),
-    icon: 'i-heroicons-eye',
-    click: () => viewTransaction(transaction)
-  },
-  {
-    label: t('transactions.editTransaction'),
-    icon: 'i-heroicons-pencil-square',
-    click: () => editTransaction(transaction)
-  },
-  {
-    label: t('transactions.printReceipt'),
-    icon: 'i-heroicons-printer',
-    click: () => printReceipt(transaction),
-    disabled: transaction.type !== 'package_purchase'
-  }
+const transactionTypeOptions = [
+  { label: t('transactions.types.package_purchase'), value: 'package_purchase' },
+  { label: t('transactions.types.credit_usage'), value: 'credit_usage' },
+  { label: t('transactions.types.cash_payment'), value: 'cash_payment' },
+  { label: t('transactions.types.refund'), value: 'refund' }
 ]
 
-const viewTransaction = (transaction: any) => {
-  // Navigate to transaction details
+const studentOptions = computed(() => {
+  return students.value.map(student => ({
+    label: student.name,
+    value: student.id
+  }))
+})
+
+const sortOptions = [
+ 
+  { label: t('transactions.sort.dateDesc'), value: 'date-desc' },
+  { label: t('transactions.sort.dateAsc'), value: 'date-asc' },
+  { label: t('transactions.sort.amountDesc'), value: 'amount-desc' },
+  { label: t('transactions.sort.amountAsc'), value: 'amount-asc' }
+]
+
+// Methods
+const loadTransactions = async () => {
+  loading.value = true
+  
+  try {
+    // Load transactions based on filters
+    let transactionsData: any[] = []
+    
+    if (filters.studentId) {
+      transactionsData = await getTransactionsByStudent(filters.studentId)
+    } else if (filters.startDate && filters.endDate) {
+      transactionsData = await getTransactionsByDateRange(filters.startDate, filters.endDate)
+    } else {
+      transactionsData = await getRecentTransactions(100)
+    }
+    
+    // Filter by transaction type if specified
+    if (filters.transactionType) {
+      transactionsData = transactionsData.filter(t => t.transaction_type === filters.transactionType)
+    }
+    
+    // Sort transactions
+    transactionsData = sortTransactions(transactionsData, sortBy.value)
+    
+    transactions.value = transactionsData
+    
+    // Load statistics
+    const statsData = await getTransactionStats(filters.startDate, filters.endDate)
+    stats.value = statsData
+  } catch (error) {
+    console.error('Error loading transactions:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const sortTransactions = (data: any[], sortBy: string) => {
+  return [...data].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-desc':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'date-asc':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      case 'amount-desc':
+        return b.amount - a.amount
+      case 'amount-asc':
+        return a.amount - b.amount
+      default:
+        return 0
+    }
+  })
+}
+
+const clearFilters = () => {
+  filters.startDate = ''
+  filters.endDate = ''
+  filters.transactionType = ''
+  filters.studentId = ''
+  loadTransactions()
+}
+
+const refreshTransactions = () => {
+  loadTransactions()
+}
+
+const exportTransactions = async () => {
+  exporting.value = true
+  
+  try {
+    // Create CSV content
+    const headers = ['Date', 'Student', 'Type', 'Description', 'Amount', 'Status', 'Notes']
+    const csvContent = [
+      headers.join(','),
+      ...transactions.value.map(t => [
+        formatDate(t.created_at),
+        getStudentName(t.student_id),
+        t(`transactions.types.${t.transaction_type}`),
+        `"${t.description}"`,
+        t.amount,
+        t(`transactions.status.${t.status}`),
+        `"${t.notes || ''}"`
+      ].join(','))
+    ].join('\n')
+    
+    // Download file
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Error exporting transactions:', error)
+  } finally {
+    exporting.value = false
+  }
+}
+
+const getStudentName = (studentId: string) => {
+  const student = students.value.find(s => s.id === studentId)
+  return student?.name || 'Unknown Student'
+}
+
+const getTransactionTypeColor = (type: string) => {
+  switch (type) {
+    case 'package_purchase': return 'success'
+    case 'credit_usage': return 'info'
+    case 'cash_payment': return 'primary'
+    case 'refund': return 'warning'
+    default: return 'neutral'
+  }
+}
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed': return 'success'
+    case 'pending': return 'warning'
+    case 'cancelled': return 'error'
+    case 'refunded': return 'info'
+    default: return 'neutral'
+  }
+}
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const viewTransactionDetails = (transaction: any) => {
+  // Navigate to transaction detail page
   navigateTo(`/transactions/${transaction.id}`)
 }
 
-const editTransaction = (transaction: any) => {
-  editingTransaction.value = transaction
-  showTransactionModal.value = true
-}
+// Watchers
+watch([filters, sortBy], () => {
+  loadTransactions()
+}, { deep: true })
 
-const printReceipt = (transaction: any) => {
-  // TODO: Implement receipt printing
-  console.log('Printing receipt for transaction:', transaction.id)
-}
-
-const exportTransactions = () => {
-  // TODO: Implement export functionality
-  console.log('Exporting transactions...')
-}
-
-const onTransactionSaved = () => {
-  showTransactionModal.value = false
-  editingTransaction.value = null
-}
-
-definePageMeta({
-  middleware: 'auth'
+// Load data on mount
+onMounted(async () => {
+  await loadStudents()
+  await loadTransactions()
 })
 </script>

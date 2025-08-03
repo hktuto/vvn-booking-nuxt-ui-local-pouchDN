@@ -393,6 +393,7 @@
         "paymentMethod": "Payment Method",
         "credit": "Credit",
         "cash": "Cash",
+        "selectPackage": "Select Package",
         "remainingCredits": "{credits} credits remaining",
         "noActivePackages": "No Active Packages",
         "buyPackagePrompt": "This student has no active packages. Would you like to buy a package first?",
@@ -559,6 +560,51 @@
     "alipay": "Alipay",
     "fps": "FPS",
     "creditCard": "Credit Card"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "description": "View and manage all financial transactions",
+    "export": "Export",
+    "dateRange": "Date Range",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "transactionType": "Transaction Type",
+    "student": "Student",
+    "allTypes": "All Types",
+    "allStudents": "All Students",
+    "clearFilters": "Clear Filters",
+    "totalRevenue": "Total Revenue",
+    "totalRefunds": "Total Refunds",
+    "netRevenue": "Net Revenue",
+    "totalTransactions": "Total Transactions",
+    "recentTransactions": "Recent Transactions",
+    "date": "Date",
+    "type": "Type",
+    "description": "Description",
+    "amount": "Amount",
+    "status": "Status",
+    "actions": "Actions",
+    "view": "View",
+    "noTransactions": "No Transactions",
+    "noTransactionsDescription": "No transactions found matching your filters",
+    "types": {
+      "package_purchase": "Package Purchase",
+      "credit_usage": "Credit Usage",
+      "cash_payment": "Cash Payment",
+      "refund": "Refund"
+    },
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "sort": {
+      "dateDesc": "Date (Newest)",
+      "dateAsc": "Date (Oldest)",
+      "amountDesc": "Amount (High to Low)",
+      "amountAsc": "Amount (Low to High)"
+    }
   },
   "location": {
     "locations": "Locations",

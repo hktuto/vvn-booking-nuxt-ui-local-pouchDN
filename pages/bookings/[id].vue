@@ -142,24 +142,19 @@
                 >
                   {{ t(`booking.status.${studentBooking.status}`) }}
                 </UBadge>
-                <UButton
-                  @click="handleRedeem(studentBooking)"
-                  variant="ghost"
-                  size="sm"
-                  icon="i-heroicons-credit-card"
-                  color="primary"
-                  :aria-label="t('validation.booking.redeem.title')"
-                >
-                  {{ t('validation.booking.redeem.title') }}
-                </UButton>
-                <UButton
-                  @click="handleRemoveStudent(studentBooking.student_id)"
-                  variant="ghost"
-                  size="sm"
-                  icon="i-heroicons-x-mark"
-                  color="error"
-                  :aria-label="t('booking.removeStudent')"
-                />
+                <UPopover>
+                  <UButton
+                    variant="ghost"
+                    icon="i-heroicons-ellipsis-vertical"
+                    size="sm"
+                  />
+                  <template #content>
+                    <UNavigationMenu
+                      orientation="vertical"
+                      :items="getStudentActions(studentBooking)"
+                    />
+                  </template>
+                </UPopover>
               </div>
             </div>
           </div>
@@ -416,8 +411,8 @@ const handleRedeemCompleted = async (data: any) => {
   selectedStudent.value = null
   
   // Show success message
-  const message = t('booking.redeem.success', { 
-    method: data.paymentMethod === 'credit' ? t('booking.redeem.credit') : t('booking.redeem.cash'),
+  const message = t('validation.booking.redeem.success', { 
+    method: data.paymentMethod === 'credit' ? t('validation.booking.redeem.credit') : t('validation.booking.redeem.cash'),
     amount: data.amount
   })
   
@@ -429,6 +424,29 @@ const handleRedeemCompleted = async (data: any) => {
 const handlePackagePurchased = async (studentPackage: any) => {
   // Package was purchased, modal will handle the rest
   console.log('Package purchased:', studentPackage)
+}
+
+// Get student actions for navigation menu
+const getStudentActions = (studentBooking: any) => {
+  return [
+    {
+      label: t('common.detail'),
+      icon: 'i-heroicons-user',
+      onSelect: () => {
+        router.push(`/students/${studentBooking.student_id}`)
+      }
+    },
+    {
+      label: t('validation.booking.redeem.title'),
+      icon: 'i-heroicons-credit-card',
+      onSelect: () => handleRedeem(studentBooking)
+    },
+    {
+      label: t('booking.removeStudent'),
+      icon: 'i-heroicons-x-mark',
+      onSelect: () => handleRemoveStudent(studentBooking.student_id)
+    }
+  ]
 }
 
 // Navigate back

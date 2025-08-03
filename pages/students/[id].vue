@@ -11,7 +11,7 @@
           </p>
         </div>
         <UButton
-          @click="navigateTo('/students')"
+          @click="$router.back()"
           variant="ghost"
           icon="i-heroicons-arrow-left"
           size="sm"

@@ -555,6 +555,51 @@
     "fps": "FPS",
     "creditCard": "信用卡"
   },
+  "transactions": {
+    "title": "交易記錄",
+    "description": "查看和管理所有財務交易",
+    "export": "匯出",
+    "dateRange": "日期範圍",
+    "startDate": "開始日期",
+    "endDate": "結束日期",
+    "transactionType": "交易類型",
+    "student": "學生",
+    "allTypes": "所有類型",
+    "allStudents": "所有學生",
+    "clearFilters": "清除篩選",
+    "totalRevenue": "總收入",
+    "totalRefunds": "總退款",
+    "netRevenue": "淨收入",
+    "totalTransactions": "總交易數",
+    "recentTransactions": "最近交易",
+    "date": "日期",
+    "type": "類型",
+    "description": "描述",
+    "amount": "金額",
+    "status": "狀態",
+    "actions": "操作",
+    "view": "查看",
+    "noTransactions": "沒有交易記錄",
+    "noTransactionsDescription": "沒有找到符合篩選條件的交易記錄",
+    "types": {
+      "package_purchase": "套票購買",
+      "credit_usage": "學分使用",
+      "cash_payment": "現金付款",
+      "refund": "退款"
+    },
+    "status": {
+      "completed": "已完成",
+      "pending": "待處理",
+      "cancelled": "已取消",
+      "refunded": "已退款"
+    },
+    "sort": {
+      "dateDesc": "日期（最新）",
+      "dateAsc": "日期（最舊）",
+      "amountDesc": "金額（高到低）",
+      "amountAsc": "金額（低到高）"
+    }
+  },
   "location": {
     "locations": "場地",
     "addLocation": "新增場地",

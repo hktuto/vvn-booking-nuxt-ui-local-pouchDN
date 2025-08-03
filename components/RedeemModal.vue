@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          {{ $t('booking.redeem.title') }}
+          {{ $t('validation.booking.redeem.title') }}
         </h3>
         <UButton
           @click="closeModal"
@@ -29,7 +29,7 @@
 
         <!-- Payment Method Selection -->
         <div class="space-y-3">
-          <label class="text-sm font-medium">{{ $t('booking.redeem.paymentMethod') }}</label>
+          <label class="text-sm font-medium">{{ $t('validation.booking.redeem.paymentMethod') }}</label>
           <div class="grid grid-cols-2 gap-3">
             <UButton
               :variant="form.paymentMethod === 'credit' ? 'solid' : 'outline'"
@@ -38,7 +38,7 @@
               class="justify-start"
             >
               <UIcon name="i-heroicons-credit-card" class="mr-2" />
-              {{ $t('booking.redeem.credit') }}
+              {{ $t('validation.booking.redeem.credit') }}
             </UButton>
             <UButton
               :variant="form.paymentMethod === 'cash' ? 'solid' : 'outline'"
@@ -47,7 +47,7 @@
               class="justify-start"
             >
               <UIcon name="i-heroicons-banknotes" class="mr-2" />
-              {{ $t('booking.redeem.cash') }}
+              {{ $t('validation.booking.redeem.cash') }}
             </UButton>
           </div>
         </div>
@@ -69,7 +69,7 @@
                   <div class="flex-1">
                     <p class="font-medium">{{ pkg.package_name }}</p>
                     <p class="text-sm text-gray-500">
-                      {{ $t('booking.redeem.remainingCredits', { credits: pkg.credits_remaining }) }}
+                      {{ $t('validation.booking.redeem.remainingCredits', { credits: pkg.credits_remaining }) }}
                     </p>
                   </div>
                   <UCheckbox
@@ -87,10 +87,10 @@
               <UIcon name="i-heroicons-exclamation-triangle" class="text-yellow-600 dark:text-yellow-400 mt-0.5" />
               <div>
                 <p class="font-medium text-yellow-800 dark:text-yellow-200">
-                  {{ $t('booking.redeem.noActivePackages') }}
+                  {{ $t('validation.booking.redeem.noActivePackages') }}
                 </p>
                 <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                  {{ $t('booking.redeem.buyPackagePrompt') }}
+                  {{ $t('validation.booking.redeem.buyPackagePrompt') }}
                 </p>
                 <UButton
                   size="sm"
@@ -99,38 +99,38 @@
                   class="mt-2"
                   @click="showBuyPackageModal = true"
                 >
-                  {{ $t('booking.redeem.buyPackage') }}
+                  {{ $t('validation.booking.redeem.buyPackage') }}
                 </UButton>
               </div>
             </div>
           </div>
 
           <!-- Credits to Use -->
-          <div v-if="form.selectedPackages.length > 0" class="space-y-2">
-            <label class="text-sm font-medium">{{ $t('booking.redeem.creditsToUse') }}</label>
+          <div v-if="form.selectedPackages.length > 0" class="flex flex-col space-y-2">
+            <label class="text-sm font-medium">{{ $t('validation.booking.redeem.creditsToUse') }}</label>
             <UInput
               v-model="form.creditsToUse"
               type="number"
               :min="1"
               :max="maxAvailableCredits"
-              :placeholder="$t('booking.redeem.enterCredits')"
+              :placeholder="$t('validation.booking.redeem.enterCredits')"
             />
             <p class="text-xs text-gray-500">
-              {{ $t('booking.redeem.availableCredits', { credits: maxAvailableCredits }) }}
+              {{ $t('validation.booking.redeem.availableCredits', { credits: maxAvailableCredits }) }}
             </p>
           </div>
         </div>
 
         <!-- Cash Payment Section -->
         <div v-if="form.paymentMethod === 'cash'" class="space-y-3">
-          <div class="space-y-2">
-            <label class="text-sm font-medium">{{ $t('booking.redeem.cashAmount') }}</label>
+          <div class="flex flex-col space-y-2">
+            <label class="text-sm font-medium">{{ $t('validation.booking.redeem.cashAmount') }}</label>
             <UInput
               v-model="form.cashAmount"
               type="number"
               :min="0.01"
               :step="0.01"
-              :placeholder="$t('booking.redeem.enterAmount')"
+              :placeholder="$t('validation.booking.redeem.enterAmount')"
               class="font-mono"
             >
               <template #leading>
@@ -139,24 +139,24 @@
             </UInput>
           </div>
 
-          <div class="space-y-2">
-            <label class="text-sm font-medium">{{ $t('booking.redeem.paymentMethod') }}</label>
+          <div class="flex flex-col space-y-2">
+            <label class="text-sm font-medium">{{ $t('validation.booking.redeem.paymentMethod') }}</label>
             <USelect
               v-model="form.selectedPaymentMethod"
-              :options="paymentMethods"
+              :items="paymentMethods" 
               option-attribute="label"
               value-attribute="value"
-              :placeholder="$t('booking.redeem.selectPaymentMethod')"
+              :placeholder="$t('validation.booking.redeem.selectPaymentMethod')"
             />
           </div>
         </div>
 
         <!-- Notes -->
-        <div class="space-y-2">
+        <div class="flex flex-col space-y-2">
           <label class="text-sm font-medium">{{ $t('common.notes') }}</label>
           <UTextarea
             v-model="form.notes"
-            :placeholder="$t('booking.redeem.notesPlaceholder')"
+            :placeholder="$t('validation.booking.redeem.notesPlaceholder')"
             :rows="2"
           />
         </div>
@@ -169,54 +169,18 @@
           {{ $t('common.cancel') }}
         </UButton>
         <UButton @click="handleSubmit" :loading="submitting" :disabled="!canSubmit">
-          {{ $t('booking.redeem.confirm') }}
+          {{ $t('validation.booking.redeem.confirm') }}
         </UButton>
       </div>
     </template>
   </UModal>
 
   <!-- Buy Package Modal -->
-  <UModal v-model="showBuyPackageModal">
-    <template #header>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        {{ $t('booking.redeem.buyPackage') }}
-      </h3>
-    </template>
-
-    <template #body>
-      <div class="space-y-4">
-        <p>{{ $t('booking.redeem.buyPackageDescription') }}</p>
-        <div class="space-y-2">
-          <label class="text-sm font-medium">{{ $t('booking.redeem.selectPackageToBuy') }}</label>
-          <USelect
-            v-model="packageToBuy"
-            :options="availablePackages"
-            option-attribute="name"
-            value-attribute="id"
-            :placeholder="$t('booking.redeem.selectPackage')"
-          />
-        </div>
-        <div v-if="packageToBuy" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-          <div class="flex justify-between items-center">
-            <span class="font-medium">{{ selectedPackageInfo?.name }}</span>
-            <span class="text-lg font-bold">${{ selectedPackageInfo?.price }}</span>
-          </div>
-          <p class="text-sm text-gray-500">{{ selectedPackageInfo?.credits }} {{ $t('common.credits') }}</p>
-        </div>
-      </div>
-    </template>
-
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <UButton @click="showBuyPackageModal = false" variant="soft">
-          {{ $t('common.cancel') }}
-        </UButton>
-        <UButton @click="handleBuyPackage" :loading="buyPackageLoading" :disabled="!packageToBuy">
-          {{ $t('booking.redeem.buyAndRedeem') }}
-        </UButton>
-      </div>
-    </template>
-  </UModal>
+  <AddPackageToStudent
+    v-model="showBuyPackageModal"
+    :student="student"
+    @saved="handlePackagePurchased"
+  />
 </template>
 
 <script setup lang="ts">
@@ -237,9 +201,8 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
-const { getActivePackagesForStudent, addPackageToStudent, useCreditsFromPackages } = useStudentPackages()
+const { getActivePackagesForStudent, useCreditsFromPackages } = useStudentPackages()
 const { createTransaction } = useTransactions()
-const { packages } = usePackages()
 
 // Modal state
 const isOpen = computed({
@@ -249,8 +212,6 @@ const isOpen = computed({
 
 const showBuyPackageModal = ref(false)
 const submitting = ref(false)
-const buyPackageLoading = ref(false)
-const packageToBuy = ref('')
 
 // Form data
 const form = reactive({
@@ -260,6 +221,16 @@ const form = reactive({
   cashAmount: 0,
   selectedPaymentMethod: 'cash',
   notes: ''
+})
+
+// Initialize form with class price when modal opens
+watch(() => isOpen.value, (newValue) => {
+  if (newValue && props.classInfo) {
+    // Set default cash amount to class price
+    form.cashAmount = props.classInfo.price || 0
+    // Set default credits to use to class credits
+    form.creditsToUse = props.classInfo.credits || 1
+  }
 })
 
 // Computed
@@ -283,13 +254,7 @@ const canSubmit = computed(() => {
   }
 })
 
-const availablePackages = computed(() => {
-  return packages.value.filter(p => p.active && !p.is_custom)
-})
 
-const selectedPackageInfo = computed(() => {
-  return availablePackages.value.find(p => p.id === packageToBuy.value)
-})
 
 const paymentMethods = [
   { label: t('payment.cash'), value: 'cash' },
@@ -322,7 +287,6 @@ const resetForm = () => {
   form.cashAmount = 0
   form.selectedPaymentMethod = 'cash'
   form.notes = ''
-  packageToBuy.value = ''
   showBuyPackageModal.value = false
 }
 
@@ -382,26 +346,13 @@ const handleCashPayment = async () => {
   })
 }
 
-const handleBuyPackage = async () => {
-  buyPackageLoading.value = true
+const handlePackagePurchased = async (studentPackage: any) => {
+  // Package was purchased successfully
+  emit('package-purchased', studentPackage)
+  showBuyPackageModal.value = false
   
-  try {
-    const newStudentPackage = await addPackageToStudent(
-      props.student.id,
-      packageToBuy.value,
-      form.notes
-    )
-    
-    emit('package-purchased', newStudentPackage)
-    showBuyPackageModal.value = false
-    
-    // Auto-select the newly purchased package
-    form.selectedPackages = [newStudentPackage.id]
-  } catch (error) {
-    console.error('Error buying package:', error)
-  } finally {
-    buyPackageLoading.value = false
-  }
+  // Auto-select the newly purchased package for redemption
+  form.selectedPackages = [studentPackage.id]
 }
 
 // Watch for modal open to auto-select packages
