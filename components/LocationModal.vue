@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          {{ location ? $t('classes.editLocation') : $t('classes.addLocation') }}
+          {{ location ? $t('location.editLocation') : $t('location.addLocation') }}
         </h3>
         <UButton
           @click="closeModal"
@@ -16,41 +16,41 @@
 
     <template #body>
       <UForm :state="form" :schema="locationSchema" class="space-y-4" @submit="saveLocation" ref="formRef">
-        <UFormField name="name" :label="$t('classes.name')" required>
+        <UFormField name="name" :label="$t('location.name')" required>
           <UInput
             v-model="form.name"
-            :placeholder="$t('classes.enterLocationName')"
+            :placeholder="$t('location.namePlaceholder')"
           />
         </UFormField>
 
-        <UFormField name="address" :label="$t('classes.address')" required>
+        <UFormField name="address" :label="$t('location.address')" required>
           <UTextarea
             v-model="form.address"
-            :placeholder="$t('classes.enterAddress')"
+            :placeholder="$t('location.addressPlaceholder')"
             rows="2"
           />
         </UFormField>
 
-        <UFormField name="phone" :label="$t('classes.phone')" required>
+        <UFormField name="phone" :label="$t('location.phone')" required>
           <UInput
             v-model="form.phone"
-            :placeholder="$t('classes.enterPhone')"
+            :placeholder="$t('location.phonePlaceholder')"
           />
         </UFormField>
 
-        <UFormField name="email" :label="$t('classes.email')">
+        <UFormField name="email" :label="$t('location.email')">
           <UInput
             v-model="form.email"
             type="email"
-            :placeholder="$t('classes.enterEmail')"
+            :placeholder="$t('location.emailPlaceholder')"
           />
         </UFormField>
 
-        <UFormField name="website" :label="$t('classes.website')">
+        <UFormField name="website" :label="$t('location.website')">
           <UInput
             v-model="form.website"
             type="url"
-            :placeholder="$t('classes.enterWebsite')"
+            :placeholder="$t('location.websitePlaceholder')"
           />
         </UFormField>
 
@@ -148,14 +148,13 @@ const saveLocation = async (event: FormSubmitEvent<LocationForm>) => {
   
   try {
     const locationData = {
-      id: props.location?.id || crypto.randomUUID(),
-      ...event.data,
-      created_at: props.location?.created_at || new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      name: event.data.name,
+      address: event.data.address,
+      phone: event.data.phone,
+      email: event.data.email || '',
+      website: event.data.website || '',
+      active: event.data.active
     }
-    
-    // TODO: Replace with actual composable call
-    // await useLocations().addLocation(locationData)
     
     emit('saved', locationData)
     closeModal()

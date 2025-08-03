@@ -293,6 +293,9 @@
     "email": {
       "invalid": "Please enter a valid email address"
     },
+    "website": {
+      "invalid": "Please enter a valid website URL"
+    },
     "countryCode": {
       "required": "Country code is required"
     },
