@@ -1,26 +1,23 @@
 <template>
-  <NuxtLayout name="default">
+  <NuxtLayout>
     <template #header>
       <div class="flex items-center justify-between w-full">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ t('class.classes') }}</h1>
-          
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ t('booking.bookings') }}</h1>
         </div>
       </div>
     </template>
 
     <div class="px-6 py-2">
       <MenuClass />
-      <ClassTabContent />
+      <BookingTabContent />
     </div>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
-
 const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
-
-</script> 
+definePageMeta({
+  middleware: 'auth'
+})
+</script>

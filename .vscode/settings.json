@@ -1,0 +1,12 @@
+{
+  "i18n-ally.dirStructure": "auto",
+  "i18n-ally.localesPaths": [
+    "i18n",
+    "i18n/locales"
+  ],
+  "i18n-ally.enabledFrameworks": [
+    "vue"
+  ],
+  "vue-i18n.sourceLocale": "zh-Hant",
+  "vue-i18n.i18nPaths": "/i18n/locales"
+}

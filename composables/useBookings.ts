@@ -90,13 +90,13 @@ export const useBookings = () => {
   const getVirtualBookingById = async (virtualId: string) => {
     try {
       // Parse virtual ID format: virtual-{classId}-{date}
-      const parts = virtualId.split('-')
+      const parts = virtualId.split('_')
       if (parts.length < 3) {
         throw new Error('Invalid virtual booking ID format')
       }
       
       const classId = parts[1]
-      const date = parts.slice(2).join('-') // Handle dates with hyphens
+      const date = parts[2] // Handle dates with hyphens
       
       // Find the class
       const class_ = classes.value.find(c => c.id === classId)
@@ -165,7 +165,7 @@ export const useBookings = () => {
         console.log('findExistingBooking', findExistingBooking.docs)
         if (!findExistingBooking.docs.length) {
           virtualBookings.push({
-            id: `virtual-${class_.id}-${date}`,
+            id: `virtual_${class_.id}_${date}`,
             class_id: class_.id,
             class_date: date,
             class_time: class_.start_time,
@@ -180,7 +180,6 @@ export const useBookings = () => {
         }
       }
     }
-    console.log('Virtual bookings:', virtualBookings.length)
     
     return virtualBookings
   }
@@ -218,7 +217,7 @@ export const useBookings = () => {
       let booking: any = null
       
       // Check if this is a virtual booking ID
-      if (bookingId.startsWith('virtual-')) {
+      if (bookingId.startsWith('virtual_')) {
         booking = await getVirtualBookingById(bookingId)
       } else {
         // Fetch the booking from database

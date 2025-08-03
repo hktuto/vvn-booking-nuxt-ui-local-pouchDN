@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Search and Add Button -->
-    <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+    <div class="flex flex-row sm:flex-row gap-4 justify-between items-start sm:items-center w-full">
       <div class="flex-1 max-w-md">
         <UInput
           v-model="searchQuery"
@@ -119,4 +119,9 @@ const handleLocationSaved = async (locationData: any) => {
 onMounted(() => {
   loadLocations()
 })
+
+defineExpose({
+  openAddLocationModal: addNewLocation
+})
+
 </script> 

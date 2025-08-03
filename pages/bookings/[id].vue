@@ -1,7 +1,8 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6 space-y-6">
+  <NuxtLayout>
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <template #header>
+    <div class="flex items-center justify-between w-full">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
           {{ t('booking.bookingDetails') }}
@@ -18,7 +19,7 @@
         {{ t('common.back') }}
       </UButton>
     </div>
-
+    </template>
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
       <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400" />
@@ -70,14 +71,14 @@
           <div class="flex items-center gap-2">
             <UBadge
               v-if="booking.is_virtual"
-              color="blue"
+              color="primary"
               variant="soft"
             >
               {{ t('booking.virtual') }}
             </UBadge>
             <UBadge
               v-else
-              color="green"
+              color="success"
               variant="soft"
             >
               {{ t('booking.inPerson') }}
@@ -145,7 +146,7 @@
                   variant="ghost"
                   size="sm"
                   icon="i-heroicons-x-mark"
-                  color="red"
+                  color="error"
                   :aria-label="t('booking.removeStudent')"
                 />
               </div>
@@ -183,7 +184,7 @@
         <UButton
           v-if="!booking?.is_virtual"
           @click="handleDeleteBooking"
-          color="red"
+          color="error"
           variant="soft"
           icon="i-heroicons-trash"
         >
@@ -218,7 +219,7 @@
       @virtual-booking-conversion="handleVirtualBookingConversion"
       @refresh-needed="loadBooking"
     />
-  </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
@@ -272,11 +273,11 @@ const formatDate = (dateString: string) => {
 // Get status color
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'confirmed': return 'green'
-    case 'cancelled': return 'red'
-    case 'completed': return 'blue'
-    case 'no_show': return 'orange'
-    default: return 'gray'
+    case 'confirmed': return 'primary'
+    case 'cancelled': return 'error'
+    case 'completed': return 'info'
+    case 'no_show': return 'warning'
+    default: return 'neutral'
   }
 }
 
