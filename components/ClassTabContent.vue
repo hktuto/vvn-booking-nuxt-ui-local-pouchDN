@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 const { t } = useI18n()
-const { classes, loading, error, loadClasses, deleteClass, getAllTags, updateClass } = useClasses()
+const { classes, loading, error, loadClasses, deleteClass, getAllTags, updateClass, addClass } = useClasses()
 
 // Reactive state
 const searchQuery = ref('')
@@ -153,8 +153,23 @@ const confirmDelete = async (class_: any) => {
 }
 
 const handleClassSaved = async (classData: any) => {
-  await updateClass(editingClass.value.id, classData)
-
+  try {
+    console.log('handleClassSaved called with:', classData)
+    console.log('editingClass.value:', editingClass.value)
+    
+    if (editingClass.value) {
+      // Editing existing class
+      console.log('Updating existing class:', editingClass.value.id)
+      await updateClass(editingClass.value.id, classData)
+    } else {
+      // Creating new class
+      console.log('Creating new class')
+      const newClass = await addClass(classData)
+      console.log('New class created:', newClass)
+    }
+  } catch (err) {
+    console.error('Error saving class:', err)
+  }
 }
 
 // Load classes on mount
