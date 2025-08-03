@@ -26,6 +26,21 @@
 
     <!-- Booking Details -->
     <div v-else-if="booking" class="space-y-6">
+      <!-- Virtual Event Notice -->
+      <div v-if="booking.is_virtual" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+        <div class="flex items-center gap-2">
+          <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div>
+            <h3 class="font-medium text-blue-900 dark:text-blue-100">
+              {{ t('booking.virtualEvent') }}
+            </h3>
+            <p class="text-sm text-blue-700 dark:text-blue-300">
+              {{ t('booking.virtualEventDescription') }}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Class Information -->
       <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-start justify-between mb-4">
@@ -166,6 +181,7 @@
           {{ t('common.cancel') }}
         </UButton>
         <UButton
+          v-if="!booking?.is_virtual"
           @click="handleDeleteBooking"
           color="red"
           variant="soft"
@@ -209,7 +225,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { getBookingById, deleteBooking, addStudentToBooking, removeStudentFromBooking } = useBookings()
-const { classes } = useClasses()
+const { classes, loadClasses } = useClasses()
 
 // State
 const loading = ref(true)
@@ -223,6 +239,8 @@ const bookingId = route.params.id as string
 async function loadBooking() {
   loading.value = true
   try {
+    // Ensure classes are loaded for virtual bookings
+    await loadClasses()
     booking.value = await getBookingById(bookingId)
   } catch (error) {
     console.error('Error loading booking:', error)
@@ -297,6 +315,12 @@ const handleRemoveStudent = async (studentId: string) => {
 // Handle delete booking
 const handleDeleteBooking = async () => {
   if (!booking.value) return
+  
+  // Virtual events cannot be deleted as they don't exist in the database
+  if (booking.value.is_virtual) {
+    console.warn('Cannot delete virtual booking')
+    return
+  }
   
   try {
     await deleteBooking(booking.value.id)

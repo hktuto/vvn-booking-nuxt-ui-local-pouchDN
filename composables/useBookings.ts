@@ -100,10 +100,53 @@ export const useBookings = () => {
 
   const getBookingById = async (id: string) => {
     try {
+      // Check if this is a virtual booking ID
+      if (id.startsWith('virtual-')) {
+        return await getVirtualBookingById(id)
+      }
+      
       const doc = await bookingsCRUD.findById(id)
       return doc ? transformBookingDoc(doc) : null
     } catch (err) {
       console.error('Error getting booking by ID:', err)
+      return null
+    }
+  }
+
+  // Get virtual booking by ID (parses virtual ID format)
+  const getVirtualBookingById = async (virtualId: string) => {
+    try {
+      // Parse virtual ID format: virtual-{classId}-{date}
+      const parts = virtualId.split('-')
+      if (parts.length < 3) {
+        throw new Error('Invalid virtual booking ID format')
+      }
+      
+      const classId = parts[1]
+      const date = parts.slice(2).join('-') // Handle dates with hyphens
+      
+      // Find the class
+      const class_ = classes.value.find(c => c.id === classId)
+      if (!class_) {
+        throw new Error('Class not found')
+      }
+      
+      // Create virtual booking object
+      return {
+        id: virtualId,
+        class_id: classId,
+        class_date: date,
+        class_time: class_.start_time,
+        bookings: [],
+        total_booked: 0,
+        max_capacity: class_.max_students,
+        is_virtual: true,
+        class_info: class_,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    } catch (err) {
+      console.error('Error getting virtual booking by ID:', err)
       return null
     }
   }
@@ -276,6 +319,7 @@ export const useBookings = () => {
     updateBooking,
     deleteBooking,
     getBookingById,
+    getVirtualBookingById,
     getVirtualBookingsForDate,
     getBookingsForDate,
     addStudentToBooking,

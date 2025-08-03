@@ -577,6 +577,8 @@
     "bookingNotFoundDescription": "您要找的預約不存在或已被移除。",
     "addFirstStudent": "為此預約新增第一個學生",
     "moreStudents": "更多學生",
+    "virtualEvent": "已排程課程",
+    "virtualEventDescription": "這是一個已排程但尚未預約的課程。新增學生以建立真實預約。",
     "status": {
       "confirmed": "已確認",
       "cancelled": "已取消",

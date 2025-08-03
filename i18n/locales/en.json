@@ -589,6 +589,8 @@
     "bookingNotFoundDescription": "The booking you're looking for doesn't exist or has been removed.",
     "addFirstStudent": "Add your first student to this booking",
     "moreStudents": "more students",
+    "virtualEvent": "Scheduled Class",
+    "virtualEventDescription": "This is a scheduled class that hasn't been booked yet. Add students to create a real booking.",
     "status": {
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
