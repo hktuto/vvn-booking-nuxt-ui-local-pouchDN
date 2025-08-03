@@ -16,21 +16,22 @@
         :time-from="9 * 60"
         :time-to="23 * 60"
         :time-step="60"
-        :views="['day', 'week', 'month']"
-        view="day"
+        :views="{
+          day: { cols: 1, rows: 1 },
+          days: { cols: 3, rows: 1 },
+          week: { cols: 7, rows: 1 },// Arbitrary range of quarters of century (25y).
+        }"
+        :view="initialView"
+        :selected-date="initialDate"
+        :view-date="initialDate"
         :events="calendarEvents"
         :locale="locale === 'zh-Hant' ? 'zh-hk' : 'en-us'"
         :time-format="'HH:mm'"
         :time-cell-height="60"
         :cell-height="60"
+        :cell-width="120"
         @event-click="onEventClick"
         :dark="isDark"
-        :editable-events="{
-          delete: false,
-          create: false,
-          draggable: false,
-          resizable: false
-        }"
         start-week-on-sunday
         sm
         @view-change="onViewChange"
@@ -56,7 +57,12 @@ const { getBookingsForDate } = useBookings()
 const showAddStudentModal = ref(false)
 const selectedBooking = ref<any>(null)
 const { locale } = useI18n()
+const route = useRoute()
 
+
+
+const initialDate = ref(route.query.date ? new Date(route.query.date as string) : new Date())
+const initialView = ref(route.query.view as string || 'day')
 // Calendar events
 const calendarEvents = ref<any[]>([])
 const loading = ref(false)
@@ -66,22 +72,56 @@ const router = useRouter()
 async function onViewChange(view: any) {
   let _view;
   if(view.config){
-    
+
     _view = view.view
   }else{
     _view = view
   }
-  const start = stringToDate(_view.start.format())
-  const end = stringToDate(_view.end.format())
+  
+  // Update URL query parameters
+  await updateQueryParams(_view)
   const days = countDays(_view.start.format(), _view.end.format(), true)
   let result:any[] = []
   for (let i = 0; i < days; i++) {
     const date = addDays(_view.start, i).format()
     const bookings = await getBookingsForDate(date)
     result.push(...bookings)
-    
   }
   calendarEvents.value = convertBookingsToEvents(result)
+}
+
+// Update URL query parameters
+const updateQueryParams = async (view: any) => {
+  try {
+    const currentDate = view.start.format('YYYY-MM-DD')
+    const currentView = view.id || 'day'
+    await router.push({
+      query: {
+        ...route.query,
+        date: currentDate,
+        view: currentView
+      }
+    })
+  } catch (err) {
+    console.error('Error updating query params:', err)
+  }
+}
+
+// Navigate to specific date and view
+const navigateToDate = async (date: Date, view: string = 'day') => {
+  try {
+    const dateString = date.toISOString().split('T')[0]
+    
+    await router.push({
+      query: {
+        ...route.query,
+        date: dateString,
+        view: view
+      }
+    })
+  } catch (err) {
+    console.error('Error navigating to date:', err)
+  }
 }
 // Convert bookings to Vue-Cal events
 const convertBookingsToEvents = (bookings: any[]) => {
@@ -181,9 +221,33 @@ watch(showAddStudentModal, async (newValue, oldValue) => {
   }
 })
 
+// // Watch for route query changes
+// watch(() => route.query, async (newQuery, oldQuery) => {
+//   // Only update if date or view changed
+//   if (newQuery.date !== oldQuery?.date || newQuery.view !== oldQuery?.view) {
+//     console.log('Query params changed, updating calendar...')
+    
+//     // Update calendar view and date
+//     const vuecal = vuecalRef.value
+//     if (vuecal) {
+//       const newDate = newQuery.date ? new Date(newQuery.date as string) : new Date()
+//       const newView = (newQuery.view as string) || 'day'
+      
+//       // Update vuecal view and date
+//       vuecal.switchView(newView)
+//       vuecal.setDate(newDate)
+      
+//       // Refresh calendar data
+//       await refreshCalendar()
+//     }
+//   }
+// }, { deep: true })
+
 // Expose refresh method for external use
 defineExpose({
-  refreshCalendar
+  refreshCalendar,
+  updateQueryParams,
+  navigateToDate
 })
 
 </script>

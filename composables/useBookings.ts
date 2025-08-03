@@ -1,8 +1,9 @@
 import type { BookingDocument } from '~/composables/usePouchDB'
 
 export const useBookings = () => {
-  const { bookings: bookingsDB } = usePouchDB()
+  const { bookings: bookingsDB, classes: classesDB } = usePouchDB()
   const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
+  const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
   const { classes, loadClasses } = useClasses()
   const { students, loadStudents } = useStudents()
 
@@ -89,17 +90,18 @@ export const useBookings = () => {
   // Get virtual booking by ID (parses virtual ID format)
   const getVirtualBookingById = async (virtualId: string) => {
     try {
+
       // Parse virtual ID format: virtual-{classId}-{date}
-      const parts = virtualId.split('_')
+      const parts = virtualId.split('-')
       if (parts.length < 3) {
         throw new Error('Invalid virtual booking ID format')
       }
       
       const classId = parts[1]
-      const date = parts[2] // Handle dates with hyphens
-      
+      const date = parts[2].replace(/_/g, '-') // Handle dates with hyphens
+      console.log("try to get class by id split in virtual booking by id", classId, date, parts, classes.value)
       // Find the class
-      const class_ = classes.value.find(c => c.id === classId)
+      const class_ = await classesCRUD.findById(classId)
       if (!class_) {
         throw new Error('Class not found')
       }
@@ -165,7 +167,7 @@ export const useBookings = () => {
         console.log('findExistingBooking', findExistingBooking.docs)
         if (!findExistingBooking.docs.length) {
           virtualBookings.push({
-            id: `virtual_${class_.id}_${date}`,
+            id: `virtual-${class_.id}-${date.replace(/-/g, '_')}`,
             class_id: class_.id,
             class_date: date,
             class_time: class_.start_time,
@@ -217,7 +219,7 @@ export const useBookings = () => {
       let booking: any = null
       
       // Check if this is a virtual booking ID
-      if (bookingId.startsWith('virtual_')) {
+      if (bookingId.startsWith('virtual-')) {
         booking = await getVirtualBookingById(bookingId)
       } else {
         // Fetch the booking from database

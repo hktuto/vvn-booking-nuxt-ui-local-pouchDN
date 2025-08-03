@@ -263,9 +263,9 @@ const formatDate = (dateString: string) => {
   if (!dateString) return ''
   const date = new Date(dateString)
   return date.toLocaleDateString(undefined, {
-    weekday: 'long',
+    weekday: 'short',
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric'
   })
 }
@@ -366,7 +366,23 @@ const handleDeleteBooking = async () => {
 
 // Navigate back
 const navigateBack = () => {
-  router.back()
+  const { date, view } = route.query
+  console.log("navigateBack", date, view)
+  if(date && view){
+    router.push({
+      path: '/bookings',
+      query: { date, view }
+    })
+  }else{
+    console.log("navigateBack", booking.value.class_date)
+    router.push({
+      path: '/bookings',
+      query: {
+        date : booking.value.class_date || new Date().toISOString().split('T')[0],
+        view : 'day'
+      }
+    })
+  }
 }
 
 // Load booking on mount

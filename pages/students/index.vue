@@ -6,10 +6,22 @@
           <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ $t('student.students') }}
           </h1>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Manage your students and their information
-          </p>
         </div>
+        
+      </div>
+    </template>
+
+    <div class="p-6">
+
+    <!-- Search and Filter Bar -->
+    <div class="mb-6 space-y-4">
+      <div class="flex flex-row sm:flex-row gap-4 justify-between items-start sm:items-center w-full">
+        <UInput
+          v-model="searchQuery"
+          :placeholder="$t('student.searchPlaceholder')"
+          icon="i-heroicons-magnifying-glass"
+          class="flex-1"
+        />
         <UButton 
           @click="addNewStudent"
           icon="i-heroicons-plus"
@@ -18,20 +30,6 @@
           {{ $t('student.addStudent') }}
         </UButton>
       </div>
-    </template>
-
-    <div class="p-6">
-
-    <!-- Search and Filter Bar -->
-    <div class="mb-6 space-y-4">
-      <UFormField name="search" :label="$t('common.search')">
-        <UInput
-          v-model="searchQuery"
-          :placeholder="$t('student.searchPlaceholder')"
-          icon="i-heroicons-magnifying-glass"
-          class="w-full"
-        />
-      </UFormField>
       
       <!-- Tag Filter -->
       <div v-if="availableTags.length > 0">
