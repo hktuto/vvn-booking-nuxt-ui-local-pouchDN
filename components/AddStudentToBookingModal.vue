@@ -144,6 +144,7 @@ interface Emits {
   (e: 'student-added', bookingId: string, studentId: string, creditsUsed: number, notes: string): void
   (e: 'student-removed', bookingId: string, studentId: string): void
   (e: 'refresh-needed'): void
+  (e: 'virtual-booking-conversion', bookingId: string, studentIds: string[], creditsUsed: number, notes: string): void
 }
 
 const modelValue = defineModel<boolean>()
@@ -202,9 +203,14 @@ const handleAddStudents = async () => {
   submitting.value = true
   
   try {
-    // Add each selected student
-    for (const studentId of selectedStudents.value) {
-      emit('student-added', props.booking.id, studentId, creditsUsed.value, notes.value)
+    if (props.booking.is_virtual) {
+      // For virtual bookings, add all students at once to create a single real booking
+      emit('virtual-booking-conversion', props.booking.id, selectedStudents.value, creditsUsed.value, notes.value)
+    } else {
+      // For real bookings, add each student individually
+      for (const studentId of selectedStudents.value) {
+        emit('student-added', props.booking.id, studentId, creditsUsed.value, notes.value)
+      }
     }
     
     // Reset form

@@ -215,6 +215,7 @@
       :booking="booking"
       @student-added="handleStudentAdded"
       @student-removed="handleStudentRemoved"
+      @virtual-booking-conversion="handleVirtualBookingConversion"
       @refresh-needed="loadBooking"
     />
   </div>
@@ -224,7 +225,7 @@
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { getBookingById, deleteBooking, addStudentToBooking, removeStudentFromBooking } = useBookings()
+const { getBookingById, deleteBooking, addStudentToBooking, removeStudentFromBooking, convertVirtualBookingToReal } = useBookings()
 const { classes, loadClasses } = useClasses()
 
 // State
@@ -279,12 +280,44 @@ const getStatusColor = (status: string) => {
   }
 }
 
+// Handle virtual booking conversion
+const handleVirtualBookingConversion = async (virtualBookingId: string, studentIds: string[], creditsUsed: number, notes: string) => {
+  try {
+    const result = await convertVirtualBookingToReal(virtualBookingId, studentIds, creditsUsed, notes)
+    
+    if (result.success) {
+      showAddStudentModal.value = false
+      
+      // Show success message
+      const message = t('booking.virtualBookingConvertedMessage', { count: studentIds.length })
+      // You can add a toast notification here if you have a notification system
+      console.log(t('booking.virtualBookingConverted'), message)
+      
+      // Navigate to the new real booking page
+      await navigateTo(`/bookings/${result.newBookingId}`)
+    }
+  } catch (err) {
+    console.error('Error converting virtual booking:', err)
+  }
+}
+
 // Handle student added
 const handleStudentAdded = async (bookingId: string, studentId: string, creditsUsed: number, notes: string) => {
   try {
-    await addStudentToBooking(bookingId, studentId, creditsUsed, notes)
-    showAddStudentModal.value = false
-    await loadBooking()
+    const result = await addStudentToBooking(bookingId, studentId, creditsUsed, notes)
+    
+    if (result.success) {
+      showAddStudentModal.value = false
+      
+      // If this was a virtual booking conversion, redirect to the new booking page
+      if (result.isVirtualConversion) {
+        // Navigate to the new real booking page
+        await navigateTo(`/bookings/${result.newBookingId}`)
+      } else {
+        // Just reload the current booking
+        await loadBooking()
+      }
+    }
   } catch (err) {
     console.error('Error adding student:', err)
   }

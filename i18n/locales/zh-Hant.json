@@ -579,6 +579,8 @@
     "moreStudents": "更多學生",
     "virtualEvent": "已排程課程",
     "virtualEventDescription": "這是一個已排程但尚未預約的課程。新增學生以建立真實預約。",
+    "virtualBookingConverted": "預約已建立",
+    "virtualBookingConvertedMessage": "已排程課程已轉換為包含 {count} 位學生的真實預約。",
     "status": {
       "confirmed": "已確認",
       "cancelled": "已取消",

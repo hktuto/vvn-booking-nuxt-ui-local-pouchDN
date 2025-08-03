@@ -591,6 +591,8 @@
     "moreStudents": "more students",
     "virtualEvent": "Scheduled Class",
     "virtualEventDescription": "This is a scheduled class that hasn't been booked yet. Add students to create a real booking.",
+    "virtualBookingConverted": "Booking Created",
+    "virtualBookingConvertedMessage": "The scheduled class has been converted to a real booking with {count} student(s).",
     "status": {
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",

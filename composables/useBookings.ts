@@ -242,7 +242,13 @@ export const useBookings = () => {
   // Add student to a booking (convert virtual to real if needed)
   const addStudentToBooking = async (bookingId: string, studentId: string, creditsUsed: number, notes: string = '') => {
     try {
-      const booking = bookings.value.find((b: any) => b.id === bookingId)
+      let booking = bookings.value.find((b: any) => b.id === bookingId)
+      
+      // If booking not found in current bookings, it might be a virtual booking
+      if (!booking && bookingId.startsWith('virtual-')) {
+        booking = await getVirtualBookingById(bookingId)
+      }
+      
       if (!booking) throw new Error('Booking not found')
       
       const student = students.value.find((s: any) => s.id === studentId)
@@ -269,8 +275,13 @@ export const useBookings = () => {
           is_virtual: false
         })
         
-        
-        return realBooking
+        // Return the new real booking with its ID
+        return {
+          success: true,
+          newBookingId: realBooking._id,
+          isVirtualConversion: true,
+          booking: transformBookingDoc(realBooking)
+        }
       } else {
         // Add to existing real booking
         const updatedBookings = [...booking.bookings, newBookingData]
@@ -279,7 +290,12 @@ export const useBookings = () => {
           total_booked: updatedBookings.length
         })
         
-        return booking
+        return {
+          success: true,
+          newBookingId: bookingId,
+          isVirtualConversion: false,
+          booking: { ...booking, bookings: updatedBookings, total_booked: updatedBookings.length }
+        }
       }
     } catch (err) {
       console.error('Error adding student to booking:', err)
@@ -310,6 +326,51 @@ export const useBookings = () => {
     }
   }
 
+  // Convert virtual booking to real booking with multiple students
+  const convertVirtualBookingToReal = async (virtualBookingId: string, studentIds: string[], creditsUsed: number, notes: string = '') => {
+    try {
+      const virtualBooking = await getVirtualBookingById(virtualBookingId)
+      if (!virtualBooking) throw new Error('Virtual booking not found')
+      
+      // Get all students
+      const studentsToAdd = studentIds.map(studentId => {
+        const student = students.value.find((s: any) => s.id === studentId)
+        if (!student) throw new Error(`Student ${studentId} not found`)
+        return student
+      })
+      
+      // Create booking data for all students
+      const bookingsData = studentsToAdd.map(student => ({
+        student_id: student.id,
+        student_name: student.name,
+        status: 'confirmed' as const,
+        credits_used: creditsUsed,
+        notes,
+        booked_at: new Date().toISOString()
+      }))
+      
+      // Create the real booking
+      const realBooking = await addBooking({
+        class_id: virtualBooking.class_id,
+        class_date: virtualBooking.class_date,
+        class_time: virtualBooking.class_time,
+        bookings: bookingsData,
+        total_booked: bookingsData.length,
+        max_capacity: virtualBooking.max_capacity,
+        is_virtual: false
+      })
+      
+      return {
+        success: true,
+        newBookingId: realBooking._id,
+        booking: transformBookingDoc(realBooking)
+      }
+    } catch (err) {
+      console.error('Error converting virtual booking to real:', err)
+      throw new Error('Failed to convert virtual booking to real')
+    }
+  }
+
   return {
     bookings: readonly(bookings),
     loading: readonly(loading),
@@ -323,6 +384,7 @@ export const useBookings = () => {
     getVirtualBookingsForDate,
     getBookingsForDate,
     addStudentToBooking,
-    removeStudentFromBooking
+    removeStudentFromBooking,
+    convertVirtualBookingToReal
   }
 } 
