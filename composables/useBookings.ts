@@ -6,7 +6,6 @@ export const useBookings = () => {
   const { classes, loadClasses } = useClasses()
   const { students, loadStudents } = useStudents()
 
-  const bookings = ref<any[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -22,29 +21,6 @@ export const useBookings = () => {
     created_at: doc.created_at,
     updated_at: doc.updated_at
   })
-
-  const loadBookings = async () => {
-    loading.value = true
-    error.value = null
-    
-    try {
-      await Promise.all([loadClasses(), loadStudents()])
-      
-      // Use find query instead of view query
-      const result = await bookingsDB.find({
-        selector: { type: 'booking' },
-      })
-      
-      console.log('Loaded bookings:', result.docs.length)
-      bookings.value = result.docs.map(doc => transformBookingDoc(doc as BookingDocument))
-    } catch (err) {
-      console.error('Error loading bookings:', err)
-      error.value = 'Failed to load bookings'
-    } finally {
-      loading.value = false
-    }
-  }
-
 
   const addBooking = async (bookingData: {
     class_id: string
@@ -68,7 +44,6 @@ export const useBookings = () => {
         ...bookingData
       })
       
-      // Don't call loadBookings() here - let the calling function handle refresh
       return newBooking
     } catch (err) {
       console.error('Error adding booking:', err)
@@ -80,7 +55,6 @@ export const useBookings = () => {
     try {
       const updatedBooking = await bookingsCRUD.update(id, updates)
       console.log('updatedBooking', updatedBooking)
-      // Don't call loadBookings() here - let the calling function handle refresh
       return updatedBooking
     } catch (err) {
       console.error('Error updating booking:', err)
@@ -91,7 +65,6 @@ export const useBookings = () => {
   const deleteBooking = async (id: string) => {
     try {
       await bookingsCRUD.remove(id)
-      // Don't call loadBookings() here - let the calling function handle refresh
     } catch (err) {
       console.error('Error deleting booking:', err)
       throw new Error('Failed to delete booking')
@@ -100,10 +73,53 @@ export const useBookings = () => {
 
   const getBookingById = async (id: string) => {
     try {
+      // Check if this is a virtual booking ID
+      if (id.startsWith('virtual-')) {
+        return await getVirtualBookingById(id)
+      }
+      
       const doc = await bookingsCRUD.findById(id)
       return doc ? transformBookingDoc(doc) : null
     } catch (err) {
       console.error('Error getting booking by ID:', err)
+      return null
+    }
+  }
+
+  // Get virtual booking by ID (parses virtual ID format)
+  const getVirtualBookingById = async (virtualId: string) => {
+    try {
+      // Parse virtual ID format: virtual-{classId}-{date}
+      const parts = virtualId.split('-')
+      if (parts.length < 3) {
+        throw new Error('Invalid virtual booking ID format')
+      }
+      
+      const classId = parts[1]
+      const date = parts.slice(2).join('-') // Handle dates with hyphens
+      
+      // Find the class
+      const class_ = classes.value.find(c => c.id === classId)
+      if (!class_) {
+        throw new Error('Class not found')
+      }
+      
+      // Create virtual booking object
+      return {
+        id: virtualId,
+        class_id: classId,
+        class_date: date,
+        class_time: class_.start_time,
+        bookings: [],
+        total_booked: 0,
+        max_capacity: class_.max_students,
+        is_virtual: true,
+        class_info: class_,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    } catch (err) {
+      console.error('Error getting virtual booking by ID:', err)
       return null
     }
   }
@@ -199,7 +215,16 @@ export const useBookings = () => {
   // Add student to a booking (convert virtual to real if needed)
   const addStudentToBooking = async (bookingId: string, studentId: string, creditsUsed: number, notes: string = '') => {
     try {
-      const booking = bookings.value.find((b: any) => b.id === bookingId)
+      let booking: any = null
+      
+      // Check if this is a virtual booking ID
+      if (bookingId.startsWith('virtual-')) {
+        booking = await getVirtualBookingById(bookingId)
+      } else {
+        // Fetch the booking from database
+        booking = await getBookingById(bookingId)
+      }
+      
       if (!booking) throw new Error('Booking not found')
       
       const student = students.value.find((s: any) => s.id === studentId)
@@ -226,8 +251,13 @@ export const useBookings = () => {
           is_virtual: false
         })
         
-        
-        return realBooking
+        // Return the new real booking with its ID
+        return {
+          success: true,
+          newBookingId: realBooking._id,
+          isVirtualConversion: true,
+          booking: transformBookingDoc(realBooking)
+        }
       } else {
         // Add to existing real booking
         const updatedBookings = [...booking.bookings, newBookingData]
@@ -236,7 +266,12 @@ export const useBookings = () => {
           total_booked: updatedBookings.length
         })
         
-        return booking
+        return {
+          success: true,
+          newBookingId: bookingId,
+          isVirtualConversion: false,
+          booking: { ...booking, bookings: updatedBookings, total_booked: updatedBookings.length }
+        }
       }
     } catch (err) {
       console.error('Error adding student to booking:', err)
@@ -267,18 +302,63 @@ export const useBookings = () => {
     }
   }
 
+  // Convert virtual booking to real booking with multiple students
+  const convertVirtualBookingToReal = async (virtualBookingId: string, studentIds: string[], creditsUsed: number, notes: string = '') => {
+    try {
+      const virtualBooking = await getVirtualBookingById(virtualBookingId)
+      if (!virtualBooking) throw new Error('Virtual booking not found')
+      
+      // Get all students
+      const studentsToAdd = studentIds.map(studentId => {
+        const student = students.value.find((s: any) => s.id === studentId)
+        if (!student) throw new Error(`Student ${studentId} not found`)
+        return student
+      })
+      
+      // Create booking data for all students
+      const bookingsData = studentsToAdd.map(student => ({
+        student_id: student.id,
+        student_name: student.name,
+        status: 'confirmed' as const,
+        credits_used: creditsUsed,
+        notes,
+        booked_at: new Date().toISOString()
+      }))
+      
+      // Create the real booking
+      const realBooking = await addBooking({
+        class_id: virtualBooking.class_id,
+        class_date: virtualBooking.class_date,
+        class_time: virtualBooking.class_time,
+        bookings: bookingsData,
+        total_booked: bookingsData.length,
+        max_capacity: virtualBooking.max_capacity,
+        is_virtual: false
+      })
+      
+      return {
+        success: true,
+        newBookingId: realBooking._id,
+        booking: transformBookingDoc(realBooking)
+      }
+    } catch (err) {
+      console.error('Error converting virtual booking to real:', err)
+      throw new Error('Failed to convert virtual booking to real')
+    }
+  }
+
   return {
-    bookings: readonly(bookings),
     loading: readonly(loading),
     error: readonly(error),
-    loadBookings,
     addBooking,
     updateBooking,
     deleteBooking,
     getBookingById,
+    getVirtualBookingById,
     getVirtualBookingsForDate,
     getBookingsForDate,
     addStudentToBooking,
-    removeStudentFromBooking
+    removeStudentFromBooking,
+    convertVirtualBookingToReal
   }
 } 

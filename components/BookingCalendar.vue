@@ -30,8 +30,13 @@
 
     <!-- Calendar Grid -->
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <!-- Loading State -->
+      <div v-if="loading" class="flex justify-center py-12">
+        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+      
       <!-- Time Slots -->
-      <div class="grid grid-cols-1 gap-1">
+      <div v-else class="grid grid-cols-1 gap-1">
         <div
           v-for="timeSlot in timeSlots"
           :key="timeSlot.time"
@@ -43,7 +48,7 @@
           </div>
 
           <!-- Bookings for this time slot -->
-          <!-- <div class="ml-16 p-2">
+          <div class="ml-16 p-2">
             <div
               v-for="booking in getBookingsForTimeSlot(timeSlot.time)"
               :key="booking.id"
@@ -52,37 +57,25 @@
               <BookingCard
                 :booking="booking"
                 :time-slot="timeSlot.time"
-                @add-student="handleAddStudentToBooking"
-                @remove-student="handleRemoveStudentFromBooking"
+                @view-details="handleViewDetails"
               />
             </div>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- Add Student Modal -->
-    <AddStudentToBookingModal
-      v-model="showAddStudentModal"
-      :booking="selectedBooking"
-      @student-added="handleStudentAdded"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 const { t } = useI18n()
-const { getBookingsForDate, addStudentToBooking, removeStudentFromBooking} = useBookings()
+const { getBookingsForDate } = useBookings()
 
 // Date management
 const selectedDate = ref(new Date().toISOString().split('T')[0])
-const showAddStudentModal = ref(false)
-const selectedBooking = ref<any>(null)
 const { locale } = useI18n()
+
 // Time slots (6 AM to 10 PM)
-
-const bookings = ref<any[]>([])
-
 const timeSlots = computed(() => {
   const slots = []
   for (let hour = 6; hour <= 22; hour++) {
@@ -94,8 +87,19 @@ const timeSlots = computed(() => {
   return slots
 })
 
+const bookings = ref<any[]>([])
+const loading = ref(false)
+
 async function loadBookings() {
-  bookings.value = await getBookingsForDate(selectedDate.value)
+  loading.value = true
+  try {
+    bookings.value = await getBookingsForDate(selectedDate.value)
+  } catch (error) {
+    console.error('Error loading bookings:', error)
+    bookings.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 // Date navigation
@@ -126,34 +130,17 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Handle adding student to booking
-const handleAddStudentToBooking = (booking: any) => {
-  selectedBooking.value = booking
-  showAddStudentModal.value = true
+// Get bookings for a specific time slot
+const getBookingsForTimeSlot = (timeSlot: string) => {
+  return bookings.value.filter(booking => booking.class_time === timeSlot)
 }
 
-// Handle removing student from booking
-const handleRemoveStudentFromBooking = async (bookingId: string, studentId: string) => {
-  try {
-    await removeStudentFromBooking(bookingId, studentId)
-  } catch (err) {
-    console.error('Error removing student:', err)
-  }
+// Handle viewing booking details
+const handleViewDetails = (booking: any) => {
+  navigateTo(`/bookings/${booking.id}`)
 }
 
-// Handle student added
-const handleStudentAdded = async (bookingId: string, studentId: string, creditsUsed: number, notes: string) => {
-  try {
-    await addStudentToBooking(bookingId, studentId, creditsUsed, notes)
-    showAddStudentModal.value = false
-    selectedBooking.value = null
-  } catch (err) {
-    console.error('Error adding student:', err)
-  }
-}
-
-
-
+// Watch for date changes to reload bookings
 watch(selectedDate, () => {
   loadBookings()
 }, {
