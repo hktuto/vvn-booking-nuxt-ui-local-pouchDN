@@ -79,6 +79,11 @@ pwa: {
 
 ### Composables
 - `usePWA()` - Built-in composable from `@vite-pwa/nuxt` for PWA functionality
+  - `isPWAInstalled`: Ref<boolean> - whether the PWA is installed
+  - `showInstallPrompt`: Ref<boolean> - whether the install prompt should be shown
+  - `install()`: function to trigger the install prompt
+  - `cancelInstall()`: function to cancel the install prompt
+  - `updateServiceWorker()`: function to update the service worker
 
 ## Usage
 
@@ -94,22 +99,31 @@ The install button automatically appears when the app can be installed:
 ### PWA Composable
 ```vue
 <script setup>
-const { canInstall, isInstalled, installPWA } = usePWA()
-
-// Check if app can be installed
-console.log('Can install:', canInstall.value)
+const { isPWAInstalled, showInstallPrompt, install, cancelInstall } = usePWA()
 
 // Check if app is already installed
-console.log('Is installed:', isInstalled.value)
+console.log('Is installed:', isPWAInstalled.value)
+
+// Check if install prompt should be shown
+console.log('Show install prompt:', showInstallPrompt.value)
 
 // Install the app
 const installApp = async () => {
   try {
-    await installPWA()
-    console.log('App installed successfully!')
+    const result = await install()
+    if (result?.outcome === 'accepted') {
+      console.log('App installed successfully!')
+    } else {
+      console.log('Installation was dismissed')
+    }
   } catch (error) {
     console.error('Installation failed:', error)
   }
+}
+
+// Cancel install prompt
+const cancelInstallPrompt = () => {
+  cancelInstall()
 }
 </script>
 ```

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="canInstall && !isInstalled" class="pwa-install-banner">
+  <div v-if="showInstallPrompt && !isPWAInstalled" class="pwa-install-banner">
     <div class="pwa-install-content">
       <div class="pwa-install-text">
         <h3>Install App</h3>
@@ -18,19 +18,23 @@
 </template>
 
 <script setup lang="ts">
-const { canInstall, isInstalled, installPWA } = usePWA()
+const { isPWAInstalled, showInstallPrompt, install, cancelInstall } = usePWA()
 
 const handleInstall = async () => {
   try {
-    await installPWA()
-    console.log('PWA installed successfully')
+    const result = await install()
+    if (result?.outcome === 'accepted') {
+      console.log('PWA installed successfully')
+    } else {
+      console.log('PWA installation was dismissed')
+    }
   } catch (error) {
     console.error('Failed to install PWA:', error)
   }
 }
 
 const dismissInstall = () => {
-  // You can implement dismiss logic here
+  cancelInstall()
   console.log('Install prompt dismissed')
 }
 </script>
