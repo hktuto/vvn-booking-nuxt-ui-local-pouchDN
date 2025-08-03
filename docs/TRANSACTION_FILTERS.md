@@ -127,9 +127,7 @@ The transactions page (`/pages/transactions.vue`) automatically uses this compos
 2. **Watchers**: Automatically reloads data when filters change
 3. **Clear Function**: Uses the composable's `clearFilters` method
 
-## Demo Page
 
-Visit `/filter-demo` to see a demonstration of how to use the composable from other pages.
 
 ## Best Practices
 
