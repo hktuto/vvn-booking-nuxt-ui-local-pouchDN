@@ -6,7 +6,6 @@ export const useBookings = () => {
   const { classes, loadClasses } = useClasses()
   const { students, loadStudents } = useStudents()
 
-  const bookings = ref<any[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -22,29 +21,6 @@ export const useBookings = () => {
     created_at: doc.created_at,
     updated_at: doc.updated_at
   })
-
-  const loadBookings = async () => {
-    loading.value = true
-    error.value = null
-    
-    try {
-      await Promise.all([loadClasses(), loadStudents()])
-      
-      // Use find query instead of view query
-      const result = await bookingsDB.find({
-        selector: { type: 'booking' },
-      })
-      
-      console.log('Loaded bookings:', result.docs.length)
-      bookings.value = result.docs.map(doc => transformBookingDoc(doc as BookingDocument))
-    } catch (err) {
-      console.error('Error loading bookings:', err)
-      error.value = 'Failed to load bookings'
-    } finally {
-      loading.value = false
-    }
-  }
-
 
   const addBooking = async (bookingData: {
     class_id: string
@@ -68,7 +44,6 @@ export const useBookings = () => {
         ...bookingData
       })
       
-      // Don't call loadBookings() here - let the calling function handle refresh
       return newBooking
     } catch (err) {
       console.error('Error adding booking:', err)
@@ -80,7 +55,6 @@ export const useBookings = () => {
     try {
       const updatedBooking = await bookingsCRUD.update(id, updates)
       console.log('updatedBooking', updatedBooking)
-      // Don't call loadBookings() here - let the calling function handle refresh
       return updatedBooking
     } catch (err) {
       console.error('Error updating booking:', err)
@@ -91,7 +65,6 @@ export const useBookings = () => {
   const deleteBooking = async (id: string) => {
     try {
       await bookingsCRUD.remove(id)
-      // Don't call loadBookings() here - let the calling function handle refresh
     } catch (err) {
       console.error('Error deleting booking:', err)
       throw new Error('Failed to delete booking')
@@ -242,11 +215,14 @@ export const useBookings = () => {
   // Add student to a booking (convert virtual to real if needed)
   const addStudentToBooking = async (bookingId: string, studentId: string, creditsUsed: number, notes: string = '') => {
     try {
-      let booking = bookings.value.find((b: any) => b.id === bookingId)
+      let booking: any = null
       
-      // If booking not found in current bookings, it might be a virtual booking
-      if (!booking && bookingId.startsWith('virtual-')) {
+      // Check if this is a virtual booking ID
+      if (bookingId.startsWith('virtual-')) {
         booking = await getVirtualBookingById(bookingId)
+      } else {
+        // Fetch the booking from database
+        booking = await getBookingById(bookingId)
       }
       
       if (!booking) throw new Error('Booking not found')
@@ -372,10 +348,8 @@ export const useBookings = () => {
   }
 
   return {
-    bookings: readonly(bookings),
     loading: readonly(loading),
     error: readonly(error),
-    loadBookings,
     addBooking,
     updateBooking,
     deleteBooking,

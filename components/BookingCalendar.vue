@@ -30,8 +30,13 @@
 
     <!-- Calendar Grid -->
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <!-- Loading State -->
+      <div v-if="loading" class="flex justify-center py-12">
+        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+      
       <!-- Time Slots -->
-      <div class="grid grid-cols-1 gap-1">
+      <div v-else class="grid grid-cols-1 gap-1">
         <div
           v-for="timeSlot in timeSlots"
           :key="timeSlot.time"
@@ -83,9 +88,18 @@ const timeSlots = computed(() => {
 })
 
 const bookings = ref<any[]>([])
+const loading = ref(false)
 
 async function loadBookings() {
-  bookings.value = await getBookingsForDate(selectedDate.value)
+  loading.value = true
+  try {
+    bookings.value = await getBookingsForDate(selectedDate.value)
+  } catch (error) {
+    console.error('Error loading bookings:', error)
+    bookings.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 // Date navigation
