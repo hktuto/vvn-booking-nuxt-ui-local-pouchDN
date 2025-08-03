@@ -177,94 +177,72 @@
       </div>
 
       <!-- Transactions Table -->
-      <div v-else-if="transactions.length > 0" class="overflow-x-auto">
-        <table class="w-full table-fixed">
-          <thead class="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                {{ t('transactions.date') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                {{ t('transactions.student') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                {{ t('transactions.type') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                {{ t('transactions.description') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                {{ t('transactions.amount') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                {{ t('transactions.status') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                {{ t('transactions.actions') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                {{ formatDate(transaction.created_at) }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                    <UIcon name="i-heroicons-user" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                  </div>
-                  <div class="ml-3">
-                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                      {{ getStudentName(transaction.student_id) }}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <UBadge
-                  :color="getTransactionTypeColor(transaction.transaction_type)"
-                  variant="soft"
-                >
-                  {{ t(`transactions.types.${transaction.transaction_type}`) }}
-                </UBadge>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                <div class="max-w-xs truncate" :title="transaction.description">
-                  {{ transaction.description }}
-                </div>
-                <div v-if="transaction.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {{ transaction.notes }}
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <span :class="transaction.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                  {{ transaction.amount >= 0 ? '+' : '' }}${{ transaction.amount.toFixed(2) }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <UBadge
-                  :color="getStatusColor(transaction.status)"
-                  variant="soft"
-                >
-                  {{ t(`transactions.status.${transaction.status}`) }}
-                </UBadge>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <UButton
-                  @click="viewTransactionDetails(transaction)"
-                  variant="ghost"
-                  size="sm"
-                  icon="i-heroicons-eye"
-                >
-                  {{ t('transactions.view') }}
-                </UButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <div v-else-if="transactions.length > 0" class="overflow-x-auto w-full">
+      <UTable
+        
+        :data="transactions"
+        :columns="columns"
+        :loading="loading"
+        class="flex-1"
+      >
+        <template #student_id-data="{ row }">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+              <UIcon name="i-heroicons-user" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div class="ml-3">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ getStudentName(row.student_id) }}
+              </div>
+            </div>
+          </div>
+        </template>
 
+        <template #transaction_type-data="{ row }">
+          <UBadge
+            :color="getTransactionTypeColor(row.transaction_type)"
+            variant="soft"
+          >
+            {{ t(`transactions.types.${row.transaction_type}`) }}
+          </UBadge>
+        </template>
+
+        <template #description-data="{ row }">
+          <div class="max-w-xs truncate" :title="row.description">
+            {{ row.description }}
+          </div>
+          <div v-if="row.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {{ row.notes }}
+          </div>
+        </template>
+
+        <template #amount-data="{ row }">
+          <span :class="row.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+            {{ row.amount >= 0 ? '+' : '' }}${{ row.amount.toFixed(2) }}
+          </span>
+        </template>
+
+        <template #status-data="{ row }">
+          <UBadge
+            :color="getStatusColor(row.status)"
+            variant="soft"
+          >
+            {{ t(`transactions.status.${row.status}`) }}
+          </UBadge>
+        </template>
+
+        <template #actions-data="{ row }">
+          <UButton
+            @click="viewTransactionDetails(row)"
+            variant="ghost"
+            size="sm"
+            icon="i-heroicons-eye"
+          >
+            {{ t('transactions.view') }}
+          </UButton>
+        </template>
+      </UTable>
+      </div>
       <!-- Empty State -->
       <div v-else class="p-12 text-center">
         <UIcon name="i-heroicons-document-text" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -331,11 +309,49 @@ const studentOptions = computed(() => {
 })
 
 const sortOptions = [
- 
   { label: t('transactions.sort.dateDesc'), value: 'date-desc' },
   { label: t('transactions.sort.dateAsc'), value: 'date-asc' },
   { label: t('transactions.sort.amountDesc'), value: 'amount-desc' },
   { label: t('transactions.sort.amountAsc'), value: 'amount-asc' }
+]
+
+// Table columns configuration
+const columns = [
+  {
+    accessorKey: 'created_at',
+    header: t('transactions.date'),
+    sortable: true
+  },
+  {
+    accessorKey: 'student_id',
+    header: t('transactions.student'),
+    sortable: true
+  },
+  {
+    accessorKey: 'transaction_type',
+    header: t('transactions.type'),
+    sortable: true
+  },
+  {
+    accessorKey: 'description',
+    header: t('transactions.description'),
+    sortable: false
+  },
+  {
+    accessorKey: 'amount',
+    header: t('transactions.amount'),
+    sortable: true
+  },
+  {
+    accessorKey: 'status',
+    header: t('transactions.status'),
+    sortable: true
+  },
+  {
+    accessorKey: 'actions',
+    header: t('transactions.actions'),
+    sortable: false
+  }
 ]
 
 // Methods
