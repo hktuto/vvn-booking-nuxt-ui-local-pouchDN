@@ -8,7 +8,7 @@ export interface TransactionFilters {
 }
 
 // Move useState outside the composable to prevent memory trapping
-const useTransactionFilterState = useState<TransactionFilters>('transaction-filters', () => {
+const useTransactionFilterState = () => useState<TransactionFilters>('transaction-filters', () => {
   // Get current month start and end dates
   const getCurrentMonthDates = () => {
     const now = new Date()

@@ -4,7 +4,7 @@ import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalize
 const props = defineProps<{
   class: string
 }>()
-
+const modelValue = defineModel<string>()
 const formatter = new DateFormatter('en-CA', {
   year: 'numeric',
   month: '2-digit',
@@ -12,7 +12,6 @@ const formatter = new DateFormatter('en-CA', {
 });
 
 
-const modelValue = ref<string | null>(null);
 const emit = defineEmits(['update:modelValue'])
 const localModelValue = computed({
   get: () =>{ 
@@ -22,8 +21,8 @@ const localModelValue = computed({
   set: (value:any) => {
     // set value is a CalendarDate
     console.log(value)
-    modelValue.value = value ? formatter.format(value.toDate()) : null
-    emit('update:modelValue', modelValue.value)
+    const updatedValue = value ? formatter.format(value.toDate()) : null
+    emit('update:modelValue', updatedValue)
   }
 })
 
@@ -33,7 +32,7 @@ const localModelValue = computed({
 <template>
   <UPopover>
     <UButton color="neutral" variant="subtle" icon="i-lucide-calendar" :class="class">
-      {{ modelValue  }}
+      {{ modelValue }}
     </UButton>
 
     <template #content>

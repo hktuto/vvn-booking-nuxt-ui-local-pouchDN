@@ -65,7 +65,7 @@
       
 
       <!-- Desktop Sidebar -->
-      <div class="hidden lg:flex lg:w-64 lg:flex-col">
+      <div class="hidden lg:flex lg:w-64 lg:flex-col " >
         <div class="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between px-4 mb-8">
             <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -95,7 +95,7 @@
       </div>
 
       <!-- Main Content -->
-      <div class="flex-1 lg:pl-0">
+      <div class="flex-1 lg:pl-0 overflow-hidden">
         <!-- Desktop Top Header -->
         <div class="hidden lg:flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center gap-4">
