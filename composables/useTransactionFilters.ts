@@ -7,6 +7,30 @@ export interface TransactionFilters {
   studentId: string
 }
 
+// Move useState outside the composable to prevent memory trapping
+const useTransactionFilterState = useState<TransactionFilters>('transaction-filters', () => {
+  // Get current month start and end dates
+  const getCurrentMonthDates = () => {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    
+    return {
+      startDate: startOfMonth.toISOString().split('T')[0],
+      endDate: endOfMonth.toISOString().split('T')[0]
+    }
+  }
+
+  const { startDate: defaultStartDate, endDate: defaultEndDate } = getCurrentMonthDates()
+
+  return {
+    startDate: defaultStartDate,
+    endDate: defaultEndDate,
+    transactionType: '',
+    studentId: ''
+  }
+})
+
 export const useTransactionFilters = () => {
   // Get current month start and end dates
   const getCurrentMonthDates = () => {
@@ -22,13 +46,8 @@ export const useTransactionFilters = () => {
 
   const { startDate: defaultStartDate, endDate: defaultEndDate } = getCurrentMonthDates()
 
-  // Filter state using useState for Nuxt state management
-  const filters = useState<TransactionFilters>('transaction-filters', () => ({
-    startDate: defaultStartDate,
-    endDate: defaultEndDate,
-    transactionType: '',
-    studentId: ''
-  }))
+  // Use the state from outside the composable
+  const filters = useTransactionFilterState()
 
   // Computed properties
   const hasActiveFilters = computed(() => {
