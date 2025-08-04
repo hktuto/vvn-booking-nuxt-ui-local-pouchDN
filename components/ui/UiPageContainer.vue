@@ -34,21 +34,19 @@ const paddingClass = computed(() => {
     case 'none':
       return 'p-0'
     case 'small':
-      return 'px-6 py-2'
+      return 'px-2 py-2'
     case 'default':
-      return 'p-6'
+      return 'px-4 py-2'
     case 'large':
       return 'p-8'
     case 'custom':
       return props.customPadding
     default:
-      return 'p-6'
+      return 'px-2 py-2'
   }
 })
 </script>
 
 <style scoped>
-.page-container {
-  /* Additional styles can be added here if needed */
-}
+
 </style>
