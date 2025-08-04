@@ -20,7 +20,7 @@
       </div>
     </template>
 
-    <div class="p-6">
+    <UiPageContainer>
 
     <!-- Search Bar -->
     <div class="mb-6">
@@ -88,7 +88,7 @@
       :package_="editingPackage"
       @saved="handlePackageSaved"
     />
-  </div>
+    </UiPageContainer>
   </NuxtLayout>
 </template>
 

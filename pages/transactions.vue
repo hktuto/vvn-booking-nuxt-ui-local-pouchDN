@@ -21,7 +21,7 @@
         </UButton>
       </div>
     </template>
-    <div class="p-6">
+    <UiPageContainer>
     <!-- Filters Section -->
       <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
         <div class="flex flex-col lg:flex-row gap-4">
@@ -254,7 +254,7 @@
           </p>
         </div>
       </div>
-    </div>
+    </UiPageContainer>
   </NuxtLayout>
 </template>
 

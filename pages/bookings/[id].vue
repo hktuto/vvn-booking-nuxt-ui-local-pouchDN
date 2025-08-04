@@ -17,6 +17,7 @@
       </UButton>
     </div>
     </template>
+    <UiPageContainer>
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
       <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400" />
@@ -236,6 +237,7 @@
       @redeem-completed="handleRedeemCompleted"
       @package-purchased="handlePackagePurchased"
     />
+    </UiPageContainer>
   </NuxtLayout>
 </template>
 

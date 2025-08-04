@@ -10,10 +10,10 @@
       </div>
     </template>
 
-    <div class="px-6 py-2">
+    <UiPageContainer padding="small">
       <MenuClass />
       <LocationTabContent ref="locationTabContentRef" />
-    </div>
+    </UiPageContainer>
 
   </NuxtLayout>
 </template>

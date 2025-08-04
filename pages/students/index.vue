@@ -11,7 +11,7 @@
       </div>
     </template>
 
-    <div class="p-6">
+    <UiPageContainer>
 
     <!-- Search and Filter Bar -->
     <div class="mb-6 space-y-4">
@@ -94,7 +94,7 @@
       :student="selectedStudent"
       @saved="handlePackageAdded"
     />
-  </div>
+    </UiPageContainer>
   </NuxtLayout>
 </template>
 
