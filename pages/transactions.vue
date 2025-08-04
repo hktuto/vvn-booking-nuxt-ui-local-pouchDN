@@ -21,237 +21,238 @@
         </UButton>
       </div>
     </template>
-
+    <div class="p-6">
     <!-- Filters Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-      <div class="flex flex-col lg:flex-row gap-4">
-        <!-- Date Range Filter -->
-        <div class="flex-1">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-            {{ t('transactions.dateRange') }}
-          </label>
-          <div class="flex gap-2">
-            <UiDatePicker v-model="filters.startDate" class="flex-1" />
-            <UiDatePicker v-model="filters.endDate" class="flex-1" />
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div class="flex flex-col lg:flex-row gap-4">
+          <!-- Date Range Filter -->
+          <div class="flex-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              {{ t('transactions.dateRange') }}
+            </label>
+            <div class="flex gap-2">
+              <UiDatePicker v-model="filters.startDate" class="flex-1" />
+              <UiDatePicker v-model="filters.endDate" class="flex-1" />
+            </div>
           </div>
-        </div>
 
-        <!-- Transaction Type Filter -->
-        <!-- add a row to wrap transaction type and student filter -->
-        <div class="flex flex-row gap-2">
-        <div class="flex-1">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-            {{ t('transactions.transactionType') }}
-          </label>
-          <USelect
-            v-model="filters.transactionType"
-            :items="transactionTypeOptions"
-            :placeholder="t('transactions.allTypes')"
-            class="w-full"
-          />
-        </div>
-
-        <!-- Student Filter -->
-        <div class="flex-1">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-            {{ t('transactions.student') }}
-          </label>
+          <!-- Transaction Type Filter -->
+          <!-- add a row to wrap transaction type and student filter -->
+          <div class="flex flex-row gap-2">
+          <div class="flex-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              {{ t('transactions.transactionType') }}
+            </label>
             <USelect
-              v-model="filters.studentId"
-              :items="studentOptions"
-              :placeholder="t('transactions.allStudents')"
+              v-model="filters.transactionType"
+              :items="transactionTypeOptions"
+              :placeholder="t('transactions.allTypes')"
               class="w-full"
             />
-        </div>
-        </div>
+          </div>
 
-        <!-- Clear Filters -->
-        <div class="flex items-end">
-          <UButton
-            @click="clearFilters"
-            variant="ghost"
-            icon="i-heroicons-x-mark"
-            :disabled="!hasActiveFilters"
-          >
-            {{ t('transactions.clearFilters') }}
-          </UButton>
-        </div>
-      </div>
-    </div>
+          <!-- Student Filter -->
+          <div class="flex-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              {{ t('transactions.student') }}
+            </label>
+              <USelect
+                v-model="filters.studentId"
+                :items="studentOptions"
+                :placeholder="t('transactions.allStudents')"
+                class="w-full"
+              />
+          </div>
+          </div>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
-      <UCard>
-        <div class="flex items-center">
-          <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-            <UIcon name="i-heroicons-arrow-up" class="w-6 h-6 text-green-600 dark:text-green-400" />
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ t('transactions.totalRevenue') }}
-            </p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              ${{ stats.totalRevenue.toFixed(2) }}
-            </p>
-          </div>
-        </div>
-      </UCard>
-
-      <UCard>
-        <div class="flex items-center">
-          <div class="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
-            <UIcon name="i-heroicons-arrow-down" class="w-6 h-6 text-red-600 dark:text-red-400" />
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ t('transactions.totalRefunds') }}
-            </p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              ${{ stats.totalRefunds.toFixed(2) }}
-            </p>
-          </div>
-        </div>
-      </UCard>
-
-      <UCard>
-        <div class="flex items-center">
-          <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-            <UIcon name="i-heroicons-currency-dollar" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ t('transactions.netRevenue') }}
-            </p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              ${{ stats.netRevenue.toFixed(2) }}
-            </p>
-          </div>
-        </div>
-      </UCard>
-
-      <UCard>
-        <div class="flex items-center">
-          <div class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-            <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ t('transactions.totalTransactions') }}
-            </p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ stats.totalTransactions }}
-            </p>
-          </div>
-        </div>
-      </UCard>
-    </div>
-
-    <!-- Transactions List -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ t('transactions.recentTransactions') }}
-          </h2>
-          <div class="flex items-center gap-2">
-            <USelect
-              v-model="sortBy"
-              :items="sortOptions"
-              size="sm"
-            />
+          <!-- Clear Filters -->
+          <div class="flex items-end">
             <UButton
-              @click="refreshTransactions"
+              @click="clearFilters"
               variant="ghost"
-              icon="i-heroicons-arrow-path"
-              :loading="loading"
-              size="sm"
-            />
+              icon="i-heroicons-x-mark"
+              :disabled="!hasActiveFilters"
+            >
+              {{ t('transactions.clearFilters') }}
+            </UButton>
           </div>
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="p-12 text-center">
-        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
-        <p class="text-gray-600 dark:text-gray-400">{{ t('common.loading') }}</p>
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
+        <UCard>
+          <div class="flex items-center">
+            <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+              <UIcon name="i-heroicons-arrow-up" class="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {{ t('transactions.totalRevenue') }}
+              </p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ stats.totalRevenue.toFixed(2) }}
+              </p>
+            </div>
+          </div>
+        </UCard>
+
+        <UCard>
+          <div class="flex items-center">
+            <div class="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+              <UIcon name="i-heroicons-arrow-down" class="w-6 h-6 text-red-600 dark:text-red-400" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {{ t('transactions.totalRefunds') }}
+              </p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ stats.totalRefunds.toFixed(2) }}
+              </p>
+            </div>
+          </div>
+        </UCard>
+
+        <UCard>
+          <div class="flex items-center">
+            <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+              <UIcon name="i-heroicons-currency-dollar" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {{ t('transactions.netRevenue') }}
+              </p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ stats.netRevenue.toFixed(2) }}
+              </p>
+            </div>
+          </div>
+        </UCard>
+
+        <UCard>
+          <div class="flex items-center">
+            <div class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+              <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {{ t('transactions.totalTransactions') }}
+              </p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ stats.totalTransactions }}
+              </p>
+            </div>
+          </div>
+        </UCard>
       </div>
 
-      <!-- Transactions Table -->
-      <div v-else-if="transactions.length > 0" class="overflow-x-auto w-full">
-      <UTable
-        
-        :data="transactions"
-        :columns="columns"
-        :loading="loading"
-        class="flex-1"
-      >
-        <template #student_id-data="{ row }">
-          <div class="flex items-center">
-            <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-              <UIcon name="i-heroicons-user" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+      <!-- Transactions List -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('transactions.recentTransactions') }}
+            </h2>
+            <div class="flex items-center gap-2">
+              <USelect
+                v-model="sortBy"
+                :items="sortOptions"
+                size="sm"
+              />
+              <UButton
+                @click="refreshTransactions"
+                variant="ghost"
+                icon="i-heroicons-arrow-path"
+                :loading="loading"
+                size="sm"
+              />
             </div>
-            <div class="ml-3">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">
-                {{ getStudentName(row.student_id) }}
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="p-12 text-center">
+          <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
+          <p class="text-gray-600 dark:text-gray-400">{{ t('common.loading') }}</p>
+        </div>
+
+        <!-- Transactions Table -->
+        <div v-else-if="transactions.length > 0" class="overflow-x-auto w-full">
+        <UTable
+          
+          :data="transactions"
+          :columns="columns"
+          :loading="loading"
+          class="flex-1"
+        >
+          <template #student_id-data="{ row }">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+                <UIcon name="i-heroicons-user" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              </div>
+              <div class="ml-3">
+                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ getStudentName(row.student_id) }}
+                </div>
               </div>
             </div>
-          </div>
-        </template>
+          </template>
 
-        <template #transaction_type-data="{ row }">
-          <UBadge
-            :color="getTransactionTypeColor(row.transaction_type)"
-            variant="soft"
-          >
-            {{ t(`transactions.types.${row.transaction_type}`) }}
-          </UBadge>
-        </template>
+          <template #transaction_type-data="{ row }">
+            <UBadge
+              :color="getTransactionTypeColor(row.transaction_type)"
+              variant="soft"
+            >
+              {{ t(`transactions.types.${row.transaction_type}`) }}
+            </UBadge>
+          </template>
 
-        <template #description-data="{ row }">
-          <div class="max-w-xs truncate" :title="row.description">
-            {{ row.description }}
-          </div>
-          <div v-if="row.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {{ row.notes }}
-          </div>
-        </template>
+          <template #description-data="{ row }">
+            <div class="max-w-xs truncate" :title="row.description">
+              {{ row.description }}
+            </div>
+            <div v-if="row.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {{ row.notes }}
+            </div>
+          </template>
 
-        <template #amount-data="{ row }">
-          <span :class="row.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-            {{ row.amount >= 0 ? '+' : '' }}${{ row.amount.toFixed(2) }}
-          </span>
-        </template>
+          <template #amount-data="{ row }">
+            <span :class="row.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+              {{ row.amount >= 0 ? '+' : '' }}${{ row.amount.toFixed(2) }}
+            </span>
+          </template>
 
-        <template #status-data="{ row }">
-          <UBadge
-            :color="getStatusColor(row.status)"
-            variant="soft"
-          >
-            {{ t(`transactions.status.${row.status}`) }}
-          </UBadge>
-        </template>
+          <template #status-data="{ row }">
+            <UBadge
+              :color="getStatusColor(row.status)"
+              variant="soft"
+            >
+              {{ t(`transactions.status.${row.status}`) }}
+            </UBadge>
+          </template>
 
-        <template #actions-data="{ row }">
-          <UButton
-            @click="viewTransactionDetails(row)"
-            variant="ghost"
-            size="sm"
-            icon="i-heroicons-eye"
-          >
-            {{ t('transactions.view') }}
-          </UButton>
-        </template>
-      </UTable>
-      </div>
-      <!-- Empty State -->
-      <div v-else class="p-12 text-center">
-        <UIcon name="i-heroicons-document-text" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          {{ t('transactions.noTransactions') }}
-        </h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">
-          {{ t('transactions.noTransactionsDescription') }}
-        </p>
+          <template #actions-data="{ row }">
+            <UButton
+              @click="viewTransactionDetails(row)"
+              variant="ghost"
+              size="sm"
+              icon="i-heroicons-eye"
+            >
+              {{ t('transactions.view') }}
+            </UButton>
+          </template>
+        </UTable>
+        </div>
+        <!-- Empty State -->
+        <div v-else class="p-12 text-center">
+          <UIcon name="i-heroicons-document-text" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            {{ t('transactions.noTransactions') }}
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-4">
+            {{ t('transactions.noTransactionsDescription') }}
+          </p>
+        </div>
       </div>
     </div>
   </NuxtLayout>
