@@ -8,10 +8,10 @@
       </div>
     </template>
 
-    <div class="px-6 py-2">
+    <UiPageContainer padding="small">
       <MenuClass />
       <BookingTabContent />
-    </div>
+    </UiPageContainer>
   </NuxtLayout>
 </template>
 

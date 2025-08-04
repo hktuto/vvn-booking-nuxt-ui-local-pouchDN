@@ -21,7 +21,7 @@
       </div>
     </template>
 
-    <div class="space-y-6 p-6">
+    <UiPageContainer class="space-y-6">
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
@@ -284,7 +284,7 @@
       :student="student"
       @saved="handleStudentUpdated"
     />
-  </div>
+    </UiPageContainer>
   </NuxtLayout>
 </template>
 
