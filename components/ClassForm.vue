@@ -420,6 +420,14 @@ watch(() => modelValue.value, (newValue) => {
   }
 })
 
+// Auto-select location when there's only one option available
+watch(() => locations.value, (newLocations) => {
+  if (newLocations.length === 1 && !form.location_id && !props.class_) {
+    // Auto-select the only available location for new classes
+    form.location_id = newLocations[0].id
+  }
+}, { immediate: true })
+
 const resetForm = () => {
   const today = new Date()
   const tomorrow = new Date(today)
