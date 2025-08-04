@@ -31,47 +31,56 @@
             {{ t('transactions.dateRange') }}
           </label>
           <div class="flex gap-2">
-            <UiDatePicker v-model="filters.startDate" class="flex-1" />
-            <UiDatePicker v-model="filters.endDate" class="flex-1" />
+            <UiDatePicker v-model="transactionFilters.filters.startDate" class="flex-1" />
+            <UiDatePicker v-model="transactionFilters.filters.endDate" class="flex-1" />
+          </div>
+          <!-- Reset to default dates button -->
+          <div v-if="!transactionFilters.isDefaultDateRange" class="mt-2">
+            <UButton
+              @click="transactionFilters.resetToDefaultDates"
+              variant="ghost"
+              size="xs"
+              icon="i-heroicons-arrow-path"
+            >
+              {{ t('transactions.resetToDefault') }}
+            </UButton>
           </div>
         </div>
 
-        <!-- Transaction Type Filter -->
-        <!-- add a row to wrap transaction type and student filter -->
+        <!-- Transaction Type and Student Filter -->
         <div class="flex flex-row gap-2">
-        <div class="flex-1">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-            {{ t('transactions.transactionType') }}
-          </label>
-          <USelect
-            v-model="filters.transactionType"
-            :items="transactionTypeOptions"
-            :placeholder="t('transactions.allTypes')"
-            class="w-full"
-          />
-        </div>
-
-        <!-- Student Filter -->
-        <div class="flex-1">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-            {{ t('transactions.student') }}
-          </label>
+          <div class="flex-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              {{ t('transactions.transactionType') }}
+            </label>
             <USelect
-              v-model="filters.studentId"
+              v-model="transactionFilters.filters.transactionType"
+              :items="transactionTypeOptions"
+              :placeholder="t('transactions.allTypes')"
+              class="w-full"
+            />
+          </div>
+
+          <div class="flex-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              {{ t('transactions.student') }}
+            </label>
+            <USelect
+              v-model="transactionFilters.filters.studentId"
               :items="studentOptions"
               :placeholder="t('transactions.allStudents')"
               class="w-full"
             />
-        </div>
+          </div>
         </div>
 
         <!-- Clear Filters -->
         <div class="flex items-end">
           <UButton
-            @click="clearFilters"
+            @click="clearAllFilters"
             variant="ghost"
             icon="i-heroicons-x-mark"
-            :disabled="!hasActiveFilters"
+            :disabled="!transactionFilters.hasActiveFilters"
           >
             {{ t('transactions.clearFilters') }}
           </UButton>
@@ -262,7 +271,9 @@ import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalize
 const { t, locale } = useI18n()
 const { getRecentTransactions, getTransactionStats, getTransactionsByStudent, getTransactionsByDateRange } = useTransactions()
 const { students, loadStudents } = useStudents()
-const { filters, hasActiveFilters, clearFilters: clearFiltersComposable } = useTransactionFilters()
+
+// Use the transaction filters composable
+const transactionFilters = useTransactionFilters()
 
 const df = new DateFormatter(locale.value === 'zh-Hant' ? 'zh-HK' : 'en-US', {
   dateStyle: 'medium'
@@ -347,20 +358,20 @@ const loadTransactions = async () => {
   loading.value = true
   
   try {
-    // Load transactions based on filters
+    // Load transactions based on filters from the composable
     let transactionsData: any[] = []
     
-    if (filters.studentId) {
-      transactionsData = await getTransactionsByStudent(filters.studentId)
-    } else if (filters.startDate && filters.endDate) {
-      transactionsData = await getTransactionsByDateRange(filters.startDate, filters.endDate)
+    if (transactionFilters.filters.value.studentId) {
+      transactionsData = await getTransactionsByStudent(transactionFilters.filters.value.studentId)
+    } else if (transactionFilters.filters.value.startDate && transactionFilters.filters.value.endDate) {
+      transactionsData = await getTransactionsByDateRange(transactionFilters.filters.value.startDate, transactionFilters.filters.value.endDate)
     } else {
       transactionsData = await getRecentTransactions(100)
     }
     
     // Filter by transaction type if specified
-    if (filters.transactionType) {
-      transactionsData = transactionsData.filter(t => t.transaction_type === filters.transactionType)
+    if (transactionFilters.filters.value.transactionType) {
+      transactionsData = transactionsData.filter(t => t.transaction_type === transactionFilters.filters.value.transactionType)
     }
     
     // Sort transactions
@@ -368,8 +379,8 @@ const loadTransactions = async () => {
     
     transactions.value = transactionsData
     
-    // Load statistics
-    const statsData = await getTransactionStats(filters.startDate, filters.endDate)
+    // Load statistics using filter dates
+    const statsData = await getTransactionStats(transactionFilters.filters.value.startDate, transactionFilters.filters.value.endDate)
     stats.value = statsData
   } catch (error) {
     console.error('Error loading transactions:', error)
@@ -395,8 +406,8 @@ const sortTransactions = (data: any[], sortBy: string) => {
   })
 }
 
-const clearFilters = () => {
-  clearFiltersComposable()
+const clearAllFilters = () => {
+  transactionFilters.clearFilters()
   loadTransactions()
 }
 
@@ -480,7 +491,7 @@ const viewTransactionDetails = (transaction: any) => {
 }
 
 // Watchers
-watch([filters, sortBy], () => {
+watch([transactionFilters.filters, sortBy], () => {
   loadTransactions()
 }, { deep: true })
 
