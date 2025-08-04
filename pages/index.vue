@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="default">
+  <NuxtLayout >
     <template #header>
       <div class="flex items-center justify-between w-full">
         <div>

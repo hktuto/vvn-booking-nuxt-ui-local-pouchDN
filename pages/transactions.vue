@@ -303,44 +303,56 @@ const sortOptions = [
   { label: t('transactions.sort.amountDesc'), value: 'amount-desc' },
   { label: t('transactions.sort.amountAsc'), value: 'amount-asc' }
 ]
-
 // Table columns configuration
 const columns = [
   {
     accessorKey: 'created_at',
     header: t('transactions.date'),
-    sortable: true
+    cell: ({ row }:any) => {
+      return new Date(row.getValue('created_at')).toLocaleString(locale.value === 'zh-Hant' ? 'zh' : 'en-US', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+    }
   },
   {
     accessorKey: 'student_id',
     header: t('transactions.student'),
-    sortable: true
+    cell: ({row}:any) => {
+      const student = students.value.find(s => s.id === row.getValue('student_id'))
+      return student?.name || 'Unknown Student'
+    }
+  },
+  {
+    accessorKey: 'amount',
+    header: t('transactions.amount'),
   },
   {
     accessorKey: 'transaction_type',
     header: t('transactions.type'),
     sortable: true
   },
+  
   {
     accessorKey: 'description',
     header: t('transactions.description'),
     sortable: false
   },
-  {
-    accessorKey: 'amount',
-    header: t('transactions.amount'),
-    sortable: true
-  },
+  
   {
     accessorKey: 'status',
     header: t('transactions.status'),
     sortable: true
   },
-  {
-    accessorKey: 'actions',
-    header: t('transactions.actions'),
-    sortable: false
-  }
+  // TODO : add action later
+  // {
+  //   accessorKey: 'actions',
+  //   header: t('transactions.actions'),
+  //   sortable: false
+  // }
 ]
 
 // Methods
@@ -351,17 +363,17 @@ const loadTransactions = async () => {
     // Load transactions based on filters
     let transactionsData: any[] = []
     
-    if (filters.studentId) {
-      transactionsData = await getTransactionsByStudent(filters.studentId)
-    } else if (filters.startDate && filters.endDate) {
-      transactionsData = await getTransactionsByDateRange(filters.startDate, filters.endDate)
+    if (filters.value.studentId) {
+      transactionsData = await getTransactionsByStudent(filters.value.studentId)
+    } else if (filters.value.startDate && filters.value.endDate) {
+      transactionsData = await getTransactionsByDateRange(filters.value.startDate, filters.value.endDate)
     } else {
       transactionsData = await getRecentTransactions(100)
     }
     
     // Filter by transaction type if specified
-    if (filters.transactionType) {
-      transactionsData = transactionsData.filter(t => t.transaction_type === filters.transactionType)
+    if (filters.value.transactionType) {
+      transactionsData = transactionsData.filter(t => t.transaction_type === filters.value.transactionType)
     }
     
     // Sort transactions
@@ -370,7 +382,7 @@ const loadTransactions = async () => {
     transactions.value = transactionsData
     
     // Load statistics
-    const statsData = await getTransactionStats(filters.startDate, filters.endDate)
+    const statsData = await getTransactionStats(filters.value.startDate, filters.value.endDate, filters.value.studentId, filters.value.transactionType)
     stats.value = statsData
   } catch (error) {
     console.error('Error loading transactions:', error)

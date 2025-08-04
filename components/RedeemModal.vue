@@ -62,8 +62,8 @@
                 v-for="pkg in activePackages"
                 :key="pkg.id"
                 class="border rounded-lg p-3 cursor-pointer transition-colors"
-                :class="form.selectedPackages.includes(pkg.id) ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700'"
-                @click="togglePackageSelection(pkg.id)"
+                :class="form.selectedPackage === pkg.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700'"
+                @click="selectPackage(pkg.id)"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
@@ -71,10 +71,14 @@
                     <p class="text-sm text-gray-500">
                       {{ $t('validation.booking.redeem.remainingCredits', { credits: pkg.credits_remaining }) }}
                     </p>
+                    <p class="text-xs text-gray-400">
+                      Unit Price: ${{ calculateUnitPrice(pkg)* form.creditsToUse }}
+                    </p>
                   </div>
-                  <UCheckbox
-                    :model-value="form.selectedPackages.includes(pkg.id)"
-                    @update:model-value="togglePackageSelection(pkg.id)"
+                  <URadio
+                    :model-value="form.selectedPackage"
+                    :value="pkg.id"
+                    @update:model-value="selectPackage(pkg.id)"
                   />
                 </div>
               </div>
@@ -106,7 +110,7 @@
           </div>
 
           <!-- Credits to Use -->
-          <div v-if="form.selectedPackages.length > 0" class="flex flex-col space-y-2">
+          <div v-if="form.selectedPackage" class="flex flex-col space-y-2">
             <label class="text-sm font-medium">{{ $t('validation.booking.redeem.creditsToUse') }}</label>
             <UInput
               v-model="form.creditsToUse"
@@ -117,6 +121,9 @@
             />
             <p class="text-xs text-gray-500">
               {{ $t('validation.booking.redeem.availableCredits', { credits: maxAvailableCredits }) }}
+            </p>
+            <p v-if="selectedPackageInfo" class="text-xs text-gray-500">
+              Total Value: ${{ (selectedPackageInfo.package_price * form.creditsToUse).toFixed(2) }}
             </p>
           </div>
         </div>
@@ -199,10 +206,12 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
-
+const { student } = toRefs(props)
 const { t } = useI18n()
-const { getActivePackagesForStudent, useCreditsFromPackages } = useStudentPackages()
+const { useCreditsFromPackages, calculateUnitPrice, getActivePackagesForStudent } = useStudentPackages()
 const { createTransaction } = useTransactions()
+const { updateStudent } = useStudents()
+const { updateStudentBookingAndPaymentStatus } = useBookings()
 
 // Modal state
 const isOpen = computed({
@@ -213,10 +222,10 @@ const isOpen = computed({
 const showBuyPackageModal = ref(false)
 const submitting = ref(false)
 
-// Form data
+// Form data - changed to single package selection
 const form = reactive({
   paymentMethod: 'credit' as 'credit' | 'cash',
-  selectedPackages: [] as string[],
+  selectedPackage: '' as string, // Single package selection
   creditsToUse: 1,
   cashAmount: 0,
   selectedPaymentMethod: 'cash',
@@ -233,28 +242,46 @@ watch(() => isOpen.value, (newValue) => {
   }
 })
 
-// Computed
-const activePackages = computed(() => {
-  if (!props.student) return []
-  return getActivePackagesForStudent(props.student.id)
+function useStudentPackageLogic(form:any) {
+  const activePackages = ref<any[]>([])
+  const loading = ref(false)
+  async function loadStudentPackages(studentId: string) {
+    loading.value = true
+    const packages = await getActivePackagesForStudent(studentId)
+    activePackages.value = packages.filter(p => p.status === 'active')
+    if(form.selectedPackage === '' && packages.length === 1) {
+      form.selectedPackage = packages[0].id
+    }
+    loading.value = false
+  }
+
+  return {
+    activePackages,
+    loadStudentPackages,
+    loading
+  }
+}
+const { loading: packageLoading, activePackages, loadStudentPackages } = useStudentPackageLogic(form)
+
+// Get selected package info
+const selectedPackageInfo = computed(() => {
+  if (!form.selectedPackage) return null
+  return activePackages.value.find(p => p.id === form.selectedPackage)
 })
 
 const maxAvailableCredits = computed(() => {
-  return form.selectedPackages.reduce((total, packageId) => {
-    const pkg = activePackages.value.find(p => p.id === packageId)
-    return total + (pkg?.credits_remaining || 0)
-  }, 0)
+  if (!form.selectedPackage) return 0
+  const pkg = activePackages.value.find(p => p.id === form.selectedPackage)
+  return pkg?.credits_remaining || 0
 })
 
 const canSubmit = computed(() => {
   if (form.paymentMethod === 'credit') {
-    return form.selectedPackages.length > 0 && form.creditsToUse > 0 && form.creditsToUse <= maxAvailableCredits.value
+    return form.selectedPackage && form.creditsToUse > 0 && form.creditsToUse <= maxAvailableCredits.value
   } else {
     return form.cashAmount > 0 && form.selectedPaymentMethod
   }
 })
-
-
 
 const paymentMethods = [
   { label: t('payment.cash'), value: 'cash' },
@@ -266,13 +293,8 @@ const paymentMethods = [
 ]
 
 // Methods
-const togglePackageSelection = (packageId: string) => {
-  const index = form.selectedPackages.indexOf(packageId)
-  if (index > -1) {
-    form.selectedPackages.splice(index, 1)
-  } else {
-    form.selectedPackages.push(packageId)
-  }
+const selectPackage = (packageId: string) => {
+  form.selectedPackage = packageId
 }
 
 const closeModal = () => {
@@ -282,7 +304,7 @@ const closeModal = () => {
 
 const resetForm = () => {
   form.paymentMethod = 'credit'
-  form.selectedPackages = []
+  form.selectedPackage = ''
   form.creditsToUse = 1
   form.cashAmount = 0
   form.selectedPaymentMethod = 'cash'
@@ -314,24 +336,47 @@ const handleSubmit = async () => {
 }
 
 const handleCreditPayment = async () => {
-  // Use credits from selected packages
-  await useCreditsFromPackages(props.student.id, form.creditsToUse, form.selectedPackages)
+  if (!form.selectedPackage || !selectedPackageInfo.value) {
+    throw new Error('No package selected')
+  }
+
+  // Use credits from selected package
+  const updatedPackage = await useCreditsFromPackages(props.student.id, form.creditsToUse, form.selectedPackage)
+  
+  // Update student's total credits
+  await updateStudent(props.student.id, {
+    credits: props.student.credits - form.creditsToUse
+  })
+
+  // Update booking status and payment status
+  if (props.bookingId) {
+    await updateStudentBookingAndPaymentStatus(props.bookingId, props.student.id, 'completed', 'paid', form.creditsToUse)
+  }
 
   // Create transaction for credit usage
   await createTransaction({
     student_id: props.student.id,
     transaction_type: 'credit_usage',
     status: 'completed',
-    amount: 0, // Credit usage doesn't have monetary amount
+    amount: calculateUnitPrice(selectedPackageInfo.value) * form.creditsToUse, // Credit usage doesn't have monetary amount
     currency: 'HKD',
+    student_package_id: form.selectedPackage, // Add student package ID
+    package_id: selectedPackageInfo.value.package_id,
     class_id: props.classInfo.id,
     booking_id: props.bookingId,
     description: `Credit usage: ${props.classInfo.name} (${form.creditsToUse} credits)`,
+    unit_price: selectedPackageInfo.value.package_price, // Add unit price
+    total_amount: selectedPackageInfo.value.package_price * form.creditsToUse, // Add total amount
     notes: form.notes
   })
 }
 
 const handleCashPayment = async () => {
+  // Update booking status and payment status (for cash payment, credits_used should be 0)
+  if (props.bookingId) {
+    await updateStudentBookingAndPaymentStatus(props.bookingId, props.student.id, 'completed', 'paid', 0)
+  }
+
   await createTransaction({
     student_id: props.student.id,
     transaction_type: 'cash_payment',
@@ -352,14 +397,16 @@ const handlePackagePurchased = async (studentPackage: any) => {
   showBuyPackageModal.value = false
   
   // Auto-select the newly purchased package for redemption
-  form.selectedPackages = [studentPackage.id]
+  form.selectedPackage = studentPackage.id
+  loadStudentPackages(props.student.id)
 }
 
-// Watch for modal open to auto-select packages
-watch(() => isOpen.value, (newValue) => {
-  if (newValue && activePackages.value.length === 1) {
-    // Auto-select if only one active package
-    form.selectedPackages = [activePackages.value[0].id]
+watch(student, (newValue) => {
+  if(newValue) {
+    loadStudentPackages(newValue.id)
   }
+},{
+  immediate: true
 })
+
 </script> 

@@ -40,242 +40,46 @@
     <!-- Student Information -->
     <div v-else-if="student" class="space-y-6">
       <!-- Student Info Card -->
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">{{ t('student.information') }}</h2>
-            <UButton
-              @click="editStudent"
-              variant="ghost"
-              size="sm"
-              icon="i-heroicons-pencil-square"
-            >
-              {{ t('common.edit') }}
-            </UButton>
-          </div>
-        </template>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-4">
-            <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('student.name') }}
-              </label>
-              <p class="text-gray-900 dark:text-white">{{ student.name }}</p>
-            </div>
-            
-            <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('student.phone') }}
-              </label>
-              <p class="text-gray-900 dark:text-white">{{ student.country_code }} {{ student.phone }}</p>
-            </div>
-            
-            <div v-if="student.email">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('student.email') }}
-              </label>
-              <p class="text-gray-900 dark:text-white">{{ student.email }}</p>
-            </div>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('student.credits') }}
-              </label>
-              <p class="text-gray-900 dark:text-white">{{ student.credits }}</p>
-            </div>
-            
-            <div v-if="student.address">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('student.address') }}
-              </label>
-              <p class="text-gray-900 dark:text-white">{{ student.address }}</p>
-            </div>
-            
-            <div v-if="student.notes">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('student.notes') }}
-              </label>
-              <p class="text-gray-900 dark:text-white">{{ student.notes }}</p>
-            </div>
-            
-            <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('student.tags') }}
-              </label>
-              <div v-if="student.tags && student.tags.length > 0" class="flex flex-wrap gap-2 mt-1">
-                <UBadge
-                  v-for="tag in student.tags"
-                  :key="tag"
-                  color="secondary"
-                  variant="soft"
-                  size="sm"
-                >
-                  {{ tag }}
-                </UBadge>
-              </div>
-              <p v-else class="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                {{ t('student.noTags') }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </UCard>
+      <StudentInfoCard 
+        :student="student"
+        @edit="editStudent"
+      />
 
       <!-- Student Packages -->
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">{{ t('student.packages') }}</h2>
-            <UButton
-              @click="showAddPackageModal = true"
-              variant="solid"
-              size="sm"
-              icon="i-heroicons-plus"
-            >
-              {{ t('student.addPackage') }}
-            </UButton>
-          </div>
-        </template>
+      <StudentPackagesCard
+        :student-packages="studentPackages"
+        :package-filter="packageFilter"
+        :package-search-query="packageSearchQuery"
+        @add-package="showAddPackageModal = true"
+        @edit-package="editStudentPackage"
+        @delete-package="handleDeleteStudentPackage"
+        @update:package-filter="packageFilter = $event"
+        @update:package-search-query="packageSearchQuery = $event"
+      />
 
-        <!-- Package Filters -->
-        <div class="mb-4 flex flex-wrap gap-2">
-          <USelect
-            v-model="packageFilter"
-            :options="packageFilterOptions"
-            placeholder="Filter packages"
-            size="sm"
-            class="w-48"
-          />
-          <UInput
-            v-model="packageSearchQuery"
-            :placeholder="t('student.searchPackages')"
-            size="sm"
-            class="w-64"
-            icon="i-heroicons-magnifying-glass"
-          />
-        </div>
+      <!-- Recent Bookings -->
+      <StudentBookingsCard
+        :student-bookings="studentBookings"
+        :classes="classes"
+        :loading="bookingsLoading"
+        @refresh="loadStudentBookings"
+        @view-booking="viewBooking"
+      />
 
-        <!-- Package List -->
-        <div v-if="filteredStudentPackages.length > 0" class="space-y-3">
-          <div
-            v-for="studentPackage in filteredStudentPackages"
-            :key="studentPackage.id"
-            class="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-2 mb-2">
-                  <h3 class="font-medium text-gray-900 dark:text-white">
-                    {{ studentPackage.package_name }}
-                  </h3>
-                  <UBadge
-                    v-if="studentPackage.is_custom"
-                    color="secondary"
-                    variant="soft"
-                    size="sm"
-                  >
-                    {{ t('student.customPackage') }}
-                  </UBadge>
-                  <UBadge
-                    :color="getStatusColor(studentPackage.status)"
-                    variant="soft"
-                    size="sm"
-                  >
-                    {{ t(`student.packageStatus.${studentPackage.status}`) }}
-                  </UBadge>
-                </div>
-                
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
-                  <div>
-                    <span class="font-medium">{{ t('student.creditsPurchased') }}:</span>
-                    {{ studentPackage.credits_purchased }}
-                  </div>
-                  <div>
-                    <span class="font-medium">{{ t('student.creditsRemaining') }}:</span>
-                    {{ studentPackage.credits_remaining }}
-                  </div>
-                  <div>
-                    <span class="font-medium">{{ t('student.purchaseDate') }}:</span>
-                    {{ formatDate(studentPackage.purchase_date) }}
-                  </div>
-                  <div>
-                    <span class="font-medium">{{ t('student.expiryDate') }}:</span>
-                    {{ formatDate(studentPackage.expiry_date) }}
-                  </div>
-                </div>
-                
-                <div v-if="studentPackage.notes" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  <span class="font-medium">{{ t('student.notes') }}:</span>
-                  {{ studentPackage.notes }}
-                </div>
-              </div>
-              
-              <div class="flex gap-2 ml-4">
-                <UButton
-                  @click="editStudentPackage(studentPackage)"
-                  variant="ghost"
-                  size="sm"
-                  icon="i-heroicons-pencil-square"
-                  :aria-label="t('common.edit')"
-                />
-                <UButton
-                  @click="deleteStudentPackage(studentPackage)"
-                  variant="ghost"
-                  size="sm"
-                  color="error"
-                  icon="i-heroicons-trash"
-                  :aria-label="t('common.delete')"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div v-else class="text-center py-8">
-          <UIcon name="i-heroicons-cube" class="w-12 h-12 mx-auto text-gray-400 mb-4" />
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {{ t('student.noPackages') }}
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-4">
-            {{ t('student.noPackagesMessage') }}
-          </p>
-          <UButton
-            @click="showAddPackageModal = true"
-            variant="solid"
-            icon="i-heroicons-plus"
-          >
-            {{ t('student.addFirstPackage') }}
-          </UButton>
-        </div>
-      </UCard>
-
-      <!-- Booking Log (Placeholder) -->
-      <UCard>
-        <template #header>
-          <h2 class="text-lg font-semibold">{{ t('student.bookingLog') }}</h2>
-        </template>
-        
-        <div class="text-center py-8">
-          <UIcon name="i-heroicons-calendar" class="w-12 h-12 mx-auto text-gray-400 mb-4" />
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {{ t('student.bookingLogComingSoon') }}
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400">
-            {{ t('student.bookingLogMessage') }}
-          </p>
-        </div>
-      </UCard>
+      <!-- Recent Transactions -->
+      <StudentTransactionsCard
+        :student-transactions="studentTransactions"
+        :loading="transactionsLoading"
+        @refresh="loadStudentTransactions"
+        @view-transaction="viewTransaction"
+      />
     </div>
 
     <!-- Add Package Modal -->
     <AddPackageToStudent
       v-model="showAddPackageModal"
       :student="student"
-      @package-added="handlePackageAdded"
+      @saved="handlePackageAdded"
     />
 
     <!-- Edit Student Modal -->
@@ -297,42 +101,23 @@ const loading = ref(true)
 const error = ref('')
 const student = ref<any>(null)
 const studentPackages = ref<any[]>([])
+const studentBookings = ref<any[]>([])
+const studentTransactions = ref<any[]>([])
 const showAddPackageModal = ref(false)
 const showEditStudentModal = ref(false)
 const packageFilter = ref('all')
 const packageSearchQuery = ref('')
+const bookingsLoading = ref(false)
+const transactionsLoading = ref(false)
 
 // Composables
 const { getStudentById, updateStudent } = useStudents()
 const { loadStudentPackagesByStudent } = useStudentPackages()
+const { getBookingsByStudent } = useBookings()
+const { getTransactionsByStudent } = useTransactions()
+const { classes, loadClasses } = useClasses()
 
-// Computed
-const packageFilterOptions = computed(() => [
-  { label: t('student.filterAll'), value: 'all' },
-  { label: t('student.filterActive'), value: 'active' },
-  { label: t('student.filterExpired'), value: 'expired' },
-  { label: t('student.filterCompleted'), value: 'completed' }
-])
-
-const filteredStudentPackages = computed(() => {
-  let filtered = studentPackages.value
-
-  // Apply status filter
-  if (packageFilter.value !== 'all') {
-    filtered = filtered.filter(pkg => pkg.status === packageFilter.value)
-  }
-
-  // Apply search filter
-  if (packageSearchQuery.value) {
-    const query = packageSearchQuery.value.toLowerCase()
-    filtered = filtered.filter(pkg => 
-      pkg.package_name.toLowerCase().includes(query) ||
-      pkg.notes?.toLowerCase().includes(query)
-    )
-  }
-
-  return filtered
-})
+// Computed - removed as it's now handled by StudentPackagesCard component
 
 // Methods
 const loadStudentData = async () => {
@@ -369,15 +154,6 @@ const loadStudentPackages = async () => {
   }
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active': return 'primary'
-    case 'expired': return 'error'
-    case 'completed': return 'info'
-    default: return 'neutral'
-  }
-}
-
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString()
 }
@@ -403,7 +179,7 @@ const editStudentPackage = (studentPackage: any) => {
   console.log('Edit student package:', studentPackage)
 }
 
-const deleteStudentPackage = async (studentPackage: any) => {
+const handleDeleteStudentPackage = async (studentPackage: any) => {
   if (confirm(t('student.deletePackageConfirm', { name: studentPackage.package_name }))) {
     try {
       const { deleteStudentPackage } = useStudentPackages()
@@ -416,8 +192,54 @@ const deleteStudentPackage = async (studentPackage: any) => {
   }
 }
 
+// Load student bookings
+const loadStudentBookings = async () => {
+  if (!student.value) return
+  
+  try {
+    bookingsLoading.value = true
+    const bookings = await getBookingsByStudent(student.value.id, 10)
+    studentBookings.value = bookings
+  } catch (err) {
+    console.error('Error loading student bookings:', err)
+  } finally {
+    bookingsLoading.value = false
+  }
+}
+
+// Load student transactions
+const loadStudentTransactions = async () => {
+  if (!student.value) return
+  
+  try {
+    transactionsLoading.value = true
+    const transactions = await getTransactionsByStudent(student.value.id, 10)
+    studentTransactions.value = transactions
+  } catch (err) {
+    console.error('Error loading student transactions:', err)
+  } finally {
+    transactionsLoading.value = false
+  }
+}
+
+// Utility functions - removed as they're now handled by individual components
+
+// View booking details
+const viewBooking = (booking: any) => {
+  // TODO: Navigate to booking detail page
+  console.log('View booking:', booking)
+}
+
+// View transaction details
+const viewTransaction = (transaction: any) => {
+  // TODO: Navigate to transaction detail page
+  console.log('View transaction:', transaction)
+}
+
 // Load data on mount
 onMounted(() => {
   loadStudentData()
+  loadStudentBookings()
+  loadStudentTransactions()
 })
 </script> 

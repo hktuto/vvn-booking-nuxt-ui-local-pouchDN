@@ -50,6 +50,7 @@ export interface BookingDocument extends PouchDocument {
     student_id: string
     student_name: string
     status: 'confirmed' | 'cancelled' | 'completed' | 'no_show'
+    payment_status: 'unpaid' | 'paid' | 'refunded'
     credits_used: number
     notes: string
     booked_at: string
@@ -83,12 +84,15 @@ export interface TransactionDocument extends PouchDocument {
   // Optional fields based on transaction type
   class_id?: string
   package_id?: string
+  student_package_id?: string // Reference to specific student package
   booking_id?: string
   original_transaction_id?: string
   
   // Additional metadata
   description: string
   payment_method?: 'cash' | 'payme' | 'wechat' | 'alipay' | 'fps' | 'credit_card'
+  unit_price?: number // Unit price for credit usage
+  total_amount?: number // Total amount for credit usage (unit_price * credits_used)
   notes?: string
   
   // Timestamps

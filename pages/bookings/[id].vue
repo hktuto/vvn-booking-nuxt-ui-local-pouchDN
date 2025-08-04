@@ -129,9 +129,10 @@
                     {{ studentBooking.student_name }}
                   </div>
                   <div class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ studentBooking.credits_used }} {{ t('common.credits') }}
-                    <span class="mx-2">•</span>
+                    <!-- {{ studentBooking.credits_used }} {{ t('common.credits') }} -->
                     {{ t(`booking.status.${studentBooking.status}`) }}
+                    <span class="mx-2">•</span>
+                    {{ t(`booking.status.${studentBooking.payment_status}`) }}
                   </div>
                 </div>
               </div>
@@ -247,6 +248,7 @@ const route = useRoute()
 const router = useRouter()
 const { getBookingById, deleteBooking, addStudentToBooking, removeStudentFromBooking, convertVirtualBookingToReal, updateBooking } = useBookings()
 const { classes, loadClasses } = useClasses()
+const { getStudentById } = useStudents()
 
 // State
 const loading = ref(true)
@@ -395,14 +397,11 @@ const handleDeleteBooking = async () => {
 }
 
 // Handle redeem
-const handleRedeem = (studentBooking: any) => {
+const handleRedeem = async(studentBooking: any) => {
   console.log("handleRedeem", studentBooking)
+  const student = await getStudentById(studentBooking.student_id)
   // Find the student data
-  const student = {
-    id: studentBooking.student_id,
-    name: studentBooking.student_name,
-    phone: studentBooking.student_phone || ''
-  }
+
   selectedStudent.value = student
   showRedeemModal.value = true
 }
@@ -441,11 +440,13 @@ const getStudentActions = (studentBooking: any) => {
     {
       label: t('validation.booking.redeem.title'),
       icon: 'i-heroicons-credit-card',
+      disabled: studentBooking.status === 'completed',
       onSelect: () => handleRedeem(studentBooking)
     },
     {
       label: t('booking.removeStudent'),
       icon: 'i-heroicons-x-mark',
+      disabled: studentBooking.status === 'completed',
       onSelect: () => handleRemoveStudent(studentBooking.student_id)
     }
   ]

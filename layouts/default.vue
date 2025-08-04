@@ -5,10 +5,10 @@
     Pages can now use the header slot to provide custom header content.
     See the documentation in the README for usage examples.
   -->
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen">
     <!-- Mobile Navigation Header -->
     <div class="lg:hidden">
-      <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between p-4 bg-white  dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <UButton 
           @click="sidebarOpen = !sidebarOpen"
           variant="ghost"
@@ -60,7 +60,7 @@
       </template>
     </USlideover>
 
-    <div class="flex h-svh">
+    <div class="flex h-svh overflow-y-auto">
       <!-- Sidebar -->
       
 
@@ -95,7 +95,7 @@
       </div>
 
       <!-- Main Content -->
-      <div class="flex-1 lg:pl-0 overflow-hidden">
+      <div class="flex-1 lg:pl-0 overflow-x-hidden">
         <!-- Desktop Top Header -->
         <div class="hidden lg:flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center gap-4">

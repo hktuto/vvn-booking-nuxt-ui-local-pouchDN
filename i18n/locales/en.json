@@ -597,7 +597,10 @@
       "completed": "Completed",
       "pending": "Pending",
       "cancelled": "Cancelled",
-      "refunded": "Refunded"
+      "refunded": "Refunded",
+      "unpaid": "Unpaid",
+      "paid": "Paid",
+      "no_show": "No Show"
     },
     "sort": {
       "dateDesc": "Date (Newest)",
@@ -686,7 +689,10 @@
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
       "completed": "Completed",
-      "no_show": "No Show"
+      "no_show": "No Show",
+      "refunded": "Refunded",
+      "unpaid": "Unpaid",
+      "paid": "Paid"
     }
   },
   "class": {

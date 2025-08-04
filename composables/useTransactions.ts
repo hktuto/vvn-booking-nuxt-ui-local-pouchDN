@@ -10,10 +10,13 @@ const transformTransactionDoc = (doc: TransactionDocument) => ({
   currency: doc.currency,
   class_id: doc.class_id,
   package_id: doc.package_id,
+  student_package_id: doc.student_package_id,
   booking_id: doc.booking_id,
   original_transaction_id: doc.original_transaction_id,
   description: doc.description,
   payment_method: doc.payment_method,
+  unit_price: doc.unit_price,
+  total_amount: doc.total_amount,
   notes: doc.notes,
   created_at: doc.created_at,
   updated_at: doc.updated_at
@@ -35,10 +38,13 @@ export const useTransactions = () => {
     currency?: string
     class_id?: string
     package_id?: string
+    student_package_id?: string
     booking_id?: string
     original_transaction_id?: string
     description: string
     payment_method?: 'cash' | 'payme' | 'wechat' | 'alipay' | 'fps' | 'credit_card'
+    unit_price?: number
+    total_amount?: number
     notes?: string
   }) => {
     try {
@@ -222,7 +228,7 @@ export const useTransactions = () => {
   }
 
   // Get transaction statistics
-  const getTransactionStats = async (startDate?: string, endDate?: string) => {
+  const getTransactionStats = async (startDate?: string, endDate?: string, userId?: string, transactionType?: string) => {
     try {
       const selector: any = { type: 'transaction' }
       
@@ -232,7 +238,12 @@ export const useTransactions = () => {
           $lte: endDate
         }
       }
-
+      if(userId) {
+        selector.student_id = userId
+      }
+      if(transactionType) {
+        selector.transaction_type = transactionType
+      }
       const result = await transactionsDB.find({ selector })
       
       const transactions = result.docs.map(doc => transformTransactionDoc(doc as TransactionDocument))

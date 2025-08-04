@@ -44,12 +44,11 @@ export const useStudentPackages = () => {
   const { studentPackages: studentPackagesDB, students: studentsDB, packages: packagesDB } = usePouchDB()
   const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
   
-  // Reactive student packages list
-  const studentPackages = ref<Awaited<ReturnType<typeof transformStudentPackageDoc>>[]>([])
+  // Only keep loading and error states for individual operations
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  // Load all student packages
+  // Load all student packages (now returns data directly instead of storing in global array)
   const loadStudentPackages = async () => {
     loading.value = true
     error.value = null
@@ -59,14 +58,23 @@ export const useStudentPackages = () => {
       const transformedDocs = await Promise.all(
         docs.map(doc => transformStudentPackageDoc(doc, packagesDB))
       )
-      studentPackages.value = transformedDocs
+      return transformedDocs
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err: any) {
       error.value = err.message || 'Failed to load student packages'
       console.error('Error loading student packages:', err)
+      throw err
     } finally {
       loading.value = false
     }
+  }
+
+  async function getPackageByStudentId(studentId: string) {
+    const docs = await studentPackagesCRUD.findWhere({
+      type: 'student_package',
+      student_id: studentId
+    })
+    return Promise.all( docs.map(doc => transformStudentPackageDoc(doc, packagesDB)) )
   }
 
   // Load student packages by student ID
@@ -146,10 +154,7 @@ export const useStudentPackages = () => {
         notes: notes || ''
       })
 
-      const studentPackage = await transformStudentPackageDoc(studentPackageDoc, packagesDB)
-      studentPackages.value.unshift(studentPackage) // Add to beginning for newest first
-      
-      return studentPackage
+      return await transformStudentPackageDoc(studentPackageDoc, packagesDB)
     } catch (err: any) {
       error.value = err.message || 'Failed to add package to student'
       console.error('Error adding package to student:', err)
@@ -169,16 +174,11 @@ export const useStudentPackages = () => {
     error.value = null
     
     try {
-      const doc = await studentPackagesCRUD.update(id, updates)
-      const studentPackage = await transformStudentPackageDoc(doc, packagesDB)
-      
-      // Update in reactive array
-      const index = studentPackages.value.findIndex(sp => sp.id === id)
-      if (index !== -1) {
-        studentPackages.value[index] = studentPackage
+      if(updates.credits_remaining === 0 || updates.credits_remaining && updates.credits_remaining <= 0) {
+        updates.status = 'completed'
       }
-      
-      return studentPackage
+      const doc = await studentPackagesCRUD.update(id, updates)
+      return await transformStudentPackageDoc(doc, packagesDB)
     } catch (err: any) {
       error.value = err.message || 'Failed to update student package'
       console.error('Error updating student package:', err)
@@ -194,17 +194,7 @@ export const useStudentPackages = () => {
     error.value = null
     
     try {
-      const success = await studentPackagesCRUD.remove(id)
-      
-      if (success) {
-        // Remove from reactive array
-        const index = studentPackages.value.findIndex(sp => sp.id === id)
-        if (index !== -1) {
-          studentPackages.value.splice(index, 1)
-        }
-      }
-      
-      return success
+      return await studentPackagesCRUD.remove(id)
     } catch (err: any) {
       error.value = err.message || 'Failed to delete student package'
       console.error('Error deleting student package:', err)
@@ -230,52 +220,61 @@ export const useStudentPackages = () => {
     return new Date(expiryDate) < new Date()
   }
 
-  // Get active packages for a student
-  const getActivePackagesForStudent = (studentId: string) => {
-    return studentPackages.value.filter(sp => 
-      sp.student_id === studentId && 
-      sp.status === 'active' && 
-      sp.credits_remaining > 0 &&
-      !isPackageExpired(sp.expiry_date)
-    )
+  // Get active packages for a student (now fetches data directly)
+  const getActivePackagesForStudent = async (studentId: string) => {
+    try {
+      const packages = await loadStudentPackagesByStudent(studentId)
+      return packages.filter(sp => 
+        sp.status === 'active' && 
+        sp.credits_remaining > 0 &&
+        !isPackageExpired(sp.expiry_date)
+      )
+    } catch (err) {
+      console.error('Error getting active packages for student:', err)
+      return []
+    }
+  }
+
+  function calculateUnitPrice(sp: any) {
+    const price = sp.custom_price || sp.package_price
+    const credits = sp.credits_purchased
+    return price / credits
   }
 
   // Use credits from student packages
-  const useCreditsFromPackages = async (studentId: string, creditsToUse: number, packageIds: string[]) => {
+  const useCreditsFromPackages = async (studentId: string, creditsToUse: number, packageId: string) => {
     loading.value = true
     error.value = null
     
     try {
       let remainingCredits = creditsToUse
-      const updatedPackages = []
 
+      // Get current packages for the student
+      
+      const packageFormDb = await studentPackagesCRUD.findById(packageId)
+      
       // Sort packages by expiry date (earliest first) to use oldest credits first
-      const packagesToUpdate = studentPackages.value
-        .filter(sp => packageIds.includes(sp.id) && sp.student_id === studentId)
-        .sort((a, b) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime())
-
-      for (const studentPackage of packagesToUpdate) {
-        if (remainingCredits <= 0) break
-
-        const creditsFromThisPackage = Math.min(remainingCredits, studentPackage.credits_remaining)
-        const newRemainingCredits = studentPackage.credits_remaining - creditsFromThisPackage
-        const newStatus = newRemainingCredits === 0 ? 'completed' : 'active'
-
-        // Update the student package
-        const updatedPackage = await updateStudentPackage(studentPackage.id, {
-          credits_remaining: newRemainingCredits,
-          status: newStatus
-        })
-
-        updatedPackages.push(updatedPackage)
-        remainingCredits -= creditsFromThisPackage
+      if(!packageFormDb) {
+        throw new Error('package not found')
       }
+      const packageObj = await transformStudentPackageDoc(packageFormDb, packagesDB)
+      const creditsFromThisPackage = Math.min(remainingCredits, packageObj.credits_remaining)
+      const newRemainingCredits = packageObj.credits_remaining - creditsFromThisPackage
+      const newStatus = newRemainingCredits === 0 ? 'completed' : 'active'
+
+      // Update the student package
+      const updatedPackage = await updateStudentPackage(packageObj.id, {
+        credits_remaining: newRemainingCredits,
+        status: newStatus
+      })
+
+      remainingCredits -= creditsFromThisPackage
 
       if (remainingCredits > 0) {
         throw new Error(`Not enough credits available. Need ${creditsToUse} but only have ${creditsToUse - remainingCredits}`)
       }
 
-      return updatedPackages
+      return updatedPackage
     } catch (err: any) {
       error.value = err.message || 'Failed to use credits from packages'
       console.error('Error using credits from packages:', err)
@@ -286,7 +285,6 @@ export const useStudentPackages = () => {
   }
 
   return {
-    studentPackages: readonly(studentPackages),
     loading: readonly(loading),
     error: readonly(error),
     loadStudentPackages,
@@ -297,6 +295,9 @@ export const useStudentPackages = () => {
     getStudentPackageById,
     isPackageExpired,
     getActivePackagesForStudent,
-    useCreditsFromPackages
+    useCreditsFromPackages,
+    getPackageByStudentId,
+    // utils
+    calculateUnitPrice
   }
 } 

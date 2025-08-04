@@ -7,7 +7,7 @@
     </template>
 
     <template #body>
-      <UForm :state="form" :schema="addPackageToStudentSchema" class="space-y-4" @submit="handleSubmit" ref="formRef">
+      <UForm :state="form" :schema="addPackageToStudentSchema" class="space-y-4"  ref="formRef">
         <!-- Package Type Toggle -->
         <div class="flex gap-4 mb-4">
           <UButton
@@ -184,7 +184,7 @@
           {{ t('common.cancel') }}
         </UButton>
         <UButton
-          @click="() => formRef?.submit()"
+          @click="handleSubmit"
           :loading="submitting"
           color="primary"
         >
@@ -256,7 +256,7 @@ const expiryDate = computed(() => {
 
 const packageOptions = computed(() => {
   return packages.value
-    .filter(p => p.active)
+    .filter(p => p.active && p.is_custom === false)
     .map(p => ({
       label: `${p.name} - $${p.price} (${p.credits} ${t('package.credits')})`,
       value: p.id
@@ -295,24 +295,24 @@ const resetForm = () => {
   form.custom_package_duration = 0
 }
 
-const handleSubmit = async (event: FormSubmitEvent<AddPackageToStudentForm>) => {
+const handleSubmit = async () => {
   if (!props.student) return
 
   submitting.value = true
   
   try {
-    let packageId = event.data.package_id
-    let customPrice: number | undefined = event.data.custom_price || undefined
+    let packageId = form.package_id
+    let customPrice: number | undefined = form.custom_price || undefined
 
     // If custom package, create it first
-    if (event.data.package_type === 'custom') {
+    if (form.package_type === 'custom') {
       const { addPackage } = usePackages()
       const customPackage = await addPackage({
         name: generatedPackageName.value,
         description: '', // Custom packages don't need description, use notes field instead
-        price: event.data.custom_package_price!,
-        credits: event.data.custom_package_credits!,
-        duration_days: event.data.custom_package_duration!,
+        price: form.custom_package_price!,
+        credits: form.custom_package_credits!,
+        duration_days: form.custom_package_duration!,
         active: true,
         is_custom: true // Flag to identify custom packages
       })
@@ -328,7 +328,7 @@ const handleSubmit = async (event: FormSubmitEvent<AddPackageToStudentForm>) => 
     const studentPackage = await addPackageToStudent(
       props.student.id,
       packageId,
-      event.data.notes,
+      form.notes,
       customPrice || undefined
     )
     

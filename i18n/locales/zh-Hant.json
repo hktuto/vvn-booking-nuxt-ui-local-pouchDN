@@ -680,7 +680,10 @@
       "confirmed": "已確認",
       "cancelled": "已取消",
       "completed": "已完成",
-      "no_show": "未出席"
+      "no_show": "未出席",
+      "refunded": "已退款",
+      "unpaid": "未付款",
+      "paid": "已付款"
     }
   },
   "class": {
