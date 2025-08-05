@@ -160,9 +160,10 @@
 import type { RegisterForm } from '~/composables/useAuthValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
-// Use blank layout for register page
+// Use blank layout for register page and mark as public
 definePageMeta({
-  layout: 'blank'
+  layout: 'blank',
+  auth: false
 })
 
 const { createUser } = useUsers()

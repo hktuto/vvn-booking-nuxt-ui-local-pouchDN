@@ -45,19 +45,19 @@
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
               <div>
-                <span class="font-medium">{{ t('transaction.amount') }}:</span>
+                <span class="font-medium">{{ t('transactions.amount') }}:</span>
                 ${{ transaction.amount.toFixed(2) }}
               </div>
               <div>
-                <span class="font-medium">{{ t('transaction.date') }}:</span>
+                <span class="font-medium">{{ t('transactions.date') }}:</span>
                 {{ formatDate(transaction.created_at) }}
               </div>
               <div v-if="transaction.payment_method">
-                <span class="font-medium">{{ t('transaction.paymentMethod') }}:</span>
+                <span class="font-medium">{{ t('transactions.paymentMethod') }}:</span>
                 {{ t(`payment.${transaction.payment_method}`) }}
               </div>
               <div v-if="transaction.unit_price">
-                <span class="font-medium">{{ t('transaction.unitPrice') }}:</span>
+                <span class="font-medium">{{ t('transactions.unitPrice') }}:</span>
                 ${{ transaction.unit_price.toFixed(2) }}
               </div>
             </div>

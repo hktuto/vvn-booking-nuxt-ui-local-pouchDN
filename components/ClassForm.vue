@@ -60,14 +60,14 @@
               </UInput>
             </UFormField>
 
-            <UFormField name="credits" :label="t('class.credits')" required>
+            <UFormField name="credits" :label="t('classes.credits')" required>
               <UInput
                 v-model.number="form.credits"
                 type="number"
                 min="1"
                 max="100"
                 class="w-full"
-                :placeholder="t('class.creditsPlaceholder')"
+                :placeholder="t('classes.credits')"
               />
             </UFormField>
           </div>

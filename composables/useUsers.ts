@@ -1,14 +1,15 @@
 import type { UserDocument } from './usePouchDB'
-import { usePouchDB, usePouchCRUD } from './usePouchDB'
-
+import { usePouchCRUD } from './usePouchDB'
+import { useUserDB } from '~/utils/dbStateHelper'
 
 export const useUsers = () => {
-  const { users: usersDB } = usePouchDB()
-  const usersCRUD = usePouchCRUD<UserDocument>(usersDB)
+  const { getDB } = useUserDB()
   
   // Check if any users exist
   const hasUsers = async (): Promise<boolean> => {
     try {
+      const usersDB = await getDB()
+      console.log('usersDB', usersDB)
       const result = await usersDB.find({
         selector: { type: 'user' },
         limit: 1
@@ -23,6 +24,7 @@ export const useUsers = () => {
   // Get user by username
   const getUserByUsername = async (username: string): Promise<UserDocument | null> => {
     try {
+      const usersDB = await getDB()
       const result = await usersDB.find({
         selector: { 
           type: 'user',
@@ -51,6 +53,9 @@ export const useUsers = () => {
     }
   }) => {
     try {
+      const usersDB = await getDB()
+      const usersCRUD = usePouchCRUD<UserDocument>(usersDB)
+      
       // Check if username already exists
       const existingUser = await getUserByUsername(userData.username)
       if (existingUser) {
@@ -74,9 +79,9 @@ export const useUsers = () => {
           timezone: userData.settings?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           currency: userData.settings?.currency || 'USD'
         }
-              })
+      })
         
-        return user
+      return user
     } catch (error) {
       console.error('Error creating user:', error)
       throw error
@@ -107,6 +112,9 @@ export const useUsers = () => {
   // Update user settings
   const updateUserSettings = async (userId: string, settings: Partial<UserDocument['settings']>) => {
     try {
+      const usersDB = await getDB()
+      const usersCRUD = usePouchCRUD<UserDocument>(usersDB)
+      
       const user = await usersCRUD.findById(userId)
       if (!user) {
         throw new Error('User not found')

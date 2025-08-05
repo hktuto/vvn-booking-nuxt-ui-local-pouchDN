@@ -8,7 +8,7 @@ export const useAuthState = () => useState('auth', () => ({
 
 export const useAuth = () => {
   const auth = useAuthState()
-  const { hasUsers, authenticateUser } = useUsers()
+  
 
   // Check for existing session on composable initialization
   const initAuth = () => {
@@ -35,6 +35,7 @@ export const useAuth = () => {
   // Check if this is first time setup
   const checkFirstTimeSetup = async () => {
     try {
+      const { hasUsers } = useUsers()
       const usersExist = await hasUsers()
       return !usersExist
     } catch (error) {
@@ -46,6 +47,7 @@ export const useAuth = () => {
   // Login function
   const login = async (username: string, password: string) => {
     try {
+      const { authenticateUser } = useUsers()
       const user = await authenticateUser(username, password)
       
       if (user) {

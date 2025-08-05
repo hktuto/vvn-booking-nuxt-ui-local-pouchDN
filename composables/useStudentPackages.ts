@@ -1,5 +1,6 @@
 import type { StudentPackageDocument, StudentDocument, PackageDocument } from './usePouchDB'
-import { usePouchDB, usePouchCRUD } from './usePouchDB'
+import { usePouchCRUD } from './usePouchDB'
+import { useStudentPackageDB, usePackageDB } from '~/utils/dbStateHelper'
 
 // Transform PouchDB document to display format
 const transformStudentPackageDoc = async (doc: StudentPackageDocument, packagesDB?: any) => {
@@ -41,8 +42,8 @@ const transformStudentPackageDoc = async (doc: StudentPackageDocument, packagesD
 }
 
 export const useStudentPackages = () => {
-  const { studentPackages: studentPackagesDB, students: studentsDB, packages: packagesDB } = usePouchDB()
-  const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+  const { getDB: getStudentPackagesDB } = useStudentPackageDB()
+  const { getDB: getPackagesDB } = usePackageDB()
   
   // Only keep loading and error states for individual operations
   const loading = ref(false)
@@ -54,6 +55,10 @@ export const useStudentPackages = () => {
     error.value = null
     
     try {
+      const studentPackagesDB = await getStudentPackagesDB()
+      const packagesDB = await getPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+      
       const docs = await studentPackagesCRUD.findAll('student_package')
       const transformedDocs = await Promise.all(
         docs.map(doc => transformStudentPackageDoc(doc, packagesDB))
@@ -70,6 +75,10 @@ export const useStudentPackages = () => {
   }
 
   async function getPackageByStudentId(studentId: string) {
+    const studentPackagesDB = await getStudentPackagesDB()
+    const packagesDB = await getPackagesDB()
+    const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+    
     const docs = await studentPackagesCRUD.findWhere({
       type: 'student_package',
       student_id: studentId
@@ -83,6 +92,10 @@ export const useStudentPackages = () => {
     error.value = null
     
     try {
+      const studentPackagesDB = await getStudentPackagesDB()
+      const packagesDB = await getPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+      
       const docs = await studentPackagesCRUD.findWhere({
         type: 'student_package',
         student_id: studentId
@@ -107,19 +120,23 @@ export const useStudentPackages = () => {
     error.value = null
     
     try {
-      // Get the package details
+      const studentPackagesDB = await getStudentPackagesDB()
+      const packagesDB = await getPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+      
+      // Get package details
       const packageDoc = await packagesDB.get(packageId) as PackageDocument
       if (!packageDoc) {
         throw new Error('Package not found')
       }
-
+      
       // Calculate expiry date
       const purchaseDate = new Date()
       const expiryDate = new Date(purchaseDate)
       expiryDate.setDate(expiryDate.getDate() + packageDoc.duration_days)
-
-      // Create student package record
-      const studentPackageDoc = await studentPackagesCRUD.create({
+      
+      // Create student package
+      const studentPackage = await studentPackagesCRUD.create({
         type: 'student_package',
         student_id: studentId,
         package_id: packageId,
@@ -131,30 +148,29 @@ export const useStudentPackages = () => {
         notes: notes || '',
         custom_price: customPrice
       })
-
-      // Update student's total credits
-      const studentDoc = await studentsDB.get(studentId) as StudentDocument
-      await studentsDB.put({
-        ...studentDoc,
-        credits: studentDoc.credits + packageDoc.credits,
-        updated_at: new Date().toISOString()
-      })
-
-      // Create transaction for package purchase
+      // also update student's credits
+      const { getStudentById, updateStudent } = useStudents()
+      const student = await getStudentById(studentId)
+      if (student) {
+        student.credits += packageDoc.credits
+        await updateStudent(studentId, student)
+      }
+      // create a transaction
       const { createTransaction } = useTransactions()
       await createTransaction({
         student_id: studentId,
         transaction_type: 'package_purchase',
-        status: 'completed',
-        amount: customPrice || packageDoc.price,
+        amount: packageDoc.price,
         currency: 'HKD',
         package_id: packageId,
-        description: `Package purchase: ${packageDoc.name} (${packageDoc.credits} credits)`,
-        payment_method: 'cash', // Default, can be updated later
-        notes: notes || ''
+        student_package_id: studentPackage._id,
+        status: 'completed',
+        description: `Package purchase: ${packageDoc.name}`,
+        showDetailsDialog: true,
+        packageInfo: packageDoc,
+        
       })
-
-      return await transformStudentPackageDoc(studentPackageDoc, packagesDB)
+      return await transformStudentPackageDoc(studentPackage, packagesDB)
     } catch (err: any) {
       error.value = err.message || 'Failed to add package to student'
       console.error('Error adding package to student:', err)
@@ -174,9 +190,10 @@ export const useStudentPackages = () => {
     error.value = null
     
     try {
-      if(updates.credits_remaining === 0 || updates.credits_remaining && updates.credits_remaining <= 0) {
-        updates.status = 'completed'
-      }
+      const studentPackagesDB = await getStudentPackagesDB()
+      const packagesDB = await getPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+      
       const doc = await studentPackagesCRUD.update(id, updates)
       return await transformStudentPackageDoc(doc, packagesDB)
     } catch (err: any) {
@@ -194,7 +211,10 @@ export const useStudentPackages = () => {
     error.value = null
     
     try {
-      return await studentPackagesCRUD.remove(id)
+      const studentPackagesDB = await getStudentPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+      const success = await studentPackagesCRUD.remove(id)
+      return success
     } catch (err: any) {
       error.value = err.message || 'Failed to delete student package'
       console.error('Error deleting student package:', err)
@@ -207,10 +227,14 @@ export const useStudentPackages = () => {
   // Get student package by ID
   const getStudentPackageById = async (id: string) => {
     try {
+      const studentPackagesDB = await getStudentPackagesDB()
+      const packagesDB = await getPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+      
       const doc = await studentPackagesCRUD.findById(id)
       return doc ? await transformStudentPackageDoc(doc, packagesDB) : null
     } catch (err: any) {
-      console.error('Error getting student package:', err)
+      console.error('Error getting student package by ID:', err)
       return null
     }
   }
@@ -220,67 +244,60 @@ export const useStudentPackages = () => {
     return new Date(expiryDate) < new Date()
   }
 
-  // Get active packages for a student (now fetches data directly)
+  // Get active packages for a student
   const getActivePackagesForStudent = async (studentId: string) => {
     try {
-      const packages = await loadStudentPackagesByStudent(studentId)
-      return packages.filter(sp => 
-        sp.status === 'active' && 
-        sp.credits_remaining > 0 &&
-        !isPackageExpired(sp.expiry_date)
+      const studentPackagesDB = await getStudentPackagesDB()
+      const packagesDB = await getPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
+      
+      const docs = await studentPackagesCRUD.findWhere({
+        type: 'student_package',
+        student_id: studentId,
+        status: 'active'
+      })
+      
+      const transformedDocs = await Promise.all(
+        docs.map(doc => transformStudentPackageDoc(doc, packagesDB))
       )
-    } catch (err) {
+      
+      return transformedDocs.filter(sp => !isPackageExpired(sp.expiry_date))
+    } catch (err: any) {
       console.error('Error getting active packages for student:', err)
       return []
     }
   }
 
   function calculateUnitPrice(sp: any) {
-    const price = sp.custom_price || sp.package_price
-    const credits = sp.credits_purchased
-    return price / credits
+    return (sp.custom_price || sp.package_price) / sp.credits_purchased
   }
 
-  // Use credits from student packages
+  // Use credits from packages
   const useCreditsFromPackages = async (studentId: string, creditsToUse: number, packageId: string) => {
-    loading.value = true
-    error.value = null
-    
     try {
-      let remainingCredits = creditsToUse
-
-      // Get current packages for the student
+      const studentPackagesDB = await getStudentPackagesDB()
+      const studentPackagesCRUD = usePouchCRUD<StudentPackageDocument>(studentPackagesDB)
       
-      const packageFormDb = await studentPackagesCRUD.findById(packageId)
-      
-      // Sort packages by expiry date (earliest first) to use oldest credits first
-      if(!packageFormDb) {
-        throw new Error('package not found')
+      // Get the specific package
+      const packageDoc = await studentPackagesCRUD.findById(packageId)
+      if (!packageDoc || packageDoc.student_id !== studentId) {
+        throw new Error('Package not found or does not belong to student')
       }
-      const packageObj = await transformStudentPackageDoc(packageFormDb, packagesDB)
-      const creditsFromThisPackage = Math.min(remainingCredits, packageObj.credits_remaining)
-      const newRemainingCredits = packageObj.credits_remaining - creditsFromThisPackage
-      const newStatus = newRemainingCredits === 0 ? 'completed' : 'active'
-
-      // Update the student package
-      const updatedPackage = await updateStudentPackage(packageObj.id, {
-        credits_remaining: newRemainingCredits,
-        status: newStatus
+      
+      if (packageDoc.credits_remaining < creditsToUse) {
+        throw new Error('Insufficient credits')
+      }
+      
+      // Update credits
+      const updatedPackage = await studentPackagesCRUD.update(packageId, {
+        credits_remaining: packageDoc.credits_remaining - creditsToUse,
+        status: packageDoc.credits_remaining - creditsToUse === 0 ? 'completed' : 'active'
       })
-
-      remainingCredits -= creditsFromThisPackage
-
-      if (remainingCredits > 0) {
-        throw new Error(`Not enough credits available. Need ${creditsToUse} but only have ${creditsToUse - remainingCredits}`)
-      }
-
+      
       return updatedPackage
     } catch (err: any) {
-      error.value = err.message || 'Failed to use credits from packages'
       console.error('Error using credits from packages:', err)
       throw err
-    } finally {
-      loading.value = false
     }
   }
 
@@ -288,6 +305,7 @@ export const useStudentPackages = () => {
     loading: readonly(loading),
     error: readonly(error),
     loadStudentPackages,
+    getPackageByStudentId,
     loadStudentPackagesByStudent,
     addPackageToStudent,
     updateStudentPackage,
@@ -295,9 +313,7 @@ export const useStudentPackages = () => {
     getStudentPackageById,
     isPackageExpired,
     getActivePackagesForStudent,
-    useCreditsFromPackages,
-    getPackageByStudentId,
-    // utils
-    calculateUnitPrice
+    calculateUnitPrice,
+    useCreditsFromPackages
   }
 } 

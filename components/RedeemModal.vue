@@ -58,7 +58,7 @@
         <div v-if="form.paymentMethod === 'credit'" class="space-y-4">
           <!-- Active Packages -->
           <div v-if="activePackages.length > 0" class="space-y-3">
-            <label class="text-sm font-medium">{{ $t('booking.redeem.selectPackage') }}</label>
+            <label class="text-sm font-medium">{{ $t('validation.booking.redeem.selectPackage') }}</label>
             <div class="space-y-2 max-h-40 overflow-y-auto">
               <div
                 v-for="pkg in activePackages"
@@ -74,7 +74,7 @@
                       {{ $t('validation.booking.redeem.remainingCredits', { credits: pkg.credits_remaining }) }}
                     </p>
                     <p class="text-xs text-gray-400">
-                      Unit Price: ${{ calculateUnitPrice(pkg)* form.creditsToUse }}
+                      Unit Price: ${{ calculateUnitPrice(pkg) }}
                     </p>
                   </div>
                   <URadio
@@ -348,11 +348,10 @@ const handleCreditPayment = async () => {
     class_id: props.classInfo.id,
     booking_id: props.bookingId,
     description: `Credit usage: ${props.classInfo.name} (${form.creditsToUse} credits)`,
-    unit_price: selectedPackageInfo.value.package_price,
-    total_amount: selectedPackageInfo.value.package_price * form.creditsToUse,
+    unit_price: calculateUnitPrice(selectedPackageInfo.value),
+    total_amount: form.creditsToUse,
     notes: form.notes,
     showDetailsDialog: true,
-    student: props.student,
     packageInfo: selectedPackageInfo.value,
     classInfo: props.classInfo,
     bookingInfo: {

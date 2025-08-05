@@ -99,7 +99,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { packages, loading, error, addPackage, updatePackage, deletePackage } = usePackages()
+const { packages, loading, error, loadPackages, addPackage, updatePackage, deletePackage } = usePackages()
 
 const showAddModal = ref(false)
 const editingPackage = ref<any>(null)
@@ -154,4 +154,8 @@ const handlePackageSaved = async (packageData: any) => {
     console.error('Error saving package:', error)
   }
 }
+
+onMounted(async () => {
+  await loadPackages()
+})
 </script> 

@@ -1,9 +1,10 @@
 import type { BookingDocument } from '~/composables/usePouchDB'
+import { usePouchCRUD } from './usePouchDB'
+import { useBookingDB, useClassDB } from '~/utils/dbStateHelper'
 
 export const useBookings = () => {
-  const { bookings: bookingsDB, classes: classesDB } = usePouchDB()
-  const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-  const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
+  const { getDB: getBookingsDB } = useBookingDB()
+  const { getDB: getClassesDB } = useClassDB()
   const { classes, loadClasses } = useClasses()
   const { students, loadStudents } = useStudents()
 
@@ -41,6 +42,9 @@ export const useBookings = () => {
     is_virtual: boolean
   }) => {
     try {
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
+      
       const newBooking = await bookingsCRUD.create({
         type: 'booking',
         ...bookingData
@@ -55,6 +59,9 @@ export const useBookings = () => {
 
   const updateBooking = async (id: string, updates: Partial<Omit<BookingDocument, '_id' | 'type' | 'created_at'>>) => {
     try {
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
+      
       const updatedBooking = await bookingsCRUD.update(id, updates)
       return updatedBooking
     } catch (err) {
@@ -65,6 +72,9 @@ export const useBookings = () => {
 
   const deleteBooking = async (id: string) => {
     try {
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
+      
       await bookingsCRUD.remove(id)
     } catch (err) {
       console.error('Error deleting booking:', err)
@@ -78,6 +88,9 @@ export const useBookings = () => {
       if (id.startsWith('virtual-')) {
         return await getVirtualBookingById(id)
       }
+      
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
       
       const doc = await bookingsCRUD.findById(id)
       return doc ? transformBookingDoc(doc) : null
@@ -101,6 +114,8 @@ export const useBookings = () => {
       const date = parts[2].replace(/_/g, '-') // Handle dates with hyphens
       
       // Find the class
+      const classesDB = await getClassesDB()
+      const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
       const class_ = await classesCRUD.findById(classId)
       if (!class_) {
         throw new Error('Class not found')
@@ -158,6 +173,7 @@ export const useBookings = () => {
       
       if (isScheduledForDate) {
         // Check if there's already a real booking for this class on this date
+        const bookingsDB = await getBookingsDB()
         const findExistingBooking = await bookingsDB.find({
           selector: {
             class_id: class_.id,
@@ -192,14 +208,15 @@ export const useBookings = () => {
       await Promise.all([loadClasses(), loadStudents()])
       
       // Only load bookings for the specific date
+      const bookingsDB = await getBookingsDB()
       const realBookings = await bookingsDB.find({
         selector: { 
           class_date: {
             $eq: date
           }
         }
-      }).then(result => {
-        return result.docs.map(doc => transformBookingDoc(doc as BookingDocument))
+      }).then((result: any) => {
+        return result.docs.map((doc: any) => transformBookingDoc(doc as BookingDocument))
       })
       const virtualBookings = await getVirtualBookingsForDate(date)
       
@@ -217,6 +234,7 @@ export const useBookings = () => {
     try {
       await Promise.all([loadClasses(), loadStudents()])
       
+      const bookingsDB = await getBookingsDB()
       const result = await bookingsDB.find({
         selector: { 
           type: 'booking'
@@ -226,15 +244,15 @@ export const useBookings = () => {
       
       // Filter bookings that contain the student
       const bookingsWithStudent = result.docs
-        .map(doc => transformBookingDoc(doc as BookingDocument))
-        .filter(booking => 
-          booking.bookings.some(studentBooking => studentBooking.student_id === studentId)
+        .map((doc: any) => transformBookingDoc(doc as BookingDocument))
+        .filter((booking: any) => 
+          booking.bookings.some((studentBooking: any) => studentBooking.student_id === studentId)
         )
-        .map(booking => ({
+        .map((booking: any) => ({
           ...booking,
-          studentBooking: booking.bookings.find(studentBooking => studentBooking.student_id === studentId)
+          studentBooking: booking.bookings.find((studentBooking: any) => studentBooking.student_id === studentId)
         }))
-        .sort((a, b) => new Date(b.class_date).getTime() - new Date(a.class_date).getTime())
+        .sort((a: any, b: any) => new Date(b.class_date).getTime() - new Date(a.class_date).getTime())
         .slice(0, limit || 50)
       
       return bookingsWithStudent
@@ -315,6 +333,8 @@ export const useBookings = () => {
   // Remove student from booking
   const removeStudentFromBooking = async (bookingId: string, studentId: string) => {
     try {
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
       const existingBooking = await bookingsCRUD.findById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
         
@@ -383,6 +403,8 @@ export const useBookings = () => {
   // Update student booking status and credits used
   const updateStudentBookingStatus = async (bookingId: string, studentId: string, status: 'confirmed' | 'cancelled' | 'completed' | 'no_show', creditsUsed: number) => {
     try {
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
       const existingBooking = await bookingsCRUD.findById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
       
@@ -423,6 +445,8 @@ export const useBookings = () => {
   // Update student payment status
   const updateStudentPaymentStatus = async (bookingId: string, studentId: string, paymentStatus: 'unpaid' | 'paid' | 'refunded') => {
     try {
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
       const existingBooking = await bookingsCRUD.findById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
       
@@ -468,6 +492,8 @@ export const useBookings = () => {
     creditsUsed: number
   ) => {
     try {
+      const bookingsDB = await getBookingsDB()
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
       const existingBooking = await bookingsCRUD.findById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
       

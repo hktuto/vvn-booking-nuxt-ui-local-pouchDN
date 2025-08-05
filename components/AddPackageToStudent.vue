@@ -118,7 +118,7 @@
             v-model.number="form.custom_price"
             type="number"
             class="w-full"
-            :placeholder="t('student.customPricePlaceholder')"
+            :placeholder="t('student.customPrice')"
             min="0"
             step="0.01"
           >
@@ -126,9 +126,6 @@
               $
             </template>
           </UInput>
-          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {{ t('student.originalPrice', { price: selectedPackage.price }) }}
-          </div>
         </UFormField>
 
         <!-- Package Preview -->
@@ -196,9 +193,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PackageDocument } from '~/composables/usePouchDB'
 import type { AddPackageToStudentForm } from '~/composables/useStudentPackageValidation'
-import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
   student?: {
@@ -225,7 +220,7 @@ const emit = defineEmits<Emits>()
 
 const formRef = ref()
 const { t } = useI18n()
-const { packages, loading: packagesLoading } = usePackages()
+const { packages, loading: packagesLoading, loadPackages } = usePackages()
 const { addPackageToStudent } = useStudentPackages()
 const { addPackageToStudentSchema } = useStudentPackageValidation()
 
@@ -277,10 +272,12 @@ const generatedPackageName = computed(() => {
   return `${studentName} - $${price} - ${date}`
 })
 
+
 // Reset form when modal opens/closes
-watch(() => modelValue.value, (newValue) => {
+watch(() => modelValue.value, async (newValue) => {
   if (newValue) {
     resetForm()
+    await loadPackages()
   }
 })
 

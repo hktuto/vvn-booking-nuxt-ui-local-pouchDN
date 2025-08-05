@@ -1,8 +1,21 @@
 import type { PackageDocument } from './usePouchDB'
-import { usePouchDB, usePouchCRUD } from './usePouchDB'
+import { usePouchCRUD } from './usePouchDB'
+import { usePackageDB } from '~/utils/dbStateHelper'
 
+type TransformPackageDoc = {
+  id: string
+  name: string
+  description: string
+  price: number
+  credits: number
+  duration_days: number
+  active: boolean
+  is_custom: boolean
+  created_at: string
+  updated_at: string
+}
 // Transform PouchDB document to display format
-const transformPackageDoc = (doc: PackageDocument) => ({
+const transformPackageDoc = (doc: PackageDocument):TransformPackageDoc => ({
   id: doc._id,
   name: doc.name,
   description: doc.description,
@@ -14,13 +27,12 @@ const transformPackageDoc = (doc: PackageDocument) => ({
   created_at: doc.created_at,
   updated_at: doc.updated_at
 })
-
+const useUserPackages = () => useState<TransformPackageDoc[]>('userPackages', () => [])
 export const usePackages = () => {
-  const { packages: packagesDB } = usePouchDB()
-  const packagesCRUD = usePouchCRUD<PackageDocument>(packagesDB)
+  const { getDB } = usePackageDB()
   
   // Reactive packages list
-  const packages = ref<ReturnType<typeof transformPackageDoc>[]>([])
+  const packages = useUserPackages()
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -30,6 +42,8 @@ export const usePackages = () => {
     error.value = null
     
     try {
+      const packagesDB = await getDB()
+      const packagesCRUD = usePouchCRUD<PackageDocument>(packagesDB)
       const docs = await packagesCRUD.findAll('package')
       packages.value = docs
         .map(transformPackageDoc)
@@ -56,6 +70,8 @@ export const usePackages = () => {
     error.value = null
     
     try {
+      const packagesDB = await getDB()
+      const packagesCRUD = usePouchCRUD<PackageDocument>(packagesDB)
       const doc = await packagesCRUD.create({
         type: 'package',
         ...packageData
@@ -63,7 +79,7 @@ export const usePackages = () => {
       
       const package_ = transformPackageDoc(doc)
       packages.value.unshift(package_) // Add to beginning for newest first
-      
+      console.log('packages.value', packages.value, doc)
       return package_
     } catch (err: any) {
       error.value = err.message || 'Failed to add package'
@@ -87,6 +103,8 @@ export const usePackages = () => {
     error.value = null
     
     try {
+      const packagesDB = await getDB()
+      const packagesCRUD = usePouchCRUD<PackageDocument>(packagesDB)
       const doc = await packagesCRUD.update(id, updates)
       const package_ = transformPackageDoc(doc)
       
@@ -112,6 +130,8 @@ export const usePackages = () => {
     error.value = null
     
     try {
+      const packagesDB = await getDB()
+      const packagesCRUD = usePouchCRUD<PackageDocument>(packagesDB)
       const success = await packagesCRUD.remove(id)
       
       if (success) {
@@ -135,6 +155,8 @@ export const usePackages = () => {
   // Get package by ID
   const getPackageById = async (id: string) => {
     try {
+      const packagesDB = await getDB()
+      const packagesCRUD = usePouchCRUD<PackageDocument>(packagesDB)
       const doc = await packagesCRUD.findById(id)
       return doc ? transformPackageDoc(doc) : null
     } catch (err: any) {
@@ -148,20 +170,15 @@ export const usePackages = () => {
     return packages.value.filter(p => p.active)
   }
 
-  // Initialize - load packages on first use
-  onMounted(() => {
-    loadPackages()
-  })
-
   return {
     packages: readonly(packages),
     loading: readonly(loading),
     error: readonly(error),
+    loadPackages,
     addPackage,
     updatePackage,
     deletePackage,
     getPackageById,
-    getActivePackages,
-    loadPackages
+    getActivePackages
   }
 }

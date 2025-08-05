@@ -1,11 +1,12 @@
 import { useOverlay } from '#imports'
+import TransactionDetailsDialog from '~/components/TransactionDetailsDialog.vue'
 
 export const useTransactionDetailsDialog = () => {
   const overlay = useOverlay()
 
   const showTransactionDetailsDialog = async (transaction: any, student: any, packageInfo: any, classInfo: any, bookingInfo: any) => {
     // Dynamically import the TransactionDetailsDialog component
-    const { default: TransactionDetailsDialog } = await import('~/components/TransactionDetailsDialog.vue')
+    // const { default: TransactionDetailsDialog } = await import('~/components/TransactionDetailsDialog.vue')
     
     // Create the transaction details dialog
     const transactionDialog = overlay.create(TransactionDetailsDialog, {

@@ -146,7 +146,6 @@
     "deletePackageMessage": "Are you sure you want to delete {name}? This action cannot be undone.",
     "creditUnitPrice": "Credit unit price: ${price}"
   },
-
   "profile": {
     "settings": "Settings",
     "profile": "Profile",
@@ -194,7 +193,7 @@
     "enterPhone": "Enter phone number",
     "enterEmail": "Enter email",
     "enterWebsite": "Enter website URL",
-    "credit" : "Credit"
+    "credit": "Credit"
   },
   "bookings": {
     "title": "Bookings",
@@ -265,6 +264,58 @@
       "cash": "Cash",
       "bank_transfer": "Bank Transfer",
       "other": "Other"
+    },
+    "detailsTitle": "Transaction Details",
+    "studentInfo": "Student Information",
+    "packageInfo": "Package Information",
+    "classInfo": "Class Information",
+    "summary": "Transaction Summary",
+    "summaryText": "{studentName} has completed a transaction for {className} on {classDateTime}. Payment: {paymentInfo}. Remaining credits: {remainingCredits}.",
+    "whatsappPreview": "WhatsApp Message Preview",
+    "sendWhatsApp": "Send WhatsApp Message",
+    "en": {
+      "classBookingMessage": "Student name: {studentName}\nClass: {className}\nDate: {classDateTime}\nCredit/Cash: {paymentInfo}\nRemain Credit: {remainingCredits}",
+      "packagePurchaseMessage": "Student name: {studentName}\nDate: {purchaseDate}\nPackage: {packageName}\nCredits: {packageCredits}\nPrice: {packagePrice}\nRemaining Credits: {remainingCredits}"
+
+    },
+    "zh-Hant": {
+      "classBookingMessage": "學生姓名：{studentName}\n課程：{className}\n日期：{classDateTime}\n套票/現金：{paymentInfo}\n剩餘格數:{remainingCredits}",
+      "packagePurchaseMessage": "學生姓名：{studentName}\n日期：{purchaseDate}\n套票：{packageName}\n格數：{packageCredits}\n價格：{packagePrice}\n剩餘格數：{remainingCredits}"
+
+    },
+    "transactionDate": "Transaction Date",
+    "unitPrice": "Unit Price",
+    "totalAmount": "Total Amount",
+    "messageLanguage": "Message Language",
+    "customizeMessage": "Customize Message",
+    "messagePreview": "Message Preview",
+    "defaultMessage": "Default Message",
+    "customMessage": "Custom Message",
+    "export": "Export",
+    "dateRange": "Date Range",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "transactionType": "Transaction Type",
+    "clearFilters": "Clear Filters",
+    "totalRefunds": "Total Refunds",
+    "netRevenue": "Net Revenue",
+    "totalTransactions": "Total Transactions",
+    "status": "Status",
+    "actions": "Actions",
+    "view": "View",
+    "noTransactions": "No Transactions",
+    "noTransactionsDescription": "No transactions found matching your filters",
+    "types": {
+      "package_purchase": "Package Purchase",
+      "credit_usage": "Credit Usage",
+      "cash_payment": "Cash Payment",
+      "refund": "Refund"
+    },
+    "sort": {
+      "dateDesc": "Date (Newest)",
+      "dateAsc": "Date (Oldest)",
+      "amountDesc": "Amount (High to Low)",
+      "amountAsc": "Amount (Low to High)"
     }
   },
   "validation": {
@@ -323,15 +374,12 @@
       "min": "Credits must be at least 1",
       "maxExceeded": "Credits cannot exceed 99999"
     },
-    
     "classType": {
       "required": "Class type is required"
     },
-    
     "weeklyDays": {
       "required": "At least one day must be selected"
     },
-
     "creditCost": {
       "negative": "Credit cost cannot be negative",
       "maxExceeded": "Credit cost cannot exceed 1000"
@@ -361,7 +409,6 @@
     "classTime": {
       "required": "Class time is required"
     },
-    
     "amount": {
       "min": "Amount must be at least 0.01"
     },
@@ -408,7 +455,6 @@
         "confirm": "Confirm Payment",
         "buyPackageDescription": "Select a package to purchase for this student before redeeming credits.",
         "selectPackageToBuy": "Select Package to Buy",
-        "selectPackage": "Select a package",
         "buyAndRedeem": "Buy & Redeem",
         "success": "Payment completed successfully using {method} ({amount})"
       }
@@ -430,7 +476,6 @@
       "min": "Duration must be at least 15 minutes",
       "maxExceeded": "Duration cannot exceed 8 hours"
     },
-    
     "website": {
       "invalid": "Please enter a valid URL"
     },
@@ -560,67 +605,6 @@
     "alipay": "Alipay",
     "fps": "FPS",
     "creditCard": "Credit Card"
-  },
-  "transactions": {
-    "title": "Transactions",
-    "description": "View and manage all financial transactions",
-    "export": "Export",
-    "dateRange": "Date Range",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "transactionType": "Transaction Type",
-    "student": "Student",
-    "allTypes": "All Types",
-    "allStudents": "All Students",
-    "clearFilters": "Clear Filters",
-    "totalRevenue": "Total Revenue",
-    "totalRefunds": "Total Refunds",
-    "netRevenue": "Net Revenue",
-    "totalTransactions": "Total Transactions",
-    "recentTransactions": "Recent Transactions",
-    "date": "Date",
-    "type": "Type",
-    "description": "Description",
-    "amount": "Amount",
-    "status": "Status",
-    "actions": "Actions",
-    "view": "View",
-    "noTransactions": "No Transactions",
-    "noTransactionsDescription": "No transactions found matching your filters",
-    "types": {
-      "package_purchase": "Package Purchase",
-      "credit_usage": "Credit Usage",
-      "cash_payment": "Cash Payment",
-      "refund": "Refund"
-    },
-    "status": {
-      "completed": "Completed",
-      "pending": "Pending",
-      "cancelled": "Cancelled",
-      "refunded": "Refunded",
-      "unpaid": "Unpaid",
-      "paid": "Paid",
-      "no_show": "No Show"
-    },
-    "detailsTitle": "Transaction Details",
-    "studentInfo": "Student Information",
-    "packageInfo": "Package Information",
-    "classInfo": "Class Information",
-    "summary": "Transaction Summary",
-    "summaryText": "Hi {studentName}, your credit redemption has been processed successfully. You used {creditsUsed} credits from your {packageName} package to book {className} on {classDate} at {classTime}.",
-    "whatsappPreview": "WhatsApp Message Preview",
-    "sendWhatsApp": "Send WhatsApp Message",
-    "whatsappMessage": "Student name: {studentName}\nClass: {className}\nDate: {classDateTime}\nCredit/Cash: {paymentInfo}\nRemain Credit: {remainingCredits}",
-    "transactionDate": "Transaction Date",
-    "unitPrice": "Unit Price",
-    "totalAmount": "Total Amount",
-    "paymentMethod": "Payment Method",
-    "sort": {
-      "dateDesc": "Date (Newest)",
-      "dateAsc": "Date (Oldest)",
-      "amountDesc": "Amount (High to Low)",
-      "amountAsc": "Amount (Low to High)"
-    }
   },
   "location": {
     "locations": "Locations",

@@ -34,22 +34,8 @@
         </div>
       </UCard>
 
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-              {{ $t('dashboard.activePackages') }}
-            </h3>
-            <UIcon name="i-heroicons-book-open" class="h-6 w-6 text-primary-500" />
-          </div>
-        </template>
-        <div>
-          <p class="text-3xl font-bold text-primary-600">{{ packages.length }}</p>
-          <p class="text-sm text-gray-500 mt-1">Available packages</p>
-        </div>
-      </UCard>
 
-      <UCard>
+      <UCard v-if="todayClasses">
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-gray-900 dark:text-white">
@@ -59,7 +45,7 @@
           </div>
         </template>
         <div>
-          <p class="text-3xl font-bold text-primary-600">3</p>
+          <p class="text-3xl font-bold text-primary-600">{{ todayClasses.length }}</p>
           <p class="text-sm text-gray-500 mt-1">Scheduled for today</p>
         </div>
       </UCard>
@@ -131,7 +117,13 @@
 
 <script setup lang="ts">
 const { students } = useStudents()
-const { packages } = usePackages()
+const todayClasses = ref(0)
+const { getBookingsForDate } = useBookings()
+
+onMounted(async () => {
+  const bookings = await getBookingsForDate(new Date().toISOString().split('T')[0])
+  todayClasses.value = bookings.length
+})
 
 definePageMeta({
   middleware: 'auth'

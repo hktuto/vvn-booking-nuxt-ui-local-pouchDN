@@ -201,4 +201,8 @@ const handlePackageAdded = async (studentPackage: any) => {
     console.error('Error refreshing students:', error)
   }
 }
+
+onMounted(async () => {
+  await loadStudents()
+})
 </script>

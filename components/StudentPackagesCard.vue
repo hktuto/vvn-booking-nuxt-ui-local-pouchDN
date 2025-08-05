@@ -131,16 +131,19 @@
 <script setup lang="ts">
 interface Props {
   studentPackages: any[]
-  packageFilter: string
-  packageSearchQuery: string
 }
-
+const packageFilter = defineModel<string>('packageFilter', {
+  required: true,
+  default: 'all'
+})
+const packageSearchQuery = defineModel<string>('packageSearchQuery', {
+  required: true,
+  default: ''
+})
 interface Emits {
   (e: 'add-package'): void
   (e: 'edit-package', studentPackage: any): void
   (e: 'delete-package', studentPackage: any): void
-  (e: 'update:packageFilter', value: string): void
-  (e: 'update:packageSearchQuery', value: string): void
 }
 
 const props = defineProps<Props>()

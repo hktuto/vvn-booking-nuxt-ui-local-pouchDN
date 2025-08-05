@@ -35,6 +35,7 @@ export default defineNuxtConfig({
           { code: 'en', name: 'English', file: 'en.json' },
           { code: 'zh-Hant', name: '繁體中文', file: 'zh-Hant.json' }
         ],
+        legacy: false,
         defaultLocale: 'en',
         langDir: 'locales/',
         strategy: 'no_prefix'

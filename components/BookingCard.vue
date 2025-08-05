@@ -17,7 +17,7 @@
           </h4>
           <UBadge
             v-if="booking.is_virtual"
-            color="blue"
+            color="primary"
             variant="soft"
             size="xs"
           >
@@ -25,7 +25,7 @@
           </UBadge>
           <UBadge
             v-else
-            color="green"
+            color="success"
             variant="soft"
             size="xs"
           >
@@ -117,11 +117,11 @@ const getClassInfo = (booking: any) => {
 // Get status color
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'confirmed': return 'green'
-    case 'cancelled': return 'red'
-    case 'completed': return 'blue'
-    case 'no_show': return 'orange'
-    default: return 'gray'
+    case 'confirmed': return 'success'
+    case 'cancelled': return 'error'
+    case 'completed': return 'primary'
+    case 'no_show': return 'warning'
+    default: return 'neutral'
   }
 }
 </script> 

@@ -91,8 +91,8 @@ export interface TransactionDocument extends PouchDocument {
   // Additional metadata
   description: string
   payment_method?: 'cash' | 'payme' | 'wechat' | 'alipay' | 'fps' | 'credit_card'
-  unit_price?: number // Unit price for credit usage
-  total_amount?: number // Total amount for credit usage (unit_price * credits_used)
+  unit_price?: number // Unit price for package purchase
+  total_amount?: number // Total amount for credit usage (credits_used)
   notes?: string
   
   // Timestamps
@@ -130,17 +130,6 @@ export interface ClassDocument extends PouchDocument {
   status: 'active' | 'inactive' | 'cancelled' | 'completed'
   tags: string[]
   color: string // Added for calendar display
-}
-
-export interface ScheduleDocument extends PouchDocument {
-  type: 'schedule'
-  class_type_id: string
-  location_id: string
-  day_of_week: number
-  start_time: string
-  end_time: string
-  max_students: number
-  active: boolean
 }
 
 export interface UserDocument extends PouchDocument {
@@ -182,29 +171,6 @@ export function updateDocumentTimestamp<T extends PouchDocument>(doc: T): T {
     updated_at: new Date().toISOString()
   }
 }
-
-export const usePouchDB = () => {
-  const { $pouchdb } = useNuxtApp()
-  
-  if (!$pouchdb) {
-    throw new Error('PouchDB not initialized. Make sure the PouchDB plugin is loaded.')
-  }
-  
-  return {
-    users: $pouchdb.users,
-    students: $pouchdb.students,
-    packages: $pouchdb.packages,
-    studentPackages: $pouchdb.studentPackages,
-    classTypes: $pouchdb.classTypes,
-    classes: $pouchdb.classes,
-    bookings: $pouchdb.bookings,
-    transactions: $pouchdb.transactions,
-    locations: $pouchdb.locations,
-    schedules: $pouchdb.schedules
-  }
-}
-
-
 
 // Generic CRUD operations
 export const usePouchCRUD = <T extends PouchDocument>(db: PouchDB.Database) => {

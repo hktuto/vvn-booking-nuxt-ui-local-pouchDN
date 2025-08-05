@@ -1,5 +1,6 @@
 import type { LocationDocument } from './usePouchDB'
-import { usePouchDB, usePouchCRUD } from './usePouchDB'
+import { usePouchCRUD } from './usePouchDB'
+import { useLocationDB } from '~/utils/dbStateHelper'
 
 // Transform PouchDB document to display format
 const transformLocationDoc = (doc: LocationDocument) => ({
@@ -15,8 +16,7 @@ const transformLocationDoc = (doc: LocationDocument) => ({
 })
 
 export const useLocations = () => {
-  const { locations: locationsDB } = usePouchDB()
-  const locationsCRUD = usePouchCRUD<LocationDocument>(locationsDB)
+  const { getDB } = useLocationDB()
   
   // Reactive locations list
   const locations = ref<ReturnType<typeof transformLocationDoc>[]>([])
@@ -29,6 +29,8 @@ export const useLocations = () => {
     error.value = null
     
     try {
+      const locationsDB = await getDB()
+      const locationsCRUD = usePouchCRUD<LocationDocument>(locationsDB)
       const docs = await locationsCRUD.findAll('location')
       locations.value = docs
         .map(transformLocationDoc)
@@ -54,6 +56,8 @@ export const useLocations = () => {
     error.value = null
     
     try {
+      const locationsDB = await getDB()
+      const locationsCRUD = usePouchCRUD<LocationDocument>(locationsDB)
       const doc = await locationsCRUD.create({
         type: 'location',
         ...locationData
@@ -85,6 +89,8 @@ export const useLocations = () => {
     error.value = null
     
     try {
+      const locationsDB = await getDB()
+      const locationsCRUD = usePouchCRUD<LocationDocument>(locationsDB)
       const doc = await locationsCRUD.update(id, updates)
       const location = transformLocationDoc(doc)
       
@@ -110,13 +116,19 @@ export const useLocations = () => {
     error.value = null
     
     try {
-      await locationsCRUD.remove(id)
+      const locationsDB = await getDB()
+      const locationsCRUD = usePouchCRUD<LocationDocument>(locationsDB)
+      const success = await locationsCRUD.remove(id)
       
-      // Remove from reactive array
-      const index = locations.value.findIndex(l => l.id === id)
-      if (index !== -1) {
-        locations.value.splice(index, 1)
+      if (success) {
+        // Remove from reactive array
+        const index = locations.value.findIndex(l => l.id === id)
+        if (index !== -1) {
+          locations.value.splice(index, 1)
+        }
       }
+      
+      return success
     } catch (err: any) {
       error.value = err.message || 'Failed to delete location'
       console.error('Error deleting location:', err)
@@ -129,18 +141,19 @@ export const useLocations = () => {
   // Get location by ID
   const getLocationById = async (id: string) => {
     try {
+      const locationsDB = await getDB()
+      const locationsCRUD = usePouchCRUD<LocationDocument>(locationsDB)
       const doc = await locationsCRUD.findById(id)
-      if(!doc) return null
-      return transformLocationDoc(doc)
+      return doc ? transformLocationDoc(doc) : null
     } catch (err: any) {
-      console.error('Error getting location:', err)
+      console.error('Error getting location by ID:', err)
       return null
     }
   }
 
-  // Get active locations
+  // Get active locations only
   const getActiveLocations = () => {
-    return locations.value.filter(location => location.active)
+    return locations.value.filter(l => l.active)
   }
 
   return {

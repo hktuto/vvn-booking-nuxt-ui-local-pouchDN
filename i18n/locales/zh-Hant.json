@@ -264,6 +264,56 @@
       "cash": "現金",
       "bank_transfer": "銀行轉帳",
       "other": "其他"
+    },
+    "detailsTitle": "交易詳情",
+    "studentInfo": "學生資料",
+    "packageInfo": "課程包資料",
+    "classInfo": "課程資料",
+    "summary": "交易摘要",
+    "summaryText": "{studentName} 已完成 {className} 於 {classDateTime} 的交易。付款方式：{paymentInfo}。剩餘學分：{remainingCredits}。",
+    "whatsappPreview": "WhatsApp 訊息預覽",
+    "sendWhatsApp": "發送 WhatsApp 訊息",
+    "en": {
+      "classBookingMessage": "Student name: {studentName}\nClass: {className}\nDate: {classDateTime}\nCredit/Cash: {paymentInfo}\nRemain Credit: {remainingCredits}",
+      "packagePurchaseMessage": "Student name: {studentName}\nDate: {purchaseDate}\nPackage: {packageName}\nCredits: {packageCredits}\nPrice: {packagePrice}\nRemaining Credits: {remainingCredits}"
+    },
+    "zh-Hant": {
+      "classBookingMessage": "學生姓名：{studentName}\n課程：{className}\n日期：{classDateTime}\n套票/現金：{paymentInfo}\n剩餘格數:{remainingCredits}",
+      "packagePurchaseMessage": "學生姓名：{studentName}\n日期：{purchaseDate}\n套票：{packageName}\n格數：{packageCredits}\n價格：{packagePrice}\n剩餘格數：{remainingCredits}"
+    },
+    "transactionDate": "交易日期",
+    "unitPrice": "單價",
+    "totalAmount": "總金額",
+    "messageLanguage": "訊息語言",
+    "customizeMessage": "自訂訊息",
+    "messagePreview": "訊息預覽",
+    "defaultMessage": "預設訊息",
+    "customMessage": "自訂訊息",
+    "export": "匯出",
+    "dateRange": "日期範圍",
+    "startDate": "開始日期",
+    "endDate": "結束日期",
+    "transactionType": "交易類型",
+    "clearFilters": "清除篩選",
+    "totalRefunds": "總退款",
+    "netRevenue": "淨收入",
+    "totalTransactions": "總交易數",
+    "status": "狀態",
+    "actions": "操作",
+    "view": "查看",
+    "noTransactions": "沒有交易記錄",
+    "noTransactionsDescription": "沒有找到符合篩選條件的交易記錄",
+    "types": {
+      "package_purchase": "套票購買",
+      "credit_usage": "學分使用",
+      "cash_payment": "現金付款",
+      "refund": "退款"
+    },
+    "sort": {
+      "dateDesc": "日期（最新）",
+      "dateAsc": "日期（最舊）",
+      "amountDesc": "金額（高到低）",
+      "amountAsc": "金額（低到高）"
     }
   },
   "validation": {
@@ -380,7 +430,6 @@
         "confirm": "確認付款",
         "buyPackageDescription": "在兌換學分前為此學生選擇要購買的套票。",
         "selectPackageToBuy": "選擇要購買的套票",
-        "selectPackage": "選擇套票",
         "buyAndRedeem": "購買並兌換",
         "success": "付款成功完成，使用{method}（{amount}）"
       }
@@ -554,64 +603,6 @@
     "alipay": "支付寶",
     "fps": "FPS",
     "creditCard": "信用卡"
-  },
-  "transactions": {
-    "title": "交易記錄",
-    "description": "查看和管理所有財務交易",
-    "export": "匯出",
-    "dateRange": "日期範圍",
-    "startDate": "開始日期",
-    "endDate": "結束日期",
-    "transactionType": "交易類型",
-    "student": "學生",
-    "allTypes": "所有類型",
-    "allStudents": "所有學生",
-    "clearFilters": "清除篩選",
-    "totalRevenue": "總收入",
-    "totalRefunds": "總退款",
-    "netRevenue": "淨收入",
-    "totalTransactions": "總交易數",
-    "recentTransactions": "最近交易",
-    "date": "日期",
-    "type": "類型",
-    "description": "描述",
-    "amount": "金額",
-    "status": "狀態",
-    "actions": "操作",
-    "view": "查看",
-    "noTransactions": "沒有交易記錄",
-    "noTransactionsDescription": "沒有找到符合篩選條件的交易記錄",
-    "types": {
-      "package_purchase": "套票購買",
-      "credit_usage": "學分使用",
-      "cash_payment": "現金付款",
-      "refund": "退款"
-    },
-    "status": {
-      "completed": "已完成",
-      "pending": "待處理",
-      "cancelled": "已取消",
-      "refunded": "已退款"
-    },
-    "detailsTitle": "交易詳情",
-    "studentInfo": "學生資訊",
-    "packageInfo": "套票資訊",
-    "classInfo": "課程資訊",
-    "summary": "交易摘要",
-    "summaryText": "您好 {studentName}，您的學分兌換已成功處理。您使用了 {packageName} 套票中的 {creditsUsed} 學分來預約 {className}，日期為 {classDate}，時間為 {classTime}。",
-    "whatsappPreview": "WhatsApp 訊息預覽",
-    "sendWhatsApp": "發送 WhatsApp 訊息",
-    "whatsappMessage": "學生姓名：{studentName}\n課程：{className}\n日期：{classDateTime}\n學分/現金：{paymentInfo}\n剩餘學分：{remainingCredits}",
-    "transactionDate": "交易日期",
-    "unitPrice": "單價",
-    "totalAmount": "總金額",
-    "paymentMethod": "付款方式",
-    "sort": {
-      "dateDesc": "日期（最新）",
-      "dateAsc": "日期（最舊）",
-      "amountDesc": "金額（高到低）",
-      "amountAsc": "金額（低到高）"
-    }
   },
   "location": {
     "locations": "場地",

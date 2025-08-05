@@ -1,25 +1,28 @@
 <template>
-  <UCard>
+  <UCard :class="`border-[${class_.color}]`">
     <div class="flex justify-between items-start">
       <div class="flex-1">
-        <div class="flex items-center gap-2 mb-2">
+        <div class="flex flex-col justify-start items-start gap-2 mb-2">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ class_.name }}</h3>
-          <UBadge :color="getStatusColor(class_.status)" variant="soft" size="sm">
-            {{ t(`class.${class_.status}`) }}
-          </UBadge>
-          <UBadge :color="getScheduleTypeColor(class_.schedule_type)" variant="soft" size="sm">
-            {{ t(`class.${class_.schedule_type.replace('-', '')}`) }}
-          </UBadge>
+          <div class="flex items-center gap-2">
+            <UBadge :color="getStatusColor(class_.status)" variant="soft" size="sm">
+              {{ t(`class.${class_.status}`) }}
+            </UBadge>
+            <UBadge :color="getScheduleTypeColor(class_.schedule_type)" variant="soft" size="sm">
+              {{ t(`class.${class_.schedule_type.replace('-', '')}`) }}
+            </UBadge>
+          </div>
         </div>
         
-        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+        <div class="flex flex-row flex-wrap justify-start items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
           <div v-if="class_.description" class="flex items-start gap-2">
             <UIcon name="i-heroicons-chat-bubble-left-ellipsis" class="w-4 h-4 mt-0.5" />
             <span class="line-clamp-2">{{ class_.description }}</span>
+          </div> 
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-calendar" class="w-4 h-4" />
+            <span>{{ formatSchedule(class_) }}</span>
           </div>
-          
-
-          
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-map-pin" class="w-4 h-4" />
             <span>{{ getLocationName(class_.location_id) }}</span>
@@ -30,34 +33,27 @@
             <span>{{ t('common.students') }}: {{ class_.max_students }}</span>
           </div>
           
-          <div class="flex items-center gap-2">
-            <UIcon name="i-heroicons-banknotes" class="w-4 h-4" />
-            <span>${{ class_.price }}</span>
-          </div>
 
-                <div class="flex items-center gap-2">
-        <UIcon name="i-heroicons-academic-cap" class="w-4 h-4" />
-        <span>{{ class_.credits }} {{ t('common.credits') }}</span>
-      </div>
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-academic-cap" class="w-4 h-4" />
+              <span>{{ class_.credits }} {{ t('common.credits') }}</span>
+          </div>
       
-      <!-- Color indicator -->
-      <div class="flex items-center gap-2">
-        <div 
-          class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600"
-          :style="{ backgroundColor: class_.color || '#3B82F6' }"
-        ></div>
-        <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('class.color') }}</span>
-      </div>
+          <!-- Color indicator -->
+          <div class="flex items-center gap-2">
+            <div 
+              class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600"
+              :style="{ backgroundColor: class_.color || '#3B82F6' }"
+            ></div>
+            <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('class.color') }}</span>
+          </div>
           
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-clock" class="w-4 h-4" />
             <span>{{ class_.duration_minutes }} {{ t('common.minutes') }}</span>
           </div>
           
-          <div class="flex items-center gap-2">
-            <UIcon name="i-heroicons-calendar" class="w-4 h-4" />
-            <span>{{ formatSchedule(class_) }}</span>
-          </div>
+
           
           <div v-if="class_.tags && class_.tags.length > 0" class="flex items-start gap-2">
             <UIcon name="i-heroicons-tag" class="w-4 h-4 mt-0.5" />

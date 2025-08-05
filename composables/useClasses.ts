@@ -1,5 +1,6 @@
 import type { ClassDocument } from './usePouchDB'
-import { usePouchDB, usePouchCRUD } from './usePouchDB'
+import { usePouchCRUD } from './usePouchDB'
+import { useClassDB } from '~/utils/dbStateHelper'
 
 const transformClassDoc = (doc: ClassDocument) => ({
   id: doc._id,
@@ -24,10 +25,10 @@ const transformClassDoc = (doc: ClassDocument) => ({
   created_at: doc.created_at,
   updated_at: doc.updated_at
 })
+
 const useClassesList = () => useState<ReturnType<typeof transformClassDoc>[]>('classes', () => [])
 export const useClasses = () => {
-  const { classes: classesDB } = usePouchDB()
-  const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
+  const { getDB } = useClassDB()
   
   const classes = useClassesList()
   const loading = ref(false)
@@ -38,12 +39,11 @@ export const useClasses = () => {
     error.value = null
     
     try {
+      const classesDB = await getDB()
       const result = await classesDB.find({
         selector: { type: 'class' }
       })
       classes.value = result.docs.map((doc: any) => transformClassDoc(doc))
-
-
     } catch (err) {
       console.error('Error loading classes:', err)
       error.value = 'Failed to load classes'
@@ -73,6 +73,9 @@ export const useClasses = () => {
     color?: string
   }) => {
     try {
+      const classesDB = await getDB()
+      const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
+      
       const doc = {
         ...classData,
         type: 'class' as const,
@@ -98,6 +101,7 @@ export const useClasses = () => {
     instructor: string
     max_students: number
     price: number
+    credits: number
     duration_minutes: number
     schedule_type: 'one-time' | 'recurring' | 'series'
     start_date: string
@@ -111,6 +115,8 @@ export const useClasses = () => {
     tags: string[]
   }>) => {
     try {
+      const classesDB = await getDB()
+      const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
       const updatedClass = await classesCRUD.update(id, updates)
       await loadClasses()
       return updatedClass
@@ -122,8 +128,11 @@ export const useClasses = () => {
 
   const deleteClass = async (id: string) => {
     try {
+      const classesDB = await getDB()
+      const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
       await classesCRUD.remove(id)
       await loadClasses()
+      return true
     } catch (err) {
       console.error('Error deleting class:', err)
       throw new Error('Failed to delete class')
@@ -132,6 +141,8 @@ export const useClasses = () => {
 
   const getClassById = async (id: string) => {
     try {
+      const classesDB = await getDB()
+      const classesCRUD = usePouchCRUD<ClassDocument>(classesDB)
       const doc = await classesCRUD.findById(id)
       return doc ? transformClassDoc(doc) : null
     } catch (err) {
@@ -141,14 +152,12 @@ export const useClasses = () => {
   }
 
   const getActiveClasses = () => {
-    return classes.value.filter(class_ => class_.status === 'active')
+    return classes.value.filter(c => c.status === 'active')
   }
 
   const getClassesByLocation = (locationId: string) => {
-    return classes.value.filter(class_ => class_.location_id === locationId)
+    return classes.value.filter(c => c.location_id === locationId)
   }
-
-
 
   const getAllTags = () => {
     const allTags = new Set<string>()
@@ -159,7 +168,10 @@ export const useClasses = () => {
   }
 
   const filterClassesByTags = (selectedTags: string[]) => {
-    if (selectedTags.length === 0) return classes.value
+    if (selectedTags.length === 0) {
+      return classes.value
+    }
+    
     return classes.value.filter(class_ => 
       selectedTags.some(tag => class_.tags.includes(tag))
     )

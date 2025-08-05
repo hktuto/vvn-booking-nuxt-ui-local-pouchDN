@@ -1,5 +1,6 @@
 import type { StudentDocument } from './usePouchDB'
-import { usePouchDB, usePouchCRUD } from './usePouchDB'
+import { usePouchCRUD } from './usePouchDB'
+import { useStudentDB } from '~/utils/dbStateHelper'
 
 // Transform PouchDB document to display format
 const transformStudentDoc = (doc: StudentDocument) => ({
@@ -19,8 +20,7 @@ const transformStudentDoc = (doc: StudentDocument) => ({
 
 const useStudentsList = () => useState<ReturnType<typeof transformStudentDoc>[]>('students', () => [])
 export const useStudents = () => {
-  const { students: studentsDB } = usePouchDB()
-  const studentsCRUD = usePouchCRUD<StudentDocument>(studentsDB)
+  const { getDB } = useStudentDB()
   
   // Reactive students list
   const students = useStudentsList()
@@ -33,10 +33,12 @@ export const useStudents = () => {
     error.value = null
     
     try {
+      const studentsDB = await getDB()
+      const studentsCRUD = usePouchCRUD<StudentDocument>(studentsDB)
       const docs = await studentsCRUD.findAll('student')
       students.value = docs
         .map(transformStudentDoc)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .sort((a: ReturnType<typeof transformStudentDoc>, b: ReturnType<typeof transformStudentDoc>) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err: any) {
       error.value = err.message || 'Failed to load students'
       console.error('Error loading students:', err)
@@ -61,6 +63,8 @@ export const useStudents = () => {
     error.value = null
     
     try {
+      const studentsDB = await getDB()
+      const studentsCRUD = usePouchCRUD<StudentDocument>(studentsDB)
       const doc = await studentsCRUD.create({
         type: 'student',
         ...studentData
@@ -95,15 +99,17 @@ export const useStudents = () => {
     error.value = null
     
     try {
+      const studentsDB = await getDB()
+      const studentsCRUD = usePouchCRUD<StudentDocument>(studentsDB)
       const doc = await studentsCRUD.update(id, updates)
       const student = transformStudentDoc(doc)
       
-      // Update in reactive array
+      // Update in the list
       const index = students.value.findIndex(s => s.id === id)
       if (index !== -1) {
         students.value[index] = student
       }
-      console.log('student', student)
+      
       return student
     } catch (err: any) {
       error.value = err.message || 'Failed to update student'
@@ -120,17 +126,17 @@ export const useStudents = () => {
     error.value = null
     
     try {
-      const success = await studentsCRUD.remove(id)
+      const studentsDB = await getDB()
+      const studentsCRUD = usePouchCRUD<StudentDocument>(studentsDB)
+      await studentsCRUD.remove(id)
       
-      if (success) {
-        // Remove from reactive array
-        const index = students.value.findIndex(s => s.id === id)
-        if (index !== -1) {
-          students.value.splice(index, 1)
-        }
+      // Remove from the list
+      const index = students.value.findIndex(s => s.id === id)
+      if (index !== -1) {
+        students.value.splice(index, 1)
       }
       
-      return success
+      return true
     } catch (err: any) {
       error.value = err.message || 'Failed to delete student'
       console.error('Error deleting student:', err)
@@ -143,6 +149,8 @@ export const useStudents = () => {
   // Get student by ID
   const getStudentById = async (id: string) => {
     try {
+      const studentsDB = await getDB()
+      const studentsCRUD = usePouchCRUD<StudentDocument>(studentsDB)
       const doc = await studentsCRUD.findById(id)
       return doc ? transformStudentDoc(doc) : null
     } catch (err: any) {
@@ -157,26 +165,30 @@ export const useStudents = () => {
     error.value = null
     
     try {
-      const docs = await studentsCRUD.findWhere({
-        type: 'student',
-        $or: [
-          { name: { $regex: new RegExp(query, 'i') } },
-          { phone: { $regex: new RegExp(query, 'i') } },
-          { email: { $regex: new RegExp(query, 'i') } }
-        ]
+      const studentsDB = await getDB()
+      const result = await studentsDB.find({
+        selector: {
+          type: 'student',
+          $or: [
+            { name: { $regex: query, $options: 'i' } },
+            { email: { $regex: query, $options: 'i' } },
+            { phone: { $regex: query, $options: 'i' } }
+          ]
+        }
       })
       
-      return docs.map(transformStudentDoc)
+      students.value = result.docs
+        .map((doc: any) => transformStudentDoc(doc as StudentDocument))
+        .sort((a: ReturnType<typeof transformStudentDoc>, b: ReturnType<typeof transformStudentDoc>) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err: any) {
       error.value = err.message || 'Failed to search students'
       console.error('Error searching students:', err)
-      return []
     } finally {
       loading.value = false
     }
   }
 
-  // Get all unique tags from students
+  // Get all unique tags
   const getAllTags = () => {
     const allTags = new Set<string>()
     students.value.forEach(student => {
@@ -190,27 +202,22 @@ export const useStudents = () => {
     if (selectedTags.length === 0) {
       return students.value
     }
+    
     return students.value.filter(student => 
       selectedTags.some(tag => student.tags.includes(tag))
     )
   }
 
-  // Initialize - load students on first use
-  onMounted(() => {
-    loadStudents()
-  })
-
   return {
     students: readonly(students),
     loading: readonly(loading),
     error: readonly(error),
+    loadStudents,
     addStudent,
     updateStudent,
     deleteStudent,
     getStudentById,
     searchStudents,
-    loadStudents,
-    transformStudentDoc,
     getAllTags,
     filterStudentsByTags
   }

@@ -101,9 +101,10 @@ import type { LoginForm } from '~/composables/useAuthValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { clearAllData } from '~/utils/dbHelper'
 
-// Use blank layout for login page
+// Use blank layout for login page and mark as public
 definePageMeta({
-  layout: 'blank'
+  layout: 'blank',
+  auth: false
 })
 
 const { auth, login, checkFirstTimeSetup } = useAuth()

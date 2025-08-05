@@ -90,8 +90,8 @@
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {{ t('transactions.totalRevenue') }}
               </p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                ${{ stats.totalRevenue.toFixed(2) }}
+              <p  class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ stats.totalRevenue.toFixed(2) || 0 }}
               </p>
             </div>
           </div>
@@ -106,8 +106,8 @@
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {{ t('transactions.totalRefunds') }}
               </p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                ${{ stats.totalRefunds.toFixed(2) }}
+              <p  class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ stats.totalRefunds.toFixed(2) || 0 }}
               </p>
             </div>
           </div>
@@ -122,8 +122,8 @@
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {{ t('transactions.netRevenue') }}
               </p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                ${{ stats.netRevenue.toFixed(2) }}
+              <p  class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ stats.netRevenue.toFixed(2) || 0 }}
               </p>
             </div>
           </div>
@@ -185,7 +185,7 @@
           :loading="loading"
           class="flex-1"
         >
-          <template #student_id-data="{ row }">
+          <!-- <template #student_id-data="{ row }">
             <div class="flex items-center">
               <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
                 <UIcon name="i-heroicons-user" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -240,7 +240,7 @@
             >
               {{ t('transactions.view') }}
             </UButton>
-          </template>
+          </template> -->
         </UTable>
         </div>
         <!-- Empty State -->
@@ -273,11 +273,13 @@ const df = new DateFormatter(locale.value === 'zh-Hant' ? 'zh-HK' : 'en-US', {
 const loading = ref(false)
 const exporting = ref(false)
 const transactions = ref<any[]>([])
-const stats = ref({
+const stats = ref<any>({
   totalRevenue: 0,
   totalRefunds: 0,
   netRevenue: 0,
-  totalTransactions: 0
+  totalTransactions: 0,
+  completedTransactions: 0,
+  byType: {}
 })
 
 // Sort
@@ -485,11 +487,6 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   })
-}
-
-const viewTransactionDetails = (transaction: any) => {
-  // Navigate to transaction detail page
-  navigateTo(`/transactions/${transaction.id}`)
 }
 
 // Watchers

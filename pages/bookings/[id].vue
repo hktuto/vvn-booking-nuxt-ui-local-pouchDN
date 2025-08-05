@@ -42,7 +42,7 @@
 
       <!-- Class Information -->
       <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <div class="flex items-start justify-between mb-4">
+        <div class="flex items-start justify-between">
           <div>
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {{ getClassInfo(booking)?.name || 'Unknown Class' }}
