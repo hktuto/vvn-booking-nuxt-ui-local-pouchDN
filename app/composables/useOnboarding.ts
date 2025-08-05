@@ -23,8 +23,31 @@ export interface OnboardingTour {
 }
 
 export const useOnboarding = () => {
-  const { $t } = useNuxtApp()
+  // Only run on client side
+  if (process.server) {
+    return {
+      isOnboardingActive: readonly(ref(false)),
+      currentTourId: readonly(ref(null)),
+      hasCompletedOnboarding: readonly(ref(false)),
+      startTour: () => {},
+      stopTour: () => {},
+      initOnboarding: () => {},
+      completeOnboarding: () => {},
+      resetOnboarding: () => {},
+      getTourProgress: () => null,
+      saveTourProgress: () => {},
+      getDashboardTourSteps: () => [],
+      getStudentsTourSteps: () => [],
+      getLocationsTourSteps: () => [],
+      getPackagesTourSteps: () => [],
+      getClassesTourSteps: () => [],
+      getBookingsTourSteps: () => []
+    }
+  }
+  
+  const { t } = useI18n()
   const { locale } = useI18n()
+  
   
   // State management
   const isOnboardingActive = ref(false)
@@ -75,8 +98,8 @@ export const useOnboarding = () => {
     {
       element: '.dashboard-title',
       popover: {
-        title: $t('onboarding.welcome'),
-        description: $t('onboarding.welcomeSubtitle'),
+        title: t('onboarding.welcome'),
+        description: t('onboarding.welcomeSubtitle'),
         side: 'bottom',
         align: 'start'
       }
@@ -84,8 +107,8 @@ export const useOnboarding = () => {
     {
       element: '.stats-card',
       popover: {
-        title: $t('onboarding.dashboard.title'),
-        description: $t('onboarding.dashboard.statsCard'),
+        title: t('onboarding.dashboard.title'),
+        description: t('onboarding.dashboard.statsCard'),
         side: 'bottom',
         align: 'start'
       }
@@ -93,8 +116,8 @@ export const useOnboarding = () => {
     {
       element: '.quick-actions',
       popover: {
-        title: $t('onboarding.dashboard.quickActions'),
-        description: $t('onboarding.dashboard.studentsButton'),
+        title: t('onboarding.dashboard.quickActions'),
+        description: t('onboarding.dashboard.studentsButton'),
         side: 'bottom',
         align: 'start'
       }
@@ -102,34 +125,34 @@ export const useOnboarding = () => {
     {
       element: '.students-button',
       popover: {
-        title: $t('onboarding.students.title'),
-        description: $t('onboarding.students.addButton'),
+        title: t('onboarding.students.title'),
+        description: t('onboarding.students.addButton'),
         side: 'bottom',
         align: 'center'
       },
       action: {
-        text: $t('onboarding.letsStart'),
+        text: t('onboarding.letsStart'),
         handler: () => navigateTo('/students')
       }
     },
     {
       element: '.locations-button',
       popover: {
-        title: $t('onboarding.locations.title'),
-        description: $t('onboarding.locations.prerequisite'),
+        title: t('onboarding.locations.title'),
+        description: t('onboarding.locations.prerequisite'),
         side: 'bottom',
         align: 'center'
       },
       action: {
-        text: $t('onboarding.letsStart'),
+        text: t('onboarding.letsStart'),
         handler: () => navigateTo('/locations')
       }
     },
     {
       element: '.main-navigation',
       popover: {
-        title: $t('onboarding.dashboard.navigation'),
-        description: $t('onboarding.dashboard.description'),
+        title: t('onboarding.dashboard.navigation'),
+        description: t('onboarding.dashboard.description'),
         side: 'right',
         align: 'start'
       }
@@ -141,8 +164,8 @@ export const useOnboarding = () => {
     {
       element: '.add-student-button',
       popover: {
-        title: $t('onboarding.students.title'),
-        description: $t('onboarding.students.addButton'),
+        title: t('onboarding.students.title'),
+        description: t('onboarding.students.addButton'),
         side: 'bottom',
         align: 'center'
       }
@@ -150,8 +173,8 @@ export const useOnboarding = () => {
     {
       element: '.student-form',
       popover: {
-        title: $t('onboarding.students.form'),
-        description: $t('onboarding.students.description'),
+        title: t('onboarding.students.form'),
+        description: t('onboarding.students.description'),
         side: 'right',
         align: 'start'
       }
@@ -163,8 +186,8 @@ export const useOnboarding = () => {
     {
       element: '.add-location-button',
       popover: {
-        title: $t('onboarding.locations.title'),
-        description: $t('onboarding.locations.addButton'),
+        title: t('onboarding.locations.title'),
+        description: t('onboarding.locations.addButton'),
         side: 'bottom',
         align: 'center'
       }
@@ -172,8 +195,8 @@ export const useOnboarding = () => {
     {
       element: '.location-form',
       popover: {
-        title: $t('onboarding.locations.form'),
-        description: $t('onboarding.locations.description'),
+        title: t('onboarding.locations.form'),
+        description: t('onboarding.locations.description'),
         side: 'right',
         align: 'start'
       }
@@ -185,8 +208,8 @@ export const useOnboarding = () => {
     {
       element: '.add-package-button',
       popover: {
-        title: $t('onboarding.packages.title'),
-        description: $t('onboarding.packages.addButton'),
+        title: t('onboarding.packages.title'),
+        description: t('onboarding.packages.addButton'),
         side: 'bottom',
         align: 'center'
       }
@@ -194,8 +217,8 @@ export const useOnboarding = () => {
     {
       element: '.package-form',
       popover: {
-        title: $t('onboarding.packages.form'),
-        description: $t('onboarding.packages.description'),
+        title: t('onboarding.packages.form'),
+        description: t('onboarding.packages.description'),
         side: 'right',
         align: 'start'
       }
@@ -207,8 +230,8 @@ export const useOnboarding = () => {
     {
       element: '.classes-section',
       popover: {
-        title: $t('onboarding.classes.title'),
-        description: $t('onboarding.classes.comingSoon'),
+        title: t('onboarding.classes.title'),
+        description: t('onboarding.classes.comingSoon'),
         side: 'bottom',
         align: 'center'
       }
@@ -220,8 +243,8 @@ export const useOnboarding = () => {
     {
       element: '.bookings-section',
       popover: {
-        title: $t('onboarding.bookings.title'),
-        description: $t('onboarding.bookings.comingSoon'),
+        title: t('onboarding.bookings.title'),
+        description: t('onboarding.bookings.comingSoon'),
         side: 'bottom',
         align: 'center'
       }
@@ -286,32 +309,7 @@ export const useOnboarding = () => {
     // Create driver instance
     const driverObj = driver({
       showProgress: true,
-      steps: driverSteps,
-      onComplete: () => {
-        isOnboardingActive.value = false
-        currentTour.value = null
-        currentTourId.value = null
-        
-        if (tourId === 'dashboard') {
-          completeOnboarding()
-        }
-        
-        // Show completion message
-        const { toast } = useToast()
-        toast.add({
-          title: $t('onboarding.progress.completed'),
-          color: 'green'
-        })
-      },
-      onCloseClick: () => {
-        isOnboardingActive.value = false
-        currentTour.value = null
-        currentTourId.value = null
-      },
-      onDeselected: () => {
-        // Save progress when user skips
-        saveTourProgress(tourId, 0)
-      }
+      steps: driverSteps
     })
     
     // Start the tour
