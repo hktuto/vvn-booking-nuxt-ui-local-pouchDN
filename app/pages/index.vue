@@ -170,10 +170,6 @@ const dashboardTourSteps: DriveStep[] = [
       description: t('onboarding.students.addButton'),
       side: 'bottom',
       align: 'center',
-      onNextClick: () => {
-        completeStep()
-        navigateTo('/students')
-      }
     }
   },
   {
@@ -189,15 +185,6 @@ const dashboardTourSteps: DriveStep[] = [
       }
     }
   },
-  {
-    element: '.main-navigation',
-    popover: {
-      title: t('onboarding.dashboard.navigation'),
-      description: t('onboarding.dashboard.description'),
-      side: 'right',
-      align: 'start'
-    }
-  }
 ]
 
 // Use the new simplified onboarding API
