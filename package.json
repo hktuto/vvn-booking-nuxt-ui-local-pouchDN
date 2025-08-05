@@ -15,7 +15,7 @@
     "@nuxt/ui": "^3.3.0",
     "@nuxtjs/i18n": "^10.0.3",
     "@vite-pwa/nuxt": "^1.0.4",
-    "nuxt": "3.17.7",
+    "nuxt": "^4.0.0",
     "pouchdb": "^9.0.0",
     "pouchdb-find": "^9.0.0",
     "pouchdb-upsert": "^2.2.0",
