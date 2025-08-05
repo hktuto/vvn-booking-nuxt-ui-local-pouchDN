@@ -83,7 +83,7 @@ export const useOnBoarding = (params: UseOnBoardingParams) => {
       nextBtnText: t('onboarding.next'),
       prevBtnText: t('onboarding.previous'),
       doneBtnText: t('onboarding.finish'),
-      progressText: t('onboarding.progress.step', { current: '{current}', total: '{total}' })
+      progressText: t('onboarding.progress.step', { current: '{{current}}', total: '{{total}}' })
     })
 
     nextTick(() => {

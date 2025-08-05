@@ -777,9 +777,14 @@
       "navigation": "Access all features from this menu"
     },
     "students": {
-      "title": "Students Management",
-      "description": "Add and manage your students",
-      "addButton": "Add your students here",
+      "title": "Student Management",
+      "description": "This is where you'll manage all your students. You can add, edit, and organize student information.",
+      "search": "Search Students",
+      "searchDescription": "Quickly find students by name, phone, email, or tags.",
+      "addButton": "Add Your First Student",
+      "addButtonDescription": "Click here to add a new student to your system.",
+      "grid": "Students List",
+      "gridDescription": "All your students will appear here. You can click on any student to edit their details or add packages.",
       "form": "Enter student's full name and contact information",
       "details": "View and manage student information and packages"
     },
@@ -792,6 +797,8 @@
     "locations": {
       "title": "Locations",
       "description": "Set up your teaching locations first",
+      "content": "Location Management",
+      "contentDescription": "Add and manage your teaching locations. You'll need these to create classes.",
       "addButton": "Add your first location",
       "form": "Define location details and address",
       "prerequisite": "You'll need locations to create classes"
@@ -799,12 +806,16 @@
     "classes": {
       "title": "Classes",
       "description": "Schedule your classes and sessions",
+      "content": "Class Management",
+      "contentDescription": "Create and manage your classes. You can schedule recurring sessions and set up class types.",
       "comingSoon": "Coming soon - Schedule and manage your classes",
       "requiresLocations": "Requires locations to be set up first"
     },
     "bookings": {
       "title": "Bookings",
       "description": "Manage student bookings and attendance",
+      "content": "Booking Management",
+      "contentDescription": "Book students into classes and track attendance. View upcoming and past bookings.",
       "comingSoon": "Coming soon - Book students into classes"
     },
     "transactions": {

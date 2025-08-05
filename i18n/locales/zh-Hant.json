@@ -776,8 +776,13 @@
     },
     "students": {
       "title": "學生管理",
-      "description": "新增和管理您的學生",
-      "addButton": "在此新增您的學生",
+      "description": "這是您管理所有學生的地方。您可以新增、編輯和組織學生資訊。",
+      "search": "搜尋學生",
+      "searchDescription": "按姓名、電話、電子郵件或標籤快速找到學生。",
+      "addButton": "新增您的第一個學生",
+      "addButtonDescription": "點擊此處為您的系統新增學生。",
+      "grid": "學生清單",
+      "gridDescription": "您的所有學生都會出現在這裡。您可以點擊任何學生來編輯其詳細資訊或新增套裝。",
       "form": "輸入學生的全名和聯絡資訊",
       "details": "檢視和管理學生資訊和套裝"
     },
@@ -790,6 +795,8 @@
     "locations": {
       "title": "場地",
       "description": "首先設定您的教學場地",
+      "content": "場地管理",
+      "contentDescription": "新增和管理您的教學場地。您需要這些來建立課程。",
       "addButton": "新增您的第一個場地",
       "form": "定義場地詳情和地址",
       "prerequisite": "您需要場地才能建立課程"
@@ -797,12 +804,16 @@
     "classes": {
       "title": "課程",
       "description": "排程您的課程和課程",
+      "content": "課程管理",
+      "contentDescription": "建立和管理您的課程。您可以排程重複課程並設定課程類型。",
       "comingSoon": "即將推出 - 排程和管理您的課程",
       "requiresLocations": "需要先設定場地"
     },
     "bookings": {
       "title": "預約",
       "description": "管理學生預約和出席",
+      "content": "預約管理",
+      "contentDescription": "為學生預約課程並追蹤出席情況。檢視即將到來和過去的預約。",
       "comingSoon": "即將推出 - 為學生預約課程"
     },
     "transactions": {

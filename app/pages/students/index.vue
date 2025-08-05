@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex items-center justify-between w-full">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white students-page-title">
             {{ $t('student.students') }}
           </h1>
         </div>
@@ -20,12 +20,13 @@
           v-model="searchQuery"
           :placeholder="$t('student.searchPlaceholder')"
           icon="i-heroicons-magnifying-glass"
-          class="flex-1"
+          class="flex-1 student-search-input"
         />
         <UButton 
           @click="addNewStudent"
           icon="i-heroicons-plus"
           size="sm"
+          class="add-student-button"
         >
           {{ $t('student.addStudent') }}
         </UButton>
@@ -56,7 +57,7 @@
     </div>
 
     <!-- Students Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 students-grid">
       <StudentCard
         v-for="student in filteredStudents"
         :key="student.id"
@@ -100,8 +101,62 @@
 
 <script setup lang="ts">
 import type { StudentForm } from '~/composables/useStudentValidation'
+import type { DriveStep } from 'driver.js'
+
 const { t } = useI18n()
 const { studentSchema } = useStudentValidation()
+
+// Students page tour steps
+const studentsTourSteps: DriveStep[] = [
+  {
+    element: '.students-page-title',
+    popover: {
+      title: t('onboarding.students.title'),
+      description: t('onboarding.students.description'),
+      side: 'bottom',
+      align: 'start'
+    }
+  },
+  {
+    element: '.student-search-input',
+    popover: {
+      title: t('onboarding.students.search'),
+      description: t('onboarding.students.searchDescription'),
+      side: 'bottom',
+      align: 'start'
+    }
+  },
+  {
+    element: '.add-student-button',
+    popover: {
+      title: t('onboarding.students.addButton'),
+      description: t('onboarding.students.addButtonDescription'),
+      side: 'bottom',
+      align: 'center',
+      onNextClick: () => {
+        completeStep()
+        addNewStudent()
+      }
+    }
+  },
+  {
+    element: '.students-grid',
+    popover: {
+      title: t('onboarding.students.grid'),
+      description: t('onboarding.students.gridDescription'),
+      side: 'top',
+      align: 'start'
+    }
+  }
+]
+
+// Use the onboarding API
+const { completeStep } = useOnBoarding({
+  key: 'students',
+  path: '/students',
+  steps: studentsTourSteps,
+  autoStart: true
+})
 
 const showAddModal = ref(false)
 const editingStudent = ref<any>(null)
