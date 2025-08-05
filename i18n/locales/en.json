@@ -772,6 +772,7 @@
       "statsCard": "Track your student count and registration status here",
       "quickActions": "Quick access to all main features",
       "studentsButton": "Start by adding your first student",
+      "locationsButton": "Set up your teaching locations - you'll need these for classes",
       "navigation": "Access all features from this menu"
     },
     "students": {
@@ -787,10 +788,18 @@
       "addButton": "Create your first package",
       "form": "Define package details and pricing"
     },
+    "locations": {
+      "title": "Locations",
+      "description": "Set up your teaching locations first",
+      "addButton": "Add your first location",
+      "form": "Define location details and address",
+      "prerequisite": "You'll need locations to create classes"
+    },
     "classes": {
       "title": "Classes",
       "description": "Schedule your classes and sessions",
-      "comingSoon": "Coming soon - Schedule and manage your classes"
+      "comingSoon": "Coming soon - Schedule and manage your classes",
+      "requiresLocations": "Requires locations to be set up first"
     },
     "bookings": {
       "title": "Bookings",

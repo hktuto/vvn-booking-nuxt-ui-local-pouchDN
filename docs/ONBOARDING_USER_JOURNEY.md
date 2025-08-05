@@ -47,7 +47,17 @@ This document outlines the complete user onboarding experience for the VVN Booki
    - Message: "Start by adding your first student"
    - Action: "Add Student" button
 
-4. **Navigation Overview**
+4. **Quick Actions Grid**
+   - Element: Students button
+   - Message: "Start by adding your first student"
+   - Action: "Add Student" button
+
+5. **Locations Setup**
+   - Element: Locations button
+   - Message: "Set up your teaching locations - you'll need these for classes"
+   - Action: "Add Location" button
+
+6. **Navigation Overview**
    - Element: Main navigation
    - Message: "Access all features from this menu"
    - Highlight: Key sections
@@ -76,7 +86,20 @@ This document outlines the complete user onboarding experience for the VVN Booki
    - Message: "View and manage student information"
    - Action: "View Details" button
 
-#### 3.2 Packages Introduction
+#### 3.2 Locations Management
+**Steps:**
+1. **Locations Page**
+   - Element: Locations section
+   - Message: "Set up your teaching locations first"
+   - Action: "Add Location" button
+   - Importance: Required before creating classes
+
+2. **Location Form**
+   - Element: Location form
+   - Message: "Define location details and address"
+   - Highlight: Name, address, and capacity fields
+
+#### 3.3 Packages Introduction
 **Steps:**
 1. **Packages Page**
    - Element: Packages section
@@ -88,17 +111,25 @@ This document outlines the complete user onboarding experience for the VVN Booki
    - Message: "Define package details and pricing"
    - Highlight: Key fields
 
-#### 3.3 Classes & Bookings Preview
+#### 3.4 Locations, Classes & Bookings Preview
 **Steps:**
-1. **Classes Overview**
-   - Element: Classes section
-   - Message: "Schedule your classes and sessions"
-   - Preview: Future feature
+1. **Locations Management**
+   - Element: Locations section
+   - Message: "Set up your teaching locations first - you'll need these to create classes"
+   - Action: "Add Location" button
+   - Importance: Prerequisite for classes
 
-2. **Bookings System**
+2. **Classes Overview**
+   - Element: Classes section
+   - Message: "Schedule your classes and sessions (requires locations)"
+   - Preview: Future feature
+   - Dependency: Locations must be set up first
+
+3. **Bookings System**
    - Element: Bookings section
    - Message: "Manage student bookings and attendance"
    - Preview: Future feature
+   - Dependency: Classes must be created first
 
 ### Phase 4: Advanced Features (30+ minutes)
 

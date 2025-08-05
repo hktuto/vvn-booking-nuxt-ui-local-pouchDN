@@ -770,6 +770,7 @@
       "statsCard": "在此追蹤您的學生數量和註冊狀態",
       "quickActions": "快速存取所有主要功能",
       "studentsButton": "開始新增您的第一個學生",
+      "locationsButton": "設定您的教學場地 - 您需要這些來建立課程",
       "navigation": "從此選單存取所有功能"
     },
     "students": {
@@ -785,10 +786,18 @@
       "addButton": "建立您的第一個套裝",
       "form": "定義套裝詳情和定價"
     },
+    "locations": {
+      "title": "場地",
+      "description": "首先設定您的教學場地",
+      "addButton": "新增您的第一個場地",
+      "form": "定義場地詳情和地址",
+      "prerequisite": "您需要場地才能建立課程"
+    },
     "classes": {
       "title": "課程",
       "description": "排程您的課程和課程",
-      "comingSoon": "即將推出 - 排程和管理您的課程"
+      "comingSoon": "即將推出 - 排程和管理您的課程",
+      "requiresLocations": "需要先設定場地"
     },
     "bookings": {
       "title": "預約",
