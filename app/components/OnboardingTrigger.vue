@@ -4,20 +4,16 @@
     variant="ghost"
     size="sm"
     icon="i-heroicons-question-mark-circle"
-    :loading="isOnboardingActive"
-    :disabled="isOnboardingActive"
   >
     {{ $t('onboarding.letsStart') }}
   </UButton>
 </template>
 
 <script setup lang="ts">
-const { definePageTour } = usePageOnboarding()
-const { isOnboardingActive, hasCompletedOnboarding } = useOnboarding()
-
+// This component is now simplified - it just shows a button
+// The actual tour logic is handled by each page individually
 const handleOnboardingTrigger = () => {
-  // Start the current page's tour
-  const { startTour } = useOnboarding()
-  startTour() // No parameters will trigger current page tour
+  // This would need to be implemented per page
+  console.log('Onboarding trigger clicked - implement per page')
 }
 </script> 

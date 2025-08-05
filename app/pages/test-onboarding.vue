@@ -51,7 +51,7 @@
         <div class="space-y-2">
           <p><strong>Onboarding Active:</strong> {{ isOnboardingActive ? 'Yes' : 'No' }}</p>
           <p><strong>Current Tour:</strong> {{ currentTourId || 'None' }}</p>
-          <p><strong>Completed:</strong> {{ hasCompletedOnboarding ? 'Yes' : 'No' }}</p>
+          <p><strong>Completed:</strong> {{ needOnBoarding() ? 'No' : 'Yes' }}</p>
           <p><strong>Current Locale:</strong> {{ $i18n.locale }}</p>
         </div>
       </UCard>
@@ -112,27 +112,23 @@
 </template>
 
 <script setup lang="ts">
-const { 
-  startTour, 
-  stopTour, 
-  isOnboardingActive, 
-  currentTourId, 
-  hasCompletedOnboarding,
-  resetOnboarding 
-} = useOnboarding()
-
-const { definePageTour, createClickAction } = usePageOnboarding()
 const { t } = useI18n()
 
-// Define test page tour steps
-const testPageTourSteps = computed((): OnboardingStep[] => [
+// Test page tour steps
+const testPageTourSteps: OnboardingStep[] = [
   {
     element: '.dashboard-title',
     popover: {
       title: 'Test Dashboard Title',
       description: 'This is a test element for the dashboard title',
       side: 'bottom',
-      align: 'start'
+      align: 'start',
+      buttons: [
+        {
+          text: 'Skip',
+          action: () => completeStep()
+        }
+      ]
     }
   },
   {
@@ -150,30 +146,48 @@ const testPageTourSteps = computed((): OnboardingStep[] => [
       title: 'Test Students Button',
       description: 'This is a test element for the students button',
       side: 'bottom',
-      align: 'center'
-    },
-    action: createClickAction('Click Students', '.students-button')
+      align: 'center',
+      buttons: [
+        {
+          text: 'Click Students',
+          action: () => {
+            completeStep()
+            const element = document.querySelector('.students-button') as HTMLElement
+            if (element) element.click()
+          }
+        }
+      ]
+    }
   }
-])
+]
+
+// Use the new simplified onboarding API
+const { completeStep, startTour, stopTour, isOnboardingActive, currentTourId, resetOnboarding, needOnBoarding } = useOnBoarding({
+  key: 'test-page',
+  path: '/test-onboarding',
+  steps: testPageTourSteps,
+  autoStart: false
+})
 
 const startDashboardTour = () => {
-  startTour('dashboard')
+  // This would need a separate onboarding instance for dashboard
+  console.log('Dashboard tour not implemented in test page')
 }
 
 const startStudentsTour = () => {
-  startTour('students')
+  console.log('Students tour not implemented in test page')
 }
 
 const startLocationsTour = () => {
-  startTour('locations')
+  console.log('Locations tour not implemented in test page')
 }
 
 const startPackagesTour = () => {
-  startTour('packages')
+  console.log('Packages tour not implemented in test page')
 }
 
 const startTestPageTour = () => {
-  definePageTour(testPageTourSteps.value)
+  startTour()
 }
 
 const stopCurrentTour = () => {
@@ -184,7 +198,7 @@ const checkStatus = () => {
   console.log('Onboarding Status:', {
     isActive: isOnboardingActive.value,
     currentTour: currentTourId.value,
-    completed: hasCompletedOnboarding.value
+    completed: !needOnBoarding()
   })
 }
 

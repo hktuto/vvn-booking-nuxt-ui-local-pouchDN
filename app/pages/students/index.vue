@@ -100,7 +100,6 @@
 
 <script setup lang="ts">
 import type { StudentForm } from '~/composables/useStudentValidation'
-
 const { t } = useI18n()
 const { studentSchema } = useStudentValidation()
 

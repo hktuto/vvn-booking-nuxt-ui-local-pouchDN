@@ -764,7 +764,8 @@
     "letsStart": "Let's Start",
     "next": "Next",
     "previous": "Previous",
-    "skip": "Skip Tour",
+    "skip": "Skip",
+    "skipTour": "Skip Tour",
     "finish": "Finish Tour",
     "dashboard": {
       "title": "Dashboard Overview",

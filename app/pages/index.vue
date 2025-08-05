@@ -10,7 +10,7 @@
             Welcome back! Here's your overview for today.
           </p>
         </div>
-        <OnboardingTrigger />
+        <!-- <OnboardingTrigger /> -->
       </div>
     </template>
 
@@ -46,7 +46,7 @@
           </div>
         </template>
         <div>
-          <p class="text-3xl font-bold text-primary-600">{{ todayClasses.length }}</p>
+          <p class="text-3xl font-bold text-primary-600">{{ todayClasses }}</p>
           <p class="text-sm text-gray-500 mt-1">Scheduled for today</p>
         </div>
       </UCard>
@@ -128,22 +128,25 @@
 
 <script setup lang="ts">
 const { students } = useStudents()
-const todayClasses = ref(0)
+const todayClasses = ref<number>(0)
 const { getBookingsForDate } = useBookings()
 const { t } = useI18n()
 
-// Page-specific onboarding
-const { definePageTour, createNavigationAction, createClickAction } = usePageOnboarding()
-
-// Define dashboard tour steps
-const dashboardTourSteps = computed((): OnboardingStep[] => [
+// Dashboard tour steps
+const dashboardTourSteps: OnboardingStep[] = [
   {
     element: '.dashboard-title',
     popover: {
       title: t('onboarding.welcome'),
       description: t('onboarding.welcomeSubtitle'),
       side: 'bottom',
-      align: 'start'
+      align: 'start',
+      buttons: [
+        {
+          text: t('onboarding.skip'),
+          action: () => completeStep()
+        }
+      ]
     }
   },
   {
@@ -170,9 +173,17 @@ const dashboardTourSteps = computed((): OnboardingStep[] => [
       title: t('onboarding.students.title'),
       description: t('onboarding.students.addButton'),
       side: 'bottom',
-      align: 'center'
-    },
-    action: createNavigationAction(t('onboarding.letsStart'), '/students')
+      align: 'center',
+      buttons: [
+        {
+          text: t('onboarding.letsStart'),
+          action: () => {
+            completeStep()
+            navigateTo('/students')
+          }
+        }
+      ]
+    }
   },
   {
     element: '.locations-button',
@@ -180,9 +191,17 @@ const dashboardTourSteps = computed((): OnboardingStep[] => [
       title: t('onboarding.locations.title'),
       description: t('onboarding.locations.prerequisite'),
       side: 'bottom',
-      align: 'center'
-    },
-    action: createNavigationAction(t('onboarding.letsStart'), '/locations')
+      align: 'center',
+      buttons: [
+        {
+          text: t('onboarding.letsStart'),
+          action: () => {
+            completeStep()
+            navigateTo('/locations')
+          }
+        }
+      ]
+    }
   },
   {
     element: '.main-navigation',
@@ -193,16 +212,21 @@ const dashboardTourSteps = computed((): OnboardingStep[] => [
       align: 'start'
     }
   }
-])
+]
 
-// Start dashboard tour
-const startDashboardTour = () => {
-  definePageTour(dashboardTourSteps.value)
-}
+// Use the new simplified onboarding API
+const { completeStep, startTour } = useOnBoarding({
+  key: 'dashboard',
+  path: '/',
+  steps: dashboardTourSteps,
+  autoStart: false // We'll start it manually
+})
 
 onMounted(async () => {
-  const bookings = await getBookingsForDate(new Date().toISOString().split('T')[0])
-  todayClasses.value = bookings.length
+  const today = new Date().toISOString().split('T')[0] || ''
+  const bookings = await getBookingsForDate(today)
+  todayClasses.value = Array.isArray(bookings) ? bookings.length : 0
+  startTour() 
 })
 
 definePageMeta({
