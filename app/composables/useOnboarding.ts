@@ -1,24 +1,13 @@
-import { driver, type Driver } from 'driver.js'
+
+import { driver, type Driver, type DriveStep } from 'driver.js'
 import 'driver.js/dist/driver.css'
 
-export interface OnboardingStep {
-  element: string
-  popover: {
-    title: string
-    description: string
-    side?: 'top' | 'bottom' | 'left' | 'right'
-    align?: 'start' | 'center' | 'end'
-    buttons?: Array<{
-      text: string
-      action: () => void
-    }>
-  }
-}
+
 
 export type UseOnBoardingParams = {
   key: string
   path: string
-  steps: OnboardingStep[]
+  steps: DriveStep[]
   autoStart?: boolean
 }
 
@@ -36,23 +25,23 @@ export const useOnBoarding = (params: UseOnBoardingParams) => {
   const state = useOnBoardingState()
   const { t } = useI18n()
 
-  function completeStep(stepKey?: string) {
-    const stepToComplete = stepKey || key
-    const storageKey = `onboarding_${key}`
-    const finishedSteps = localStorage.getItem(storageKey)
+  function completeStep() {
+    console.log('completeStep', key)
+    const stepToComplete = key
+    const finishedSteps = localStorage.getItem('onboarding_keys')
     
     if (finishedSteps) {
       const finishedStepsArray = finishedSteps.split(',')
       const updatedFinishedSteps = [...new Set([...finishedStepsArray, stepToComplete])]
-      localStorage.setItem(storageKey, updatedFinishedSteps.join(','))
+      localStorage.setItem('onboarding_keys', updatedFinishedSteps.join(','))
     } else {
-      localStorage.setItem(storageKey, stepToComplete)
+      localStorage.setItem('onboarding_keys', stepToComplete)
     }
+    stopTour()
   }
 
   function needOnBoarding() {
-    const storageKey = `onboarding_${key}`
-    const finishedSteps = localStorage.getItem(storageKey)
+    const finishedSteps = localStorage.getItem('onboarding_keys')
 
     if (finishedSteps) {
       const isFinished = finishedSteps.split(',').includes(key)
@@ -78,22 +67,23 @@ export const useOnBoarding = (params: UseOnBoardingParams) => {
     }
 
     // Convert steps to Driver.js format
-    const driverSteps = steps.map((step) => ({
-      element: step.element,
-      popover: {
-        title: step.popover.title,
-        description: step.popover.description,
-        side: step.popover.side || 'bottom',
-        align: step.popover.align || 'start',
-        ...(step.popover.buttons && {
-          buttons: step.popover.buttons
-        })
-      }
-    }))
+    
 
     driverInstance.value = driver({
       showProgress: true,
-      steps: driverSteps
+      steps,
+      animate: true,
+      overlayColor: '#000',
+      overlayOpacity: 0.5,
+      stagePadding: 10,
+      stageRadius: 5,
+      allowKeyboardControl: true,
+      popoverOffset: 10,
+      showButtons: ['next', 'previous', 'close'],
+      nextBtnText: t('onboarding.next'),
+      prevBtnText: t('onboarding.previous'),
+      doneBtnText: t('onboarding.finish'),
+      progressText: t('onboarding.progress.step', { current: '{{current}}', total: '{{total}}' })
     })
 
     nextTick(() => {
@@ -107,18 +97,16 @@ export const useOnBoarding = (params: UseOnBoardingParams) => {
   }
 
   function resetOnboarding() {
-    const storageKey = `onboarding_${key}`
-    localStorage.removeItem(storageKey)
+    localStorage.removeItem('onboarding_keys')
   }
 
-  // Auto-start if needed and enabled
-  if (autoStart && process.client) {
-    onMounted(() => {
-      if (needOnBoarding()) {
-        startTour()
-      }
-    })
-  }
+  onMounted(() => {
+    console.log('needOnBoarding', needOnBoarding())
+    if (needOnBoarding()) {
+      console.log('Starting tour')
+      startTour()
+    }
+  })
 
   return {
     // State

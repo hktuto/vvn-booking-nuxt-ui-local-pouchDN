@@ -112,10 +112,11 @@
 </template>
 
 <script setup lang="ts">
+import type{ DriveStep } from 'driver.js';
 const { t } = useI18n()
 
 // Test page tour steps
-const testPageTourSteps: OnboardingStep[] = [
+const testPageTourSteps: DriveStep[] = [
   {
     element: '.dashboard-title',
     popover: {
@@ -123,12 +124,6 @@ const testPageTourSteps: OnboardingStep[] = [
       description: 'This is a test element for the dashboard title',
       side: 'bottom',
       align: 'start',
-      buttons: [
-        {
-          text: 'Skip',
-          action: () => completeStep()
-        }
-      ]
     }
   },
   {
@@ -147,23 +142,16 @@ const testPageTourSteps: OnboardingStep[] = [
       description: 'This is a test element for the students button',
       side: 'bottom',
       align: 'center',
-      buttons: [
-        {
-          text: 'Click Students',
-          action: () => {
-            completeStep()
-            const element = document.querySelector('.students-button') as HTMLElement
-            if (element) element.click()
-          }
-        }
-      ]
+      onNextClick: () => {
+        completeStep()
+      }
     }
   }
 ]
 
 // Use the new simplified onboarding API
 const { completeStep, startTour, stopTour, isOnboardingActive, currentTourId, resetOnboarding, needOnBoarding } = useOnBoarding({
-  key: 'test-page',
+  key: 'test-page2',
   path: '/test-onboarding',
   steps: testPageTourSteps,
   autoStart: false

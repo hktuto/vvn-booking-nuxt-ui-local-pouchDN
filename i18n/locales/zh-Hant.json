@@ -814,7 +814,7 @@
       "description": "自訂您的體驗和偏好設定"
     },
     "progress": {
-      "step": "第 {current} 步，共 {total} 步",
+      "step": "第 {{current}} 步，共 {{total}} 步",
       "completed": "導覽完成！您已準備好開始管理您的學生。"
     }
   }

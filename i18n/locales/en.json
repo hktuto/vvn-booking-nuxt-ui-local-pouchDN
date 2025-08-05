@@ -816,7 +816,7 @@
       "description": "Customize your experience and preferences"
     },
     "progress": {
-      "step": "Step {current} of {total}",
+      "step": "{{current}} of {{total}}",
       "completed": "Tour completed! You're all set to start managing your students."
     }
   }

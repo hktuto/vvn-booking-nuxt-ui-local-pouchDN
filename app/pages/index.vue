@@ -132,21 +132,17 @@ const todayClasses = ref<number>(0)
 const { getBookingsForDate } = useBookings()
 const { t } = useI18n()
 
+import type { DriveStep } from 'driver.js'
+
 // Dashboard tour steps
-const dashboardTourSteps: OnboardingStep[] = [
+const dashboardTourSteps: DriveStep[] = [
   {
     element: '.dashboard-title',
     popover: {
       title: t('onboarding.welcome'),
       description: t('onboarding.welcomeSubtitle'),
       side: 'bottom',
-      align: 'start',
-      buttons: [
-        {
-          text: t('onboarding.skip'),
-          action: () => completeStep()
-        }
-      ]
+      align: 'start'
     }
   },
   {
@@ -174,15 +170,10 @@ const dashboardTourSteps: OnboardingStep[] = [
       description: t('onboarding.students.addButton'),
       side: 'bottom',
       align: 'center',
-      buttons: [
-        {
-          text: t('onboarding.letsStart'),
-          action: () => {
-            completeStep()
-            navigateTo('/students')
-          }
-        }
-      ]
+      onNextClick: () => {
+        completeStep()
+        navigateTo('/students')
+      }
     }
   },
   {
@@ -192,15 +183,10 @@ const dashboardTourSteps: OnboardingStep[] = [
       description: t('onboarding.locations.prerequisite'),
       side: 'bottom',
       align: 'center',
-      buttons: [
-        {
-          text: t('onboarding.letsStart'),
-          action: () => {
-            completeStep()
-            navigateTo('/locations')
-          }
-        }
-      ]
+      onNextClick: () => {
+        completeStep()
+        navigateTo('/locations')
+      }
     }
   },
   {
@@ -215,18 +201,17 @@ const dashboardTourSteps: OnboardingStep[] = [
 ]
 
 // Use the new simplified onboarding API
-const { completeStep, startTour } = useOnBoarding({
+const { completeStep } = useOnBoarding({
   key: 'dashboard',
   path: '/',
   steps: dashboardTourSteps,
-  autoStart: false // We'll start it manually
+  autoStart: true
 })
 
 onMounted(async () => {
   const today = new Date().toISOString().split('T')[0] || ''
   const bookings = await getBookingsForDate(today)
-  todayClasses.value = Array.isArray(bookings) ? bookings.length : 0
-  startTour() 
+  todayClasses.value = Array.isArray(bookings) ? bookings.length : 0 
 })
 
 definePageMeta({
