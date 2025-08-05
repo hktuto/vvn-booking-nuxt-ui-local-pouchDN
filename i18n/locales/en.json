@@ -757,5 +757,57 @@
     "upcomingClasses": "Upcoming Classes",
     "totalInstructors": "Total Instructors",
     "averagePrice": "Average Price"
+  },
+  "onboarding": {
+    "welcome": "Welcome to VVN Booking!",
+    "welcomeSubtitle": "Let's explore your dashboard and get you started",
+    "letsStart": "Let's Start",
+    "next": "Next",
+    "previous": "Previous",
+    "skip": "Skip Tour",
+    "finish": "Finish Tour",
+    "dashboard": {
+      "title": "Dashboard Overview",
+      "description": "Your central hub for managing students, classes, and bookings",
+      "statsCard": "Track your student count and registration status here",
+      "quickActions": "Quick access to all main features",
+      "studentsButton": "Start by adding your first student",
+      "navigation": "Access all features from this menu"
+    },
+    "students": {
+      "title": "Students Management",
+      "description": "Add and manage your students",
+      "addButton": "Add your students here",
+      "form": "Enter student's full name and contact information",
+      "details": "View and manage student information and packages"
+    },
+    "packages": {
+      "title": "Packages",
+      "description": "Create packages for your services",
+      "addButton": "Create your first package",
+      "form": "Define package details and pricing"
+    },
+    "classes": {
+      "title": "Classes",
+      "description": "Schedule your classes and sessions",
+      "comingSoon": "Coming soon - Schedule and manage your classes"
+    },
+    "bookings": {
+      "title": "Bookings",
+      "description": "Manage student bookings and attendance",
+      "comingSoon": "Coming soon - Book students into classes"
+    },
+    "transactions": {
+      "title": "Transactions",
+      "description": "Track payments and generate reports"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Customize your experience and preferences"
+    },
+    "progress": {
+      "step": "Step {current} of {total}",
+      "completed": "Tour completed! You're all set to start managing your students."
+    }
   }
 }

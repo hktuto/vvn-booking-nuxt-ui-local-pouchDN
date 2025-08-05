@@ -755,5 +755,57 @@
     "upcomingClasses": "即將到來課程",
     "totalInstructors": "總導師數",
     "averagePrice": "平均價格"
+  },
+  "onboarding": {
+    "welcome": "歡迎使用 VVN Booking！",
+    "welcomeSubtitle": "讓我們探索您的儀表板並開始使用",
+    "letsStart": "開始",
+    "next": "下一步",
+    "previous": "上一步",
+    "skip": "跳過導覽",
+    "finish": "完成導覽",
+    "dashboard": {
+      "title": "儀表板概覽",
+      "description": "管理學生、課程和預約的中央樞紐",
+      "statsCard": "在此追蹤您的學生數量和註冊狀態",
+      "quickActions": "快速存取所有主要功能",
+      "studentsButton": "開始新增您的第一個學生",
+      "navigation": "從此選單存取所有功能"
+    },
+    "students": {
+      "title": "學生管理",
+      "description": "新增和管理您的學生",
+      "addButton": "在此新增您的學生",
+      "form": "輸入學生的全名和聯絡資訊",
+      "details": "檢視和管理學生資訊和套裝"
+    },
+    "packages": {
+      "title": "套裝",
+      "description": "為您的服務建立套裝",
+      "addButton": "建立您的第一個套裝",
+      "form": "定義套裝詳情和定價"
+    },
+    "classes": {
+      "title": "課程",
+      "description": "排程您的課程和課程",
+      "comingSoon": "即將推出 - 排程和管理您的課程"
+    },
+    "bookings": {
+      "title": "預約",
+      "description": "管理學生預約和出席",
+      "comingSoon": "即將推出 - 為學生預約課程"
+    },
+    "transactions": {
+      "title": "交易",
+      "description": "追蹤付款並產生報表"
+    },
+    "settings": {
+      "title": "設定",
+      "description": "自訂您的體驗和偏好設定"
+    },
+    "progress": {
+      "step": "第 {current} 步，共 {total} 步",
+      "completed": "導覽完成！您已準備好開始管理您的學生。"
+    }
   }
 }
