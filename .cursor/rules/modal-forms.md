@@ -7,7 +7,7 @@ Modal forms must use Nuxt UI's `UModal` component with `UForm` and Zod schema va
 
 ### 1. Modal Container
 ```vue
-<UModal v-model="isOpen" :ui="{ width: 'sm:max-w-md' }">
+<UModal v-model:open="isOpen" >
   <template #header>
     <!-- Modal header content -->
   </template>

@@ -1,5 +1,7 @@
 <template>
   <UModal v-model:open="isOpen">
+    <!-- Transaction Details Dialog -->
+    
     <template #header>
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -167,6 +169,8 @@
             :rows="2"
           />
         </div>
+
+
       </div>
     </template>
 
@@ -312,28 +316,7 @@ const resetForm = () => {
   showBuyPackageModal.value = false
 }
 
-const handleSubmit = async () => {
-  submitting.value = true
-  
-  try {
-    if (form.paymentMethod === 'credit') {
-      await handleCreditPayment()
-    } else {
-      await handleCashPayment()
-    }
-    
-    emit('redeem-completed', {
-      paymentMethod: form.paymentMethod,
-      amount: form.paymentMethod === 'credit' ? form.creditsToUse : form.cashAmount
-    })
-    
-    closeModal()
-  } catch (error) {
-    console.error('Error processing payment:', error)
-  } finally {
-    submitting.value = false
-  }
-}
+
 
 const handleCreditPayment = async () => {
   if (!form.selectedPackage || !selectedPackageInfo.value) {
@@ -353,21 +336,29 @@ const handleCreditPayment = async () => {
     await updateStudentBookingAndPaymentStatus(props.bookingId, props.student.id, 'completed', 'paid', form.creditsToUse)
   }
 
-  // Create transaction for credit usage
+  // Create transaction for credit usage with dialog
   await createTransaction({
     student_id: props.student.id,
     transaction_type: 'credit_usage',
     status: 'completed',
-    amount: calculateUnitPrice(selectedPackageInfo.value) * form.creditsToUse, // Credit usage doesn't have monetary amount
+    amount: calculateUnitPrice(selectedPackageInfo.value) * form.creditsToUse,
     currency: 'HKD',
-    student_package_id: form.selectedPackage, // Add student package ID
+    student_package_id: form.selectedPackage,
     package_id: selectedPackageInfo.value.package_id,
     class_id: props.classInfo.id,
     booking_id: props.bookingId,
     description: `Credit usage: ${props.classInfo.name} (${form.creditsToUse} credits)`,
-    unit_price: selectedPackageInfo.value.package_price, // Add unit price
-    total_amount: selectedPackageInfo.value.package_price * form.creditsToUse, // Add total amount
-    notes: form.notes
+    unit_price: selectedPackageInfo.value.package_price,
+    total_amount: selectedPackageInfo.value.package_price * form.creditsToUse,
+    notes: form.notes,
+    showDetailsDialog: true,
+    student: props.student,
+    packageInfo: selectedPackageInfo.value,
+    classInfo: props.classInfo,
+    bookingInfo: {
+      class_date: props.classInfo.start_date || new Date().toISOString().split('T')[0],
+      class_time: props.classInfo.start_time || 'TBD'
+    }
   })
 }
 
@@ -387,7 +378,15 @@ const handleCashPayment = async () => {
     booking_id: props.bookingId,
     description: `Cash payment: ${props.classInfo.name}`,
     payment_method: form.selectedPaymentMethod as any,
-    notes: form.notes
+    notes: form.notes,
+    showDetailsDialog: true,
+    student: props.student,
+    packageInfo: null, // No package for cash payment
+    classInfo: props.classInfo,
+    bookingInfo: {
+      class_date: props.classInfo.start_date || new Date().toISOString().split('T')[0],
+      class_time: props.classInfo.start_time || 'TBD'
+    }
   })
 }
 
@@ -408,5 +407,30 @@ watch(student, (newValue) => {
 },{
   immediate: true
 })
+
+// Close modal after successful transaction
+const handleSubmit = async () => {
+  submitting.value = true
+  
+  try {
+    if (form.paymentMethod === 'credit') {
+      await handleCreditPayment()
+    } else {
+      await handleCashPayment()
+    }
+    
+    emit('redeem-completed', {
+      paymentMethod: form.paymentMethod,
+      amount: form.paymentMethod === 'credit' ? form.creditsToUse : form.cashAmount
+    })
+    
+    // Close modal after successful transaction
+    closeModal()
+  } catch (error) {
+    console.error('Error processing payment:', error)
+  } finally {
+    submitting.value = false
+  }
+}
 
 </script> 

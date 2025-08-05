@@ -440,7 +440,7 @@ const getStudentActions = (studentBooking: any) => {
     {
       label: t('validation.booking.redeem.title'),
       icon: 'i-heroicons-credit-card',
-      disabled: studentBooking.status === 'completed',
+      // disabled: studentBooking.status === 'completed',
       onSelect: () => handleRedeem(studentBooking)
     },
     {

@@ -1,5 +1,6 @@
 import type { TransactionDocument } from './usePouchDB'
 import { usePouchDB, usePouchCRUD } from './usePouchDB'
+import { useTransactionDetailsDialog } from './useTransactionDetailsDialog'
 
 const transformTransactionDoc = (doc: TransactionDocument) => ({
   id: doc._id,
@@ -29,6 +30,9 @@ export const useTransactions = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  // Use the transaction details dialog composable
+  const { showTransactionDetailsDialog } = useTransactionDetailsDialog()
+
   // Create a new transaction
   const createTransaction = async (transactionData: {
     student_id: string
@@ -46,6 +50,11 @@ export const useTransactions = () => {
     unit_price?: number
     total_amount?: number
     notes?: string
+    showDetailsDialog?: boolean
+    student?: any
+    packageInfo?: any
+    classInfo?: any
+    bookingInfo?: any
   }) => {
     try {
       const doc = {
@@ -56,7 +65,14 @@ export const useTransactions = () => {
       }
       
       const newTransaction = await transactionsCRUD.create(doc)
-      return transformTransactionDoc(newTransaction)
+      const transformedTransaction = transformTransactionDoc(newTransaction)
+      
+      // Show transaction details dialog if requested
+      if (transactionData.showDetailsDialog) {
+        await showTransactionDetailsDialog(transformedTransaction, transactionData.student, transactionData.packageInfo, transactionData.classInfo, transactionData.bookingInfo)
+      }
+      
+      return transformedTransaction
     } catch (err) {
       console.error('Error creating transaction:', err)
       throw new Error('Failed to create transaction')
