@@ -86,7 +86,7 @@
               />
             </div>
           </div>
-          <nav class="px-4">
+          <nav class="px-4 main-navigation">
             <UNavigationMenu 
               :items="navigationLinks"
               orientation="vertical" />

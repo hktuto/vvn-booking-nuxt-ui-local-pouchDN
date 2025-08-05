@@ -2,7 +2,7 @@
   <NuxtLayout >
     <template #header>
       <div class="flex items-center justify-between w-full">
-        <div>
+        <div class="dashboard-title">
           <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ $t('dashboard.title') }}
           </h1>
@@ -10,6 +10,7 @@
             Welcome back! Here's your overview for today.
           </p>
         </div>
+        <OnboardingTrigger />
       </div>
     </template>
 
@@ -17,7 +18,7 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      <UCard>
+      <UCard class="stats-card">
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-gray-900 dark:text-white">
@@ -59,11 +60,11 @@
         </h3>
       </template>
       
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 quick-actions">
         <UButton 
           to="/students"
           variant="soft"
-          class="h-20 flex flex-col"
+          class="h-20 flex flex-col students-button"
           block
         >
           <UIcon name="i-heroicons-users" class="h-6 w-6 mb-2" />
@@ -71,9 +72,19 @@
         </UButton>
         
         <UButton 
+          to="/locations"
+          variant="soft" 
+          class="h-20 flex flex-col locations-button"
+          block
+        >
+          <UIcon name="i-heroicons-map-pin" class="h-6 w-6 mb-2" />
+          <span class="text-sm">{{ $t('common.locations') }}</span>
+        </UButton>
+        
+        <UButton 
           to="/classes"
           variant="soft" 
-          class="h-20 flex flex-col"
+          class="h-20 flex flex-col classes-button"
           block
         >
           <UIcon name="i-heroicons-calendar-days" class="h-6 w-6 mb-2" />
@@ -83,7 +94,7 @@
         <UButton 
           to="/packages"
           variant="soft"
-          class="h-20 flex flex-col"
+          class="h-20 flex flex-col packages-button"
           block
         >
           <UIcon name="i-heroicons-book-open" class="h-6 w-6 mb-2" />
@@ -93,7 +104,7 @@
         <UButton 
           to="/bookings"
           variant="soft"
-          class="h-20 flex flex-col"
+          class="h-20 flex flex-col bookings-button"
           block
         >
           <UIcon name="i-heroicons-clipboard-document-list" class="h-6 w-6 mb-2" />
@@ -103,7 +114,7 @@
         <UButton 
           to="/transactions"
           variant="soft"
-          class="h-20 flex flex-col"
+          class="h-20 flex flex-col transactions-button"
           block
         >
           <UIcon name="i-heroicons-banknotes" class="h-6 w-6 mb-2" />
