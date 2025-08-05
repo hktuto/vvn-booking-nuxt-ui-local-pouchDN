@@ -93,7 +93,34 @@ export const useOnboarding = () => {
     }
   }
   
-  // Dashboard tour steps
+  // Get tour steps from the current page
+  const getCurrentPageTourSteps = (): OnboardingStep[] => {
+    if (process.server) return []
+    
+    const route = useRoute()
+    const page = route.path
+    
+    // Each page will define its own tour steps
+    // This is just a fallback for basic tours
+    switch (page) {
+      case '/':
+        return getDashboardTourSteps()
+      case '/students':
+        return getStudentsTourSteps()
+      case '/locations':
+        return getLocationsTourSteps()
+      case '/packages':
+        return getPackagesTourSteps()
+      case '/classes':
+        return getClassesTourSteps()
+      case '/bookings':
+        return getBookingsTourSteps()
+      default:
+        return []
+    }
+  }
+  
+  // Dashboard tour steps (fallback)
   const getDashboardTourSteps = (): OnboardingStep[] => [
     {
       element: '.dashboard-title',
@@ -159,7 +186,7 @@ export const useOnboarding = () => {
     }
   ]
   
-  // Students tour steps
+  // Students tour steps (fallback)
   const getStudentsTourSteps = (): OnboardingStep[] => [
     {
       element: '.add-student-button',
@@ -181,7 +208,7 @@ export const useOnboarding = () => {
     }
   ]
   
-  // Locations tour steps
+  // Locations tour steps (fallback)
   const getLocationsTourSteps = (): OnboardingStep[] => [
     {
       element: '.add-location-button',
@@ -203,7 +230,7 @@ export const useOnboarding = () => {
     }
   ]
   
-  // Packages tour steps
+  // Packages tour steps (fallback)
   const getPackagesTourSteps = (): OnboardingStep[] => [
     {
       element: '.add-package-button',
@@ -225,7 +252,7 @@ export const useOnboarding = () => {
     }
   ]
   
-  // Classes tour steps (preview)
+  // Classes tour steps (fallback)
   const getClassesTourSteps = (): OnboardingStep[] => [
     {
       element: '.classes-section',
@@ -238,7 +265,7 @@ export const useOnboarding = () => {
     }
   ]
   
-  // Bookings tour steps (preview)
+  // Bookings tour steps (fallback)
   const getBookingsTourSteps = (): OnboardingStep[] => [
     {
       element: '.bookings-section',
@@ -252,39 +279,46 @@ export const useOnboarding = () => {
   ]
   
   // Create and start a tour
-  const startTour = (tourId: string, customSteps?: OnboardingStep[]) => {
+  const startTour = (tourId?: string, customSteps?: OnboardingStep[]) => {
     if (isOnboardingActive.value) {
       stopTour()
     }
     
     let steps: OnboardingStep[] = []
     
-    switch (tourId) {
-      case 'dashboard':
-        steps = getDashboardTourSteps()
-        break
-      case 'students':
-        steps = getStudentsTourSteps()
-        break
-      case 'locations':
-        steps = getLocationsTourSteps()
-        break
-      case 'packages':
-        steps = getPackagesTourSteps()
-        break
-      case 'classes':
-        steps = getClassesTourSteps()
-        break
-      case 'bookings':
-        steps = getBookingsTourSteps()
-        break
-      default:
-        if (customSteps) {
-          steps = customSteps
-        } else {
+    // If custom steps are provided, use them
+    if (customSteps) {
+      steps = customSteps
+    }
+    // If tourId is provided, use fallback steps
+    else if (tourId) {
+      switch (tourId) {
+        case 'dashboard':
+          steps = getDashboardTourSteps()
+          break
+        case 'students':
+          steps = getStudentsTourSteps()
+          break
+        case 'locations':
+          steps = getLocationsTourSteps()
+          break
+        case 'packages':
+          steps = getPackagesTourSteps()
+          break
+        case 'classes':
+          steps = getClassesTourSteps()
+          break
+        case 'bookings':
+          steps = getBookingsTourSteps()
+          break
+        default:
           console.warn(`Unknown tour ID: ${tourId}`)
           return
-        }
+      }
+    }
+    // Otherwise, get steps from current page
+    else {
+      steps = getCurrentPageTourSteps()
     }
     
     // Convert steps to Driver.js format
@@ -314,7 +348,7 @@ export const useOnboarding = () => {
     
     // Start the tour
     currentTour.value = driverObj
-    currentTourId.value = tourId
+    currentTourId.value = tourId || null
     isOnboardingActive.value = true
     
     // Wait for elements to be available
@@ -386,6 +420,7 @@ export const useOnboarding = () => {
     saveTourProgress,
     
     // Tour step getters
+    getCurrentPageTourSteps,
     getDashboardTourSteps,
     getStudentsTourSteps,
     getLocationsTourSteps,

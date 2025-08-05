@@ -12,10 +12,12 @@
 </template>
 
 <script setup lang="ts">
-const { startTour, isOnboardingActive, hasCompletedOnboarding } = useOnboarding()
+const { definePageTour } = usePageOnboarding()
+const { isOnboardingActive, hasCompletedOnboarding } = useOnboarding()
 
 const handleOnboardingTrigger = () => {
-  // Start the dashboard tour
-  startTour('dashboard')
+  // Start the current page's tour
+  const { startTour } = useOnboarding()
+  startTour() // No parameters will trigger current page tour
 }
 </script> 

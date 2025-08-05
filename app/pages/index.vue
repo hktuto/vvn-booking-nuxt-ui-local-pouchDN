@@ -130,6 +130,75 @@
 const { students } = useStudents()
 const todayClasses = ref(0)
 const { getBookingsForDate } = useBookings()
+const { t } = useI18n()
+
+// Page-specific onboarding
+const { definePageTour, createNavigationAction, createClickAction } = usePageOnboarding()
+
+// Define dashboard tour steps
+const dashboardTourSteps = computed((): OnboardingStep[] => [
+  {
+    element: '.dashboard-title',
+    popover: {
+      title: t('onboarding.welcome'),
+      description: t('onboarding.welcomeSubtitle'),
+      side: 'bottom',
+      align: 'start'
+    }
+  },
+  {
+    element: '.stats-card',
+    popover: {
+      title: t('onboarding.dashboard.title'),
+      description: t('onboarding.dashboard.statsCard'),
+      side: 'bottom',
+      align: 'start'
+    }
+  },
+  {
+    element: '.quick-actions',
+    popover: {
+      title: t('onboarding.dashboard.quickActions'),
+      description: t('onboarding.dashboard.studentsButton'),
+      side: 'bottom',
+      align: 'start'
+    }
+  },
+  {
+    element: '.students-button',
+    popover: {
+      title: t('onboarding.students.title'),
+      description: t('onboarding.students.addButton'),
+      side: 'bottom',
+      align: 'center'
+    },
+    action: createNavigationAction(t('onboarding.letsStart'), '/students')
+  },
+  {
+    element: '.locations-button',
+    popover: {
+      title: t('onboarding.locations.title'),
+      description: t('onboarding.locations.prerequisite'),
+      side: 'bottom',
+      align: 'center'
+    },
+    action: createNavigationAction(t('onboarding.letsStart'), '/locations')
+  },
+  {
+    element: '.main-navigation',
+    popover: {
+      title: t('onboarding.dashboard.navigation'),
+      description: t('onboarding.dashboard.description'),
+      side: 'right',
+      align: 'start'
+    }
+  }
+])
+
+// Start dashboard tour
+const startDashboardTour = () => {
+  definePageTour(dashboardTourSteps.value)
+}
 
 onMounted(async () => {
   const bookings = await getBookingsForDate(new Date().toISOString().split('T')[0])

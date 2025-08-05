@@ -11,20 +11,23 @@
         
         <div class="space-y-4">
           <div class="flex flex-wrap gap-4">
-            <UButton @click="startDashboardTour" color="blue">
+            <UButton @click="startDashboardTour" color="primary">
               Start Dashboard Tour
             </UButton>
-            <UButton @click="startStudentsTour" color="green">
+            <UButton @click="startStudentsTour" color="success">
               Start Students Tour
             </UButton>
-            <UButton @click="startLocationsTour" color="orange">
+            <UButton @click="startLocationsTour" color="warning">
               Start Locations Tour
             </UButton>
-            <UButton @click="startPackagesTour" color="purple">
+            <UButton @click="startPackagesTour" color="secondary">
               Start Packages Tour
             </UButton>
-            <UButton @click="stopCurrentTour" color="red">
+            <UButton @click="stopCurrentTour" color="error">
               Stop Current Tour
+            </UButton>
+            <UButton @click="startTestPageTour" color="info">
+              Start Test Page Tour
             </UButton>
           </div>
           
@@ -49,7 +52,7 @@
           <p><strong>Onboarding Active:</strong> {{ isOnboardingActive ? 'Yes' : 'No' }}</p>
           <p><strong>Current Tour:</strong> {{ currentTourId || 'None' }}</p>
           <p><strong>Completed:</strong> {{ hasCompletedOnboarding ? 'Yes' : 'No' }}</p>
-          <p><strong>Current Locale:</strong> {{ $i18n.locale.value }}</p>
+          <p><strong>Current Locale:</strong> {{ $i18n.locale }}</p>
         </div>
       </UCard>
       
@@ -96,10 +99,10 @@
         </template>
         
         <div class="flex gap-4">
-          <UButton @click="$i18n.setLocale('en')" :variant="$i18n.locale.value === 'en' ? 'solid' : 'outline'">
+          <UButton @click="$i18n.setLocale('en')" :variant="$i18n.locale === 'en' ? 'solid' : 'outline'">
             English
           </UButton>
-          <UButton @click="$i18n.setLocale('zh-Hant')" :variant="$i18n.locale.value === 'zh-Hant' ? 'solid' : 'outline'">
+          <UButton @click="$i18n.setLocale('zh-Hant')" :variant="$i18n.locale === 'zh-Hant' ? 'solid' : 'outline'">
             繁體中文
           </UButton>
         </div>
@@ -118,6 +121,41 @@ const {
   resetOnboarding 
 } = useOnboarding()
 
+const { definePageTour, createClickAction } = usePageOnboarding()
+const { t } = useI18n()
+
+// Define test page tour steps
+const testPageTourSteps = computed((): OnboardingStep[] => [
+  {
+    element: '.dashboard-title',
+    popover: {
+      title: 'Test Dashboard Title',
+      description: 'This is a test element for the dashboard title',
+      side: 'bottom',
+      align: 'start'
+    }
+  },
+  {
+    element: '.stats-card',
+    popover: {
+      title: 'Test Stats Card',
+      description: 'This is a test element for the stats card',
+      side: 'bottom',
+      align: 'start'
+    }
+  },
+  {
+    element: '.students-button',
+    popover: {
+      title: 'Test Students Button',
+      description: 'This is a test element for the students button',
+      side: 'bottom',
+      align: 'center'
+    },
+    action: createClickAction('Click Students', '.students-button')
+  }
+])
+
 const startDashboardTour = () => {
   startTour('dashboard')
 }
@@ -132,6 +170,10 @@ const startLocationsTour = () => {
 
 const startPackagesTour = () => {
   startTour('packages')
+}
+
+const startTestPageTour = () => {
+  definePageTour(testPageTourSteps.value)
 }
 
 const stopCurrentTour = () => {
