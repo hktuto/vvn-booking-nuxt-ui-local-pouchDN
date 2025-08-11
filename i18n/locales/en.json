@@ -713,7 +713,7 @@
     "date": "Date",
     "time": "Time",
     "creditsUsed": "Credits Used",
-    "bookedAt": "Booked At"
+    "bookedAt": "Booked At",
     "addStudentToClass": "Add Student to Class",
     "manageStudents": "Manage Students",
     "selectStudent": "Select Student",

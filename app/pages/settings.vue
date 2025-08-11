@@ -232,15 +232,14 @@
     </UiPageContainer>
 
     <!-- Change Password Modal -->
-    <UModal v-model="showChangePasswordModal">
-      <UCard>
-        <template #header>
+    <UModal v-model:open="showChangePasswordModal">
+      <template #header>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ $t('settings.account.changePassword') }}
           </h3>
         </template>
-        
-        <form @submit.prevent="changePassword" class="space-y-4">
+        <template #body>
+          <form @submit.prevent="changePassword" class="space-y-4">
           <UFormGroup :label="$t('settings.account.currentPassword')" required>
             <UInput
               v-model="passwordForm.currentPassword"
@@ -284,7 +283,7 @@
             </UButton>
           </div>
         </form>
-      </UCard>
+        </template>
     </UModal>
   </NuxtLayout>
 </template>
