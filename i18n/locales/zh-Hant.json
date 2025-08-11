@@ -153,6 +153,38 @@
     "account": "帳戶",
     "preferences": "偏好設定"
   },
+  "settings": {
+    "title": "設定",
+    "description": "管理您的帳戶設定和偏好",
+    "profile": {
+      "title": "個人資料",
+      "description": "更新您的個人資訊和聯絡資料",
+      "usernameHelp": "用戶名在帳戶建立後無法更改"
+    },
+    "preferences": {
+      "title": "偏好設定",
+      "description": "自訂您的應用程式體驗和顯示設定",
+      "languageHelp": "選擇您偏好的介面語言",
+      "theme": "主題",
+      "themeHelp": "選擇淺色或深色模式",
+      "timezone": "時區",
+      "timezoneHelp": "設定您的本地時區以準確顯示時間",
+      "currency": "貨幣",
+      "currencyHelp": "設定您偏好的交易貨幣"
+    },
+    "account": {
+      "title": "帳戶操作",
+      "description": "管理您的帳戶安全性和資料",
+      "changePassword": "更改密碼",
+      "changePasswordHelp": "更新您的帳戶密碼以確保安全",
+      "currentPassword": "目前密碼",
+      "currentPasswordPlaceholder": "請輸入您目前的密碼",
+      "newPassword": "新密碼",
+      "newPasswordPlaceholder": "請輸入您的新密碼",
+      "exportData": "匯出資料",
+      "exportDataHelp": "下載您的資料副本"
+    }
+  },
   "classes": {
     "title": "課程",
     "description": "管理課程類型、時間表和地點",

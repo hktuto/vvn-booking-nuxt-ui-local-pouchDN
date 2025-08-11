@@ -1,3 +1,11 @@
+
+<script setup lang="ts">
+const goHome = () => {
+  navigateTo('/')
+}
+
+</script>
+
 <template>
   <NuxtErrorBoundary>
     <UApp>
@@ -7,7 +15,7 @@
       <NuxtPage />
     </UApp>
     
-    <template #error="{ error, clearError }">
+    <template #error="{ error, clearError }" @error="handleError">
       <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div class="max-w-md w-full space-y-8 p-6">
           <div class="text-center">
@@ -32,8 +40,3 @@
   </NuxtErrorBoundary>
 </template>
 
-<script setup lang="ts">
-const goHome = () => {
-  navigateTo('/')
-}
-</script>

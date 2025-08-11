@@ -1,5 +1,5 @@
 <template>
-  <UDropdown :items="userProfileItems" :popper="{ placement: placement }">
+  <UDropdownMenu :items="userProfileItems" :popper="{ placement: placement }">
     <UButton
       variant="ghost"
       class="flex items-center gap-2"
@@ -17,7 +17,7 @@
       
       
     </UButton>
-  </UDropdown>
+  </UDropdownMenu>
 </template>
 
 <script setup lang="ts">

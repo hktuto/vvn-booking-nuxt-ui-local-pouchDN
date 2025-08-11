@@ -105,7 +105,7 @@ export const useBookings = () => {
     try {
 
       // Parse virtual ID format: virtual-{classId}-{date}
-      const parts = virtualId.split('-')
+      const parts = virtualId.split('-') as any
       if (parts.length < 3) {
         throw new Error('Invalid virtual booking ID format')
       }
@@ -158,7 +158,7 @@ export const useBookings = () => {
         const targetDate = new Date(date)
         const dayOfWeek = targetDate.getDay()
         const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-        const dayName = dayNames[dayOfWeek]
+        const dayName = dayNames[dayOfWeek] as any
         
         isScheduledForDate = !!(class_.days_of_week?.includes(dayName))
       } else if (class_.schedule_type === 'series') {

@@ -131,7 +131,8 @@ const navigation = [
   { to: '/classes', label: 'navigation.classes', icon: 'i-heroicons-calendar-days' },
   { to: '/bookings', label: 'navigation.bookings', icon: 'i-heroicons-calendar' },
   { to: '/locations', label: 'navigation.locations', icon: 'i-heroicons-map-pin' },
-  { to: '/transactions', label: 'navigation.transactions', icon: 'i-heroicons-banknotes' }
+  { to: '/transactions', label: 'navigation.transactions', icon: 'i-heroicons-banknotes' },
+  { to: '/settings', label: 'navigation.settings', icon: 'i-heroicons-cog-6-tooth' }
 ]
 
 // Format navigation for UNavigationMenu

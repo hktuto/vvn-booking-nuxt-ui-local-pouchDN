@@ -142,7 +142,10 @@ const form = reactive<LocationForm>({
 
 // Reset form when modal opens/closes
 watch(() => modelValue.value, (newValue) => {
-  if (newValue) {
+  // if (newValue) {
+  //   resetForm()
+  // }
+  if(!newValue){
     resetForm()
   }
 })
@@ -150,12 +153,14 @@ watch(() => modelValue.value, (newValue) => {
 // Watch for location prop changes to populate form
 watch(() => props.location, (newLocation) => {
   if (newLocation) {
+    console.log('newLocation in form', newLocation)
     form.name = newLocation.name
     form.address = newLocation.address
     form.phone = newLocation.phone
     form.email = newLocation.email || ''
     form.website = newLocation.website || ''
     form.active = newLocation.active
+    console.log('newLocation in form', newLocation, form)
   }
 }, { immediate: true })
 

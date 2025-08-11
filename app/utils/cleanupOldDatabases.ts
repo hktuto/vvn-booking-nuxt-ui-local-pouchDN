@@ -8,9 +8,9 @@
 const logoutAndRedirect = async () => {
   try {
     // Clear any cached state
-    const { auth } = useAuth()
+    const { auth, logout } = useAuth()
     if (auth.value.isAuthenticated) {
-      await auth.value.logout()
+      logout()
     }
     
     // Clear any remaining state
@@ -19,6 +19,92 @@ const logoutAndRedirect = async () => {
     console.error('Error during logout:', error)
     // Force redirect even if logout fails
     await navigateTo('/')
+  }
+}
+
+/**
+ * Cleanup current user's databases using the new database architecture
+ * This function uses the database helpers to properly destroy user-specific databases
+ */
+export const cleanupCurrentUserDatabases = async () => {
+  console.log('🧹 Starting cleanup of current user databases...')
+  
+  const { auth } = useAuth()
+  
+  if (!auth.value.isAuthenticated || !auth.value.user) {
+    console.log('❌ No authenticated user found')
+    return { success: false, deletedCount: 0, errors: ['No authenticated user'] }
+  }
+  
+  const userId = auth.value.user.id
+  console.log(`👤 Cleaning up databases for user: ${userId}`)
+  
+  try {
+    // Get all database helpers
+    const { getDB: getUserDB } = useUserDB()
+    const { getDB: getStudentDB } = useStudentDB()
+    const { getDB: getPackageDB } = usePackageDB()
+    const { getDB: getStudentPackageDB } = useStudentPackageDB()
+    const { getDB: getClassTypeDB } = useClassTypeDB()
+    const { getDB: getClassDB } = useClassDB()
+    const { getDB: getBookingDB } = useBookingDB()
+    const { getDB: getTransactionDB } = useTransactionDB()
+    const { getDB: getLocationDB } = useLocationDB()
+    
+    const databaseHelpers = [
+      { name: 'users', getDB: getUserDB, isShared: true },
+      { name: 'students', getDB: getStudentDB, isShared: false },
+      { name: 'packages', getDB: getPackageDB, isShared: false },
+      { name: 'student_packages', getDB: getStudentPackageDB, isShared: false },
+      { name: 'class_types', getDB: getClassTypeDB, isShared: false },
+      { name: 'classes', getDB: getClassDB, isShared: false },
+      { name: 'bookings', getDB: getBookingDB, isShared: false },
+      { name: 'transactions', getDB: getTransactionDB, isShared: false },
+      { name: 'locations', getDB: getLocationDB, isShared: false }
+    ]
+    
+    let deletedCount = 0
+    const errors: string[] = []
+    
+    for (const { name, getDB, isShared } of databaseHelpers) {
+      try {
+        console.log(`🗑️  Attempting to destroy database: ${name}`)
+        
+        const db = await getDB()
+        await db.destroy()
+        deletedCount++
+        console.log(`✅ Successfully destroyed: ${name}`)
+        
+      } catch (error: unknown) {
+        const errorMsg = `Failed to destroy ${name}: ${error instanceof Error ? error.message : String(error)}`
+        console.warn(`⚠️  ${errorMsg}`)
+        errors.push(errorMsg)
+      }
+    }
+    
+    console.log(`🎉 Current user cleanup completed! Deleted ${deletedCount} databases`)
+    
+    if (errors.length > 0) {
+      console.warn(`⚠️  ${errors.length} errors occurred during cleanup:`)
+      errors.forEach(error => console.warn(`  - ${error}`))
+    }
+    
+    // Logout user and redirect after cleanup
+    await logoutAndRedirect()
+    
+    return {
+      success: errors.length === 0,
+      deletedCount,
+      errors
+    }
+    
+  } catch (error) {
+    console.error('❌ Failed to cleanup current user databases:', error)
+    return {
+      success: false,
+      deletedCount: 0,
+      errors: [error.toString()]
+    }
   }
 }
 
@@ -34,7 +120,7 @@ export const cleanupOldDatabases = async () => {
       return { success: true, deletedCount: 0 }
     }
     
-    console.log(`📋 Found ${databases.length} databases to check:`)
+    console.log(`�� Found ${databases.length} databases to check:`)
     databases.forEach(db => {
       console.log(`  - ${db.name} (version: ${db.version})`)
     })
@@ -45,6 +131,11 @@ export const cleanupOldDatabases = async () => {
     // Delete each database
     for (const dbInfo of databases) {
       try {
+        if (!dbInfo.name) {
+          console.warn('⚠️  Skipping database with no name')
+          continue
+        }
+        
         console.log(`🗑️  Deleting database: ${dbInfo.name}`)
         
         // Close any existing connections
@@ -54,7 +145,7 @@ export const cleanupOldDatabases = async () => {
           db.close()
           
           // Delete the database
-          const deleteRequest = window.indexedDB.deleteDatabase(dbInfo.name)
+          const deleteRequest = window.indexedDB.deleteDatabase(dbInfo.name!)
           deleteRequest.onsuccess = () => {
             console.log(`✅ Successfully deleted: ${dbInfo.name}`)
             deletedCount++
@@ -74,8 +165,8 @@ export const cleanupOldDatabases = async () => {
         // Wait a bit for the deletion to complete
         await new Promise(resolve => setTimeout(resolve, 100))
         
-      } catch (error) {
-        const errorMsg = `Error deleting ${dbInfo.name}: ${error}`
+      } catch (error: unknown) {
+        const errorMsg = `Error deleting ${dbInfo.name}: ${error instanceof Error ? error.message : String(error)}`
         console.error(`❌ ${errorMsg}`)
         errors.push(errorMsg)
       }
@@ -327,6 +418,7 @@ export const listAllDatabases = async () => {
 // Export all cleanup functions
 export default {
   cleanupOldDatabases,
+  cleanupCurrentUserDatabases,
   cleanupSpecificDatabases,
   cleanupOldPouchDBDatabases,
   cleanupUserSpecificDatabases,

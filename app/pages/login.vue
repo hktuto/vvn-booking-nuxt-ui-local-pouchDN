@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import type { LoginForm } from '~/composables/useAuthValidation'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { clearAllData } from '~/utils/dbHelper'
+import { cleanupOldDatabases } from '~/utils/cleanupOldDatabases'
 
 // Use blank layout for login page and mark as public
 definePageMeta({
@@ -159,7 +159,7 @@ const handleRemoveAllData = async () => {
   
   removingData.value = true
   try {
-    await clearAllData()
+    await cleanupOldDatabases()
   } catch (err) {
     console.error('Error removing data:', err)
     error.value = t('common.removeDataError')

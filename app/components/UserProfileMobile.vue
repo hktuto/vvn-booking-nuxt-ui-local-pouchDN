@@ -26,16 +26,28 @@
 
 <script setup lang="ts">
 const { auth } = useAuth()
-const { t } = useI18n()
+const { t, locale, setLocale } = useI18n()
 const { isDark, toggleDarkMode } = useDarkMode()
+
+// Language toggle function
+const toggleLanguage = () => {
+  const newLocale = locale.value === 'en' ? 'zh-Hant' : 'en'
+  setLocale(newLocale)
+}
+
 // User profile dropdown items
 const userProfileItems = computed(() => [
   [
-  {
-    label: t('common.toggleColorMode'),
-    icon: isDark.value ? 'i-heroicons-sun' : 'i-heroicons-moon',
-    onSelect: () => toggleDarkMode()
-  }
+    {
+      label: t('common.toggleColorMode'),
+      icon: isDark.value ? 'i-heroicons-sun' : 'i-heroicons-moon',
+      onSelect: () => toggleDarkMode()
+    },
+    {
+      label: t('common.language'),
+      icon: 'i-heroicons-language',
+      onSelect: () => toggleLanguage()
+    }
   ],
   [
     {

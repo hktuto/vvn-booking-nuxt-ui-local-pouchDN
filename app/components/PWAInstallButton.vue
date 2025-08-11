@@ -36,6 +36,7 @@ const handleInstall = async () => {
 
 const dismissInstall = () => {
   cancelInstall()
+  showInstallPrompt.value = false
   console.log('Install prompt dismissed')
 }
 </script>

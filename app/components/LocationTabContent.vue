@@ -90,6 +90,7 @@ const addNewLocation = () => {
 }
 
 const editLocation = (location: any) => {
+  console.log('editLocation', location)
   editingLocation.value = location
   showAddModal.value = true
 }

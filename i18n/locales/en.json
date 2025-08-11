@@ -152,6 +152,38 @@
     "account": "Account",
     "preferences": "Preferences"
   },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your account settings and preferences",
+    "profile": {
+      "title": "Profile Information",
+      "description": "Update your personal information and contact details",
+      "usernameHelp": "Username cannot be changed after account creation"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "description": "Customize your app experience and display settings",
+      "languageHelp": "Choose your preferred language for the interface",
+      "theme": "Theme",
+      "themeHelp": "Choose between light and dark mode",
+      "timezone": "Timezone",
+      "timezoneHelp": "Set your local timezone for accurate time display",
+      "currency": "Currency",
+      "currencyHelp": "Set your preferred currency for transactions"
+    },
+    "account": {
+      "title": "Account Actions",
+      "description": "Manage your account security and data",
+      "changePassword": "Change Password",
+      "changePasswordHelp": "Update your account password for security",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "exportData": "Export Data",
+      "exportDataHelp": "Download a copy of your data"
+    }
+  },
   "classes": {
     "title": "Classes",
     "description": "Manage class types, schedules, and locations",
