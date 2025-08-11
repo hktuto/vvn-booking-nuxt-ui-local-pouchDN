@@ -2,9 +2,9 @@
   <UCard>
     <template #header>
       <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">{{ t('student.recentBookings') }}</h2>
+        <h2 class="text-lg font-semibold">{{ t('bookings.recentBookings') }}</h2>
         <UButton
-          @click="$emit('refresh')"
+          @click="loadStudentBookings"
           variant="ghost"
           size="sm"
           icon="i-heroicons-arrow-path"
@@ -15,69 +15,29 @@
       </div>
     </template>
     
-    <div v-if="studentBookings.length > 0" class="space-y-3">
-      <div
-        v-for="booking in studentBookings"
-        :key="booking.id"
-        class="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-2">
-              <h3 class="font-medium text-gray-900 dark:text-white">
-                {{ getClassById(booking.class_id)?.name || 'Unknown Class' }}
-              </h3>
-              <UBadge
-                :color="getBookingStatusColor(booking.studentBooking.status)"
-                variant="soft"
-                size="sm"
-              >
-                {{ t(`booking.status.${booking.studentBooking.status}`) }}
-              </UBadge>
-              <UBadge
-                :color="getPaymentStatusColor(booking.studentBooking.payment_status)"
-                variant="soft"
-                size="sm"
-              >
-                {{ t(`booking.paymentStatus.${booking.studentBooking.payment_status}`) }}
-              </UBadge>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <div>
-                <span class="font-medium">{{ t('booking.date') }}:</span>
-                {{ formatDate(booking.class_date) }}
-              </div>
-              <div>
-                <span class="font-medium">{{ t('booking.time') }}:</span>
-                {{ formatTime(booking.class_time) }}
-              </div>
-              <div>
-                <span class="font-medium">{{ t('booking.creditsUsed') }}:</span>
-                {{ booking.studentBooking.credits_used }}
-              </div>
-              <div>
-                <span class="font-medium">{{ t('booking.bookedAt') }}:</span>
-                {{ formatDate(booking.studentBooking.booked_at) }}
-              </div>
-            </div>
-            
-            <div v-if="booking.studentBooking.notes" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              <span class="font-medium">{{ t('common.notes') }}:</span>
-              {{ booking.studentBooking.notes }}
-            </div>
-          </div>
-          
-          <div class="flex gap-2 ml-4">
-            <UButton
-              @click="$emit('view-booking', booking)"
-              variant="ghost"
-              size="sm"
-              icon="i-heroicons-eye"
-              :aria-label="t('common.view')"
-            />
-          </div>
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center py-8">
+      <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 animate-spin text-primary-500" />
+    </div>
+
+    <!-- Bookings Table -->
+    <div v-else-if="studentBookings.length > 0" class="overflow-x-auto">
+      <UTable
+        :data="paginatedStudentBookings"
+        :columns="columns"
+        :loading="loading"
+      />
+      
+      <!-- Pagination -->
+      <div class="flex items-center justify-between mt-4">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+          {{ t('common.showing', { from: paginationStart + 1, to: paginationEnd, total: studentBookings.length }) }}
         </div>
+        <UPagination
+          v-model="currentPage"
+          :page-count="pageCount"
+          :total="studentBookings.length"
+        />
       </div>
     </div>
 
@@ -96,26 +56,104 @@
 
 <script setup lang="ts">
 interface Props {
-  studentBookings: readonly any[]
-  classes: readonly any[]
-  loading?: boolean
+  studentId: string
+  limit?: number
 }
 
 interface Emits {
-  (e: 'refresh'): void
   (e: 'view-booking', booking: any): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  loading: false
+  limit: 10
 })
 const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
+const { getBookingsByStudent } = useBookings()
+const { classes, loadClasses } = useClasses()
+
+// State
+const loading = ref(false)
+const studentBookings = ref<any[]>([])
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+// Table columns
+const columns = computed(() => [
+  {
+    accessorKey: 'class_name',
+    header: t('booking.className')
+  },
+  {
+    accessorKey: 'booking_status',
+    header: t('bookings.statusLabel')
+  },
+  {
+    accessorKey: 'payment_status',
+    header: t('booking.paymentStatus')
+  },
+  {
+    accessorKey: 'class_date',
+    header: t('booking.date')
+  },
+  {
+    accessorKey: 'class_time',
+    header: t('booking.time')
+  },
+  {
+    accessorKey: 'credits_used',
+    header: t('booking.creditsUsed')
+  },
+  {
+    accessorKey: 'booked_at',
+    header: t('booking.bookedAt')
+  },
+  {
+    accessorKey: 'actions',
+    header: t('transactions.actions')
+  }
+])
+
+// Pagination computed
+const pageCount = computed(() => Math.ceil(studentBookings.value.length / pageSize.value))
+const paginationStart = computed(() => (currentPage.value - 1) * pageSize.value)
+const paginationEnd = computed(() => Math.min(paginationStart.value + pageSize.value, studentBookings.value.length))
+const paginatedStudentBookings = computed(() => {
+  const start = paginationStart.value
+  const end = paginationStart.value + pageSize.value
+  return studentBookings.value.slice(start, end)
+})
 
 // Methods
-const getClassById = (classId: string) => {
-  return props.classes.find(c => c.id === classId)
+const loadStudentBookings = async () => {
+  if (!props.studentId) return
+  
+  try {
+    loading.value = true
+    const bookings = await getBookingsByStudent(props.studentId, props.limit)
+    
+    // Transform bookings to include class names and format data for table
+    const transformedBookings = bookings.map(booking => {
+      const classInfo = classes.value.find(c => c.id === booking.class_id)
+      return {
+        ...booking,
+        class_name: classInfo?.name || 'Unknown Class',
+        booking_status: booking.studentBooking.status,
+        payment_status: booking.studentBooking.payment_status,
+        credits_used: booking.studentBooking.credits_used,
+        booked_at: booking.studentBooking.booked_at,
+        class_date: formatDate(booking.class_date),
+        class_time: formatTime(booking.class_time)
+      }
+    })
+    
+    studentBookings.value = transformedBookings
+  } catch (err) {
+    console.error('Error loading student bookings:', err)
+  } finally {
+    loading.value = false
+  }
 }
 
 const getBookingStatusColor = (status: string) => {
@@ -144,4 +182,18 @@ const formatDate = (dateString: string) => {
 const formatTime = (timeString: string) => {
   return timeString
 }
+
+// Load data on mount
+onMounted(async () => {
+  await loadClasses()
+  loadStudentBookings()
+})
+
+// Watch for studentId changes
+watch(() => props.studentId, () => {
+  if (props.studentId) {
+    loadStudentBookings()
+    currentPage.value = 1
+  }
+})
 </script> 

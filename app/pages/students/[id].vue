@@ -6,9 +6,6 @@
           <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ t('student.detailTitle', { name: student?.name || '' }) }}
           </h1>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {{ t('student.detailSubtitle') }}
-          </p>
         </div>
         <UButton
           @click="$router.back()"
@@ -47,30 +44,21 @@
 
       <!-- Student Packages -->
       <StudentPackagesCard
-        :student-packages="studentPackages"
-        :package-filter="packageFilter"
-        :package-search-query="packageSearchQuery"
+        :student-id="student.id"
         @add-package="showAddPackageModal = true"
         @edit-package="editStudentPackage"
         @delete-package="handleDeleteStudentPackage"
-        @update:package-filter="packageFilter = $event"
-        @update:package-search-query="packageSearchQuery = $event"
       />
 
       <!-- Recent Bookings -->
       <StudentBookingsCard
-        :student-bookings="studentBookings"
-        :classes="classes"
-        :loading="bookingsLoading"
-        @refresh="loadStudentBookings"
+        :student-id="student.id"
         @view-booking="viewBooking"
       />
 
       <!-- Recent Transactions -->
       <StudentTransactionsCard
-        :student-transactions="studentTransactions"
-        :loading="transactionsLoading"
-        @refresh="loadStudentTransactions"
+        :student-id="student.id"
         @view-transaction="viewTransaction"
       />
     </div>
@@ -100,24 +88,11 @@ const { t } = useI18n()
 const loading = ref(true)
 const error = ref('')
 const student = ref<any>(null)
-const studentPackages = ref<any[]>([])
-const studentBookings = ref<any[]>([])
-const studentTransactions = ref<any[]>([])
 const showAddPackageModal = ref(false)
 const showEditStudentModal = ref(false)
-const packageFilter = ref('all')
-const packageSearchQuery = ref('')
-const bookingsLoading = ref(false)
-const transactionsLoading = ref(false)
 
 // Composables
 const { getStudentById, updateStudent } = useStudents()
-const { loadStudentPackagesByStudent } = useStudentPackages()
-const { getBookingsByStudent } = useBookings()
-const { getTransactionsByStudent } = useTransactions()
-const { classes, loadClasses } = useClasses()
-
-// Computed - removed as it's now handled by StudentPackagesCard component
 
 // Methods
 const loadStudentData = async () => {
@@ -134,28 +109,12 @@ const loadStudentData = async () => {
     }
     
     student.value = studentData
-    await loadStudentPackages()
   } catch (err) {
     error.value = t('common.errorLoading')
     console.error('Error loading student:', err)
   } finally {
     loading.value = false
   }
-}
-
-const loadStudentPackages = async () => {
-  if (!student.value) return
-  
-  try {
-    const packages = await loadStudentPackagesByStudent(student.value.id)
-    studentPackages.value = packages
-  } catch (err) {
-    console.error('Error loading student packages:', err)
-  }
-}
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString()
 }
 
 const editStudent = () => {
@@ -170,7 +129,7 @@ const handleStudentUpdated = async (updatedStudent: any) => {
 
 const handlePackageAdded = async () => {
   showAddPackageModal.value = false
-  // Refresh both student data (for updated credits) and packages
+  // Refresh student data (for updated credits)
   await loadStudentData()
 }
 
@@ -184,45 +143,13 @@ const handleDeleteStudentPackage = async (studentPackage: any) => {
     try {
       const { deleteStudentPackage } = useStudentPackages()
       await deleteStudentPackage(studentPackage.id)
-      // Refresh both student data (for updated credits) and packages
+      // Refresh student data (for updated credits)
       await loadStudentData()
     } catch (err) {
       console.error('Error deleting student package:', err)
     }
   }
 }
-
-// Load student bookings
-const loadStudentBookings = async () => {
-  if (!student.value) return
-  
-  try {
-    bookingsLoading.value = true
-    const bookings = await getBookingsByStudent(student.value.id, 10)
-    studentBookings.value = bookings
-  } catch (err) {
-    console.error('Error loading student bookings:', err)
-  } finally {
-    bookingsLoading.value = false
-  }
-}
-
-// Load student transactions
-const loadStudentTransactions = async () => {
-  if (!student.value) return
-  
-  try {
-    transactionsLoading.value = true
-    const transactions = await getTransactionsByStudent(student.value.id, 10)
-    studentTransactions.value = transactions
-  } catch (err) {
-    console.error('Error loading student transactions:', err)
-  } finally {
-    transactionsLoading.value = false
-  }
-}
-
-// Utility functions - removed as they're now handled by individual components
 
 // View booking details
 const viewBooking = (booking: any) => {
@@ -239,7 +166,5 @@ const viewTransaction = (transaction: any) => {
 // Load data on mount
 onMounted(() => {
   loadStudentData()
-  loadStudentBookings()
-  loadStudentTransactions()
 })
 </script> 

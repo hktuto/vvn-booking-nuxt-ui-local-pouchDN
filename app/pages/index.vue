@@ -6,9 +6,6 @@
           <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ $t('dashboard.title') }}
           </h1>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Welcome back! Here's your overview for today.
-          </p>
         </div>
         <!-- <OnboardingTrigger /> -->
       </div>
@@ -78,7 +75,7 @@
           block
         >
           <UIcon name="i-heroicons-map-pin" class="h-6 w-6 mb-2" />
-          <span class="text-sm">{{ $t('common.locations') }}</span>
+          <span class="text-sm">{{ $t('location.locations') }}</span>
         </UButton>
         
         <UButton 

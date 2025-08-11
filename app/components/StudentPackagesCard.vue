@@ -32,79 +32,29 @@
       />
     </div>
 
-    <!-- Package List -->
-    <div v-if="filteredStudentPackages.length > 0" class="space-y-3">
-      <div
-        v-for="studentPackage in filteredStudentPackages"
-        :key="studentPackage.id"
-        class="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-2">
-              <h3 class="font-medium text-gray-900 dark:text-white">
-                {{ studentPackage.package_name }}
-              </h3>
-              <UBadge
-                v-if="studentPackage.is_custom"
-                color="secondary"
-                variant="soft"
-                size="sm"
-              >
-                {{ t('student.customPackage') }}
-              </UBadge>
-              <UBadge
-                :color="getStatusColor(studentPackage.status)"
-                variant="soft"
-                size="sm"
-              >
-                {{ t(`student.packageStatus.${studentPackage.status}`) }}
-              </UBadge>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <div>
-                <span class="font-medium">{{ t('student.creditsPurchased') }}:</span>
-                {{ studentPackage.credits_purchased }}
-              </div>
-              <div>
-                <span class="font-medium">{{ t('student.creditsRemaining') }}:</span>
-                {{ studentPackage.credits_remaining }}
-              </div>
-              <div>
-                <span class="font-medium">{{ t('student.purchaseDate') }}:</span>
-                {{ formatDate(studentPackage.purchase_date) }}
-              </div>
-              <div>
-                <span class="font-medium">{{ t('student.expiryDate') }}:</span>
-                {{ formatDate(studentPackage.expiry_date) }}
-              </div>
-            </div>
-            
-            <div v-if="studentPackage.notes" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              <span class="font-medium">{{ t('student.notes') }}:</span>
-              {{ studentPackage.notes }}
-            </div>
-          </div>
-          
-          <div class="flex gap-2 ml-4">
-            <UButton
-              @click="$emit('edit-package', studentPackage)"
-              variant="ghost"
-              size="sm"
-              icon="i-heroicons-pencil-square"
-              :aria-label="t('common.edit')"
-            />
-            <UButton
-              @click="$emit('delete-package', studentPackage)"
-              variant="ghost"
-              size="sm"
-              color="error"
-              icon="i-heroicons-trash"
-              :aria-label="t('common.delete')"
-            />
-          </div>
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center py-8">
+      <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 animate-spin text-primary-500" />
+    </div>
+
+    <!-- Package Table -->
+    <div v-else-if="filteredStudentPackages.length > 0" class="overflow-x-auto">
+      <UTable
+        :data="paginatedStudentPackages"
+        :columns="columns"
+        :loading="loading"
+      />
+      
+      <!-- Pagination -->
+      <div class="flex items-center justify-between mt-4">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+          {{ t('common.showing', { from: paginationStart + 1, to: paginationEnd, total: filteredStudentPackages.length }) }}
         </div>
+        <UPagination
+          v-model="currentPage"
+          :page-count="pageCount"
+          :total="filteredStudentPackages.length"
+        />
       </div>
     </div>
 
@@ -130,16 +80,9 @@
 
 <script setup lang="ts">
 interface Props {
-  studentPackages: any[]
+  studentId: string
 }
-const packageFilter = defineModel<string>('packageFilter', {
-  required: true,
-  default: 'all'
-})
-const packageSearchQuery = defineModel<string>('packageSearchQuery', {
-  required: true,
-  default: ''
-})
+
 interface Emits {
   (e: 'add-package'): void
   (e: 'edit-package', studentPackage: any): void
@@ -150,6 +93,57 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
+const { loadStudentPackagesByStudent } = useStudentPackages()
+
+// State
+const loading = ref(false)
+const studentPackages = ref<any[]>([])
+const packageFilter = ref('all')
+const packageSearchQuery = ref('')
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+// Table columns
+const columns = computed(() => [
+  {
+    accessorKey: 'package_name',
+    header: t('student.packageNamePreview')
+  },
+  {
+    accessorKey: 'status',
+    header: t('transactions.status')
+  },
+  {
+    accessorKey: 'credits_purchased',
+    header: t('student.creditsPurchased')
+  },
+  {
+    accessorKey: 'credits_remaining',
+    header: t('student.creditsRemaining')
+  },
+  {
+    accessorKey: 'purchase_date',
+    header: t('student.purchaseDate')
+  },
+  {
+    accessorKey: 'expiry_date',
+    header: t('student.expiryDate')
+  },
+  {
+    accessorKey: 'actions',
+    header: t('transactions.actions')
+  }
+])
+
+// Pagination computed
+const pageCount = computed(() => Math.ceil(filteredStudentPackages.value.length / pageSize.value))
+const paginationStart = computed(() => (currentPage.value - 1) * pageSize.value)
+const paginationEnd = computed(() => Math.min(paginationStart.value + pageSize.value, filteredStudentPackages.value.length))
+const paginatedStudentPackages = computed(() => {
+  const start = paginationStart.value
+  const end = paginationStart.value + pageSize.value
+  return filteredStudentPackages.value.slice(start, end)
+})
 
 // Computed
 const packageFilterOptions = computed(() => [
@@ -160,16 +154,16 @@ const packageFilterOptions = computed(() => [
 ])
 
 const filteredStudentPackages = computed(() => {
-  let filtered = props.studentPackages
+  let filtered = studentPackages.value
 
   // Apply status filter
-  if (props.packageFilter !== 'all') {
-    filtered = filtered.filter(pkg => pkg.status === props.packageFilter)
+  if (packageFilter.value !== 'all') {
+    filtered = filtered.filter(pkg => pkg.status === packageFilter.value)
   }
 
   // Apply search filter
-  if (props.packageSearchQuery) {
-    const query = props.packageSearchQuery.toLowerCase()
+  if (packageSearchQuery.value) {
+    const query = packageSearchQuery.value.toLowerCase()
     filtered = filtered.filter(pkg => 
       pkg.package_name.toLowerCase().includes(query) ||
       pkg.notes?.toLowerCase().includes(query)
@@ -180,6 +174,20 @@ const filteredStudentPackages = computed(() => {
 })
 
 // Methods
+const loadStudentPackages = async () => {
+  if (!props.studentId) return
+  
+  try {
+    loading.value = true
+    const data = await loadStudentPackagesByStudent(props.studentId)
+    studentPackages.value = data
+  } catch (err) {
+    console.error('Error loading student packages:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'active': return 'primary'
@@ -192,4 +200,21 @@ const getStatusColor = (status: string) => {
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString()
 }
+
+// Load data on mount
+onMounted(() => {
+  loadStudentPackages()
+})
+
+// Watch for studentId changes
+watch(() => props.studentId, () => {
+  if (props.studentId) {
+    loadStudentPackages()
+  }
+})
+
+// Watch for filter changes and reset pagination
+watch([packageFilter, packageSearchQuery], () => {
+  currentPage.value = 1
+})
 </script> 

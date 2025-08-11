@@ -297,6 +297,14 @@
       "bank_transfer": "Bank Transfer",
       "other": "Other"
     },
+    "payment": {
+      "cash": "Cash",
+      "payme": "PayMe",
+      "wechat": "WeChat Pay",
+      "alipay": "Alipay",
+      "fps": "FPS",
+      "credit_card": "Credit Card"
+    },
     "detailsTitle": "Transaction Details",
     "studentInfo": "Student Information",
     "packageInfo": "Package Information",
@@ -338,6 +346,18 @@
     "noTransactions": "No Transactions",
     "noTransactionsDescription": "No transactions found matching your filters",
     "types": {
+      "package_purchase": "Package Purchase",
+      "credit_usage": "Credit Usage",
+      "cash_payment": "Cash Payment",
+      "refund": "Refund"
+    },
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "type": {
       "package_purchase": "Package Purchase",
       "credit_usage": "Credit Usage",
       "cash_payment": "Cash Payment",
@@ -628,7 +648,8 @@
     "sunday": "Sunday",
     "days": "days",
     "minutes": "minutes",
-    "toggleColorMode": "Toggle Color Mode"
+    "toggleColorMode": "Toggle Color Mode",
+    "showing": "Showing {from} to {to} of {total} entries"
   },
   "payment": {
     "cash": "Cash",
@@ -686,6 +707,13 @@
     "addStudent": "Add Student",
     "removeStudent": "Remove Student",
     "viewDetails": "View Details",
+    "className": "Class Name",
+    "status": "Status",
+    "paymentStatus": "Payment Status",
+    "date": "Date",
+    "time": "Time",
+    "creditsUsed": "Credits Used",
+    "bookedAt": "Booked At"
     "addStudentToClass": "Add Student to Class",
     "manageStudents": "Manage Students",
     "selectStudent": "Select Student",

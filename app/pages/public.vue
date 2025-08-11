@@ -4,9 +4,6 @@
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
         Welcome to VVN Booking
       </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        This is a public page that doesn't require authentication
-      </p>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
