@@ -83,12 +83,16 @@
       <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
         <UCard>
           <div class="flex items-center">
-            <div class="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <UIcon name="i-heroicons-arrow-up" class="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div class="hidden sm:flex items-center justify-center p-2 bg-green-100 dark:bg-green-900/20 rounded-lg ">
+              <UIcon name="i-heroicons-arrow-up" class="w-4 h-4 md:w-6 md:h-6 text-green-600 dark:text-green-400" />
             </div>
-            <div class="ml-4">
+            <div class="ml-2">
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+               
                 {{ t('transactions.totalRevenue') }}
+                <div class="sm:hidden inline-flex items-center justify-center p-1 bg-green-100 dark:bg-green-900/20 rounded-lg ">
+                  <UIcon name="i-heroicons-arrow-up" class="w-2 h-2  text-green-600 dark:text-green-400" />
+                </div>
               </p>
               <p  class="text-2xl font-bold text-gray-900 dark:text-white">
                 ${{ stats.totalRevenue.toFixed(2) || 0 }}
@@ -99,12 +103,15 @@
 
         <UCard>
           <div class="flex items-center">
-            <div class="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+            <div class="hidden sm:flex items-center justify-center p-2 bg-red-100 dark:bg-red-900/20 rounded-lg ">
               <UIcon name="i-heroicons-arrow-down" class="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
-            <div class="ml-4">
+            <div class="ml-2">
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {{ t('transactions.totalRefunds') }}
+                <div class="sm:hidden inline-flex items-center justify-center p-1 bg-red-100 dark:bg-red-900/20 rounded-lg ">
+                  <UIcon name="i-heroicons-arrow-down" class="w-2 h-2  text-red-600 dark:text-red-400" />
+                </div>
               </p>
               <p  class="text-2xl font-bold text-gray-900 dark:text-white">
                 ${{ stats.totalRefunds.toFixed(2) || 0 }}
@@ -115,12 +122,15 @@
 
         <UCard>
           <div class="flex items-center">
-            <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+            <div class="hidden sm:flex items-center justify-center p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg ">
               <UIcon name="i-heroicons-currency-dollar" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <div class="ml-4">
+            <div class="ml-2">
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {{ t('transactions.netRevenue') }}
+                <div class="sm:hidden inline-flex items-center justify-center p-1 bg-blue-100 dark:bg-blue-900/20 rounded-lg ">
+                  <UIcon name="i-heroicons-currency-dollar" class="w-2 h-2  text-blue-600 dark:text-blue-400" />
+                </div>
               </p>
               <p  class="text-2xl font-bold text-gray-900 dark:text-white">
                 ${{ stats.netRevenue.toFixed(2) || 0 }}
@@ -131,12 +141,15 @@
 
         <UCard>
           <div class="flex items-center">
-            <div class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+            <div class="hidden sm:flex items-center justify-center p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg ">
               <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <div class="ml-4">
+            <div class="ml-2">
               <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {{ t('transactions.totalTransactions') }}
+                <div class="sm:hidden inline-flex items-center justify-center p-1 bg-purple-100 dark:bg-purple-900/20 rounded-lg ">
+                  <UIcon name="i-heroicons-document-text" class="w-2 h-2  text-purple-600 dark:text-purple-400" />
+                </div>
               </p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">
                 {{ stats.totalTransactions }}
@@ -185,62 +198,7 @@
           :loading="loading"
           class="flex-1"
         >
-          <!-- <template #student_id-data="{ row }">
-            <div class="flex items-center">
-              <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                <UIcon name="i-heroicons-user" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-              </div>
-              <div class="ml-3">
-                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                  {{ getStudentName(row.student_id) }}
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <template #transaction_type-data="{ row }">
-            <UBadge
-              :color="getTransactionTypeColor(row.transaction_type)"
-              variant="soft"
-            >
-              {{ t(`transactions.types.${row.transaction_type}`) }}
-            </UBadge>
-          </template>
-
-          <template #description-data="{ row }">
-            <div class="max-w-xs truncate" :title="row.description">
-              {{ row.description }}
-            </div>
-            <div v-if="row.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {{ row.notes }}
-            </div>
-          </template>
-
-          <template #amount-data="{ row }">
-            <span :class="row.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-              {{ row.amount >= 0 ? '+' : '' }}${{ row.amount.toFixed(2) }}
-            </span>
-          </template>
-
-          <template #status-data="{ row }">
-            <UBadge
-              :color="getStatusColor(row.status)"
-              variant="soft"
-            >
-              {{ t(`transactions.status.${row.status}`) }}
-            </UBadge>
-          </template>
-
-          <template #actions-data="{ row }">
-            <UButton
-              @click="viewTransactionDetails(row)"
-              variant="ghost"
-              size="sm"
-              icon="i-heroicons-eye"
-            >
-              {{ t('transactions.view') }}
-            </UButton>
-          </template> -->
+          
         </UTable>
         </div>
         <!-- Empty State -->
