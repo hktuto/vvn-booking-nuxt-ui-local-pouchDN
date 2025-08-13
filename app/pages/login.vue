@@ -104,15 +104,10 @@ definePageMeta({
   auth: false
 })
 
-const { auth, login, checkFirstTimeSetup } = useAuth()
+const { auth, login } = useAuth()
 const { loginSchema } = useAuthValidation()
 const { isDark, toggleDarkMode } = useDarkMode()
 
-// Check for first time setup
-const isFirstTime = await checkFirstTimeSetup()
-if (isFirstTime) {
-  await navigateTo('/register')
-}
 
 // Redirect if already logged in
 if (auth.value.isAuthenticated) {

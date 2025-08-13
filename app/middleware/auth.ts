@@ -11,13 +11,18 @@ export default defineNuxtRouteMiddleware((to) => {
     return // Allow access to public pages
   }
   
-  // Allow access to login and register pages
-  if (to.path === '/login' || to.path === '/register') {
+  // Allow access to login page
+  if (to.path === '/login') {
     // Redirect to dashboard if already authenticated
     if (auth.value.isAuthenticated) {
       return navigateTo('/')
     }
     return
+  }
+
+  // Block direct access to register page
+  if (to.path === '/register') {
+    return navigateTo('/login')
   }
   
   // Require authentication for all other routes
