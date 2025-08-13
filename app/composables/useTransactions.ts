@@ -1,6 +1,6 @@
 import type { TransactionDocument } from './usePouchDB'
 import { usePouchCRUD } from './usePouchDB'
-import { useTransactionDB } from '~/utils/dbStateHelper'
+import { useTransactionDBByYear } from '~/utils/dbStateHelper'
 import { useTransactionDetailsDialog } from './useTransactionDetailsDialog'
 
 const transformTransactionDoc = (doc: TransactionDocument) => ({
@@ -25,13 +25,29 @@ const transformTransactionDoc = (doc: TransactionDocument) => ({
 })
 
 export const useTransactions = () => {
-  const { getDB } = useTransactionDB()
+  const { getDBForDate, getDBForYear, listShardYears } = useTransactionDBByYear()
   const { getStudentById } = useStudents()
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   // Use the transaction details dialog composable
   const { showTransactionDetailsDialog } = useTransactionDetailsDialog()
+
+  // Cross-year lookup helper
+  const findTransactionDocAndDBById = async (id: string): Promise<{ doc: TransactionDocument | null, db: PouchDB.Database | null, year: number | null }> => {
+    const years = await listShardYears()
+    for (const year of years) {
+      const db = await getDBForYear(year)
+      try {
+        const doc = await db.get(id) as TransactionDocument
+        return { doc, db, year }
+      } catch (e: any) {
+        if (e?.status === 404) continue
+        throw e
+      }
+    }
+    return { doc: null, db: null, year: null }
+  }
 
   // Create a new transaction
   const createTransaction = async (transactionData: {
@@ -56,7 +72,7 @@ export const useTransactions = () => {
     bookingInfo?: any
   }) => {
     try {
-      const transactionsDB = await getDB()
+      const transactionsDB = await getDBForDate(transactionData.created_at || new Date().toISOString())
       const transactionsCRUD = usePouchCRUD<TransactionDocument>(transactionsDB)
       
       const doc = {
@@ -85,10 +101,7 @@ export const useTransactions = () => {
   // Get transaction by ID
   const getTransactionById = async (id: string) => {
     try {
-      const transactionsDB = await getDB()
-      const transactionsCRUD = usePouchCRUD<TransactionDocument>(transactionsDB)
-      
-      const doc = await transactionsCRUD.findById(id)
+      const { doc } = await findTransactionDocAndDBById(id)
       return doc ? transformTransactionDoc(doc) : null
     } catch (err) {
       console.error('Error getting transaction by ID:', err)
@@ -99,16 +112,14 @@ export const useTransactions = () => {
   // Get transactions for a specific student
   const getTransactionsByStudent = async (studentId: string, limit?: number) => {
     try {
-      const transactionsDB = await getDB()
-      const result = await transactionsDB.find({
-        selector: { 
-          type: 'transaction',
-          student_id: studentId
-        },
-        limit: limit || 50
-      })
-      
-      return result.docs
+      const years = await listShardYears()
+      const allDocs: TransactionDocument[] = []
+      for (const year of years) {
+        const db = await getDBForYear(year)
+        const result = await db.find({ selector: { type: 'transaction', student_id: studentId } })
+        allDocs.push(...(result.docs as TransactionDocument[]))
+      }
+      return allDocs
         .map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err) {
@@ -120,16 +131,14 @@ export const useTransactions = () => {
   // Get transactions for a specific class
   const getTransactionsByClass = async (classId: string, limit?: number) => {
     try {
-      const transactionsDB = await getDB()
-      const result = await transactionsDB.find({
-        selector: { 
-          type: 'transaction',
-          class_id: classId
-        },
-        limit: limit || 50
-      })
-      
-      return result.docs
+      const years = await listShardYears()
+      const allDocs: TransactionDocument[] = []
+      for (const year of years) {
+        const db = await getDBForYear(year)
+        const result = await db.find({ selector: { type: 'transaction', class_id: classId } })
+        allDocs.push(...(result.docs as TransactionDocument[]))
+      }
+      return allDocs
         .map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err) {
@@ -141,16 +150,14 @@ export const useTransactions = () => {
   // Get transactions for a specific package
   const getTransactionsByPackage = async (packageId: string, limit?: number) => {
     try {
-      const transactionsDB = await getDB()
-      const result = await transactionsDB.find({
-        selector: { 
-          type: 'transaction',
-          package_id: packageId
-        },
-        limit: limit || 50
-      })
-      
-      return result.docs
+      const years = await listShardYears()
+      const allDocs: TransactionDocument[] = []
+      for (const year of years) {
+        const db = await getDBForYear(year)
+        const result = await db.find({ selector: { type: 'transaction', package_id: packageId } })
+        allDocs.push(...(result.docs as TransactionDocument[]))
+      }
+      return allDocs
         .map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err) {
@@ -162,15 +169,14 @@ export const useTransactions = () => {
   // Get recent transactions
   const getRecentTransactions = async (limit: number = 20) => {
     try {
-      const transactionsDB = await getDB()
-      const result = await transactionsDB.find({
-        selector: { 
-          type: 'transaction'
-        },
-        limit: limit
-      })
-      
-      return result.docs
+      const years = await listShardYears()
+      const allDocs: TransactionDocument[] = []
+      for (const year of years) {
+        const db = await getDBForYear(year)
+        const result = await db.find({ selector: { type: 'transaction' } })
+        allDocs.push(...(result.docs as TransactionDocument[]))
+      }
+      return allDocs
         .map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err) {
@@ -182,19 +188,15 @@ export const useTransactions = () => {
   // Get transactions by date range
   const getTransactionsByDateRange = async (startDate: string, endDate: string, limit?: number) => {
     try {
-      const transactionsDB = await getDB()
-      const result = await transactionsDB.find({
-        selector: { 
-          type: 'transaction',
-          created_at: {
-            $gte: startDate,
-            $lte: endDate
-          }
-        },
-        limit: limit || 100
-      })
-      
-      return result.docs
+      const years = await listShardYears()
+      const rangeYears = Array.from(new Set(years.filter(y => y >= new Date(startDate).getFullYear() && y <= new Date(endDate).getFullYear())))
+      const allDocs: TransactionDocument[] = []
+      for (const year of rangeYears) {
+        const db = await getDBForYear(year)
+        const result = await db.find({ selector: { type: 'transaction', created_at: { $gte: startDate, $lte: endDate } } })
+        allDocs.push(...(result.docs as TransactionDocument[]))
+      }
+      return allDocs
         .map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err) {
@@ -206,16 +208,14 @@ export const useTransactions = () => {
   // Get transactions by type
   const getTransactionsByType = async (transactionType: string, limit?: number) => {
     try {
-      const transactionsDB = await getDB()
-      const result = await transactionsDB.find({
-        selector: { 
-          type: 'transaction',
-          transaction_type: transactionType
-        },
-        limit: limit || 50
-      })
-      
-      return result.docs
+      const years = await listShardYears()
+      const allDocs: TransactionDocument[] = []
+      for (const year of years) {
+        const db = await getDBForYear(year)
+        const result = await db.find({ selector: { type: 'transaction', transaction_type: transactionType } })
+        allDocs.push(...(result.docs as TransactionDocument[]))
+      }
+      return allDocs
         .map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } catch (err) {
@@ -227,9 +227,9 @@ export const useTransactions = () => {
   // Update transaction status
   const updateTransactionStatus = async (id: string, status: 'completed' | 'refunded' | 'pending' | 'cancelled') => {
     try {
-      const transactionsDB = await getDB()
-      const transactionsCRUD = usePouchCRUD<TransactionDocument>(transactionsDB)
-      
+      const { db } = await findTransactionDocAndDBById(id)
+      if (!db) throw new Error('Transaction not found')
+      const transactionsCRUD = usePouchCRUD<TransactionDocument>(db)
       const updatedTransaction = await transactionsCRUD.update(id, { status })
       return transformTransactionDoc(updatedTransaction)
     } catch (err) {
@@ -241,15 +241,13 @@ export const useTransactions = () => {
   // Create refund transaction
   const createRefundTransaction = async (originalTransactionId: string, refundAmount: number, notes?: string) => {
     try {
-      const transactionsDB = await getDB()
-      const transactionsCRUD = usePouchCRUD<TransactionDocument>(transactionsDB)
-      
-      // Get original transaction
-      const originalTransaction = await transactionsCRUD.findById(originalTransactionId)
+      const { doc: originalTransaction } = await findTransactionDocAndDBById(originalTransactionId)
       if (!originalTransaction) {
         throw new Error('Original transaction not found')
       }
       
+      const transactionsDB = await getDBForDate(originalTransaction.created_at)
+      const transactionsCRUD = usePouchCRUD<TransactionDocument>(transactionsDB)
       // Create refund transaction
       const refundTransaction = await transactionsCRUD.create({
         type: 'transaction',
@@ -278,25 +276,24 @@ export const useTransactions = () => {
   // Get transaction statistics
   const getTransactionStats = async (startDate?: string, endDate?: string, userId?: string, transactionType?: string) => {
     try {
-      const transactionsDB = await getDB()
-      
       let selector: any = { type: 'transaction' }
-      
-      if (startDate && endDate) {
-        selector.created_at = { $gte: startDate, $lte: endDate }
+      if (startDate && endDate) selector.created_at = { $gte: startDate, $lte: endDate }
+      if (userId) selector.student_id = userId
+      if (transactionType) selector.transaction_type = transactionType
+
+      const years = await listShardYears()
+      const targetYears = startDate && endDate
+        ? years.filter(y => y >= new Date(startDate).getFullYear() && y <= new Date(endDate).getFullYear())
+        : years
+
+      const allDocs: TransactionDocument[] = []
+      for (const year of targetYears) {
+        const db = await getDBForYear(year)
+        const result = await db.find({ selector })
+        allDocs.push(...(result.docs as TransactionDocument[]))
       }
-      
-      if (userId) {
-        selector.student_id = userId
-      }
-      
-      if (transactionType) {
-        selector.transaction_type = transactionType
-      }
-      
-      const result = await transactionsDB.find({ selector })
-      
-      const transactions = result.docs.map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
+
+      const transactions = allDocs.map((doc: any) => transformTransactionDoc(doc as TransactionDocument))
       
       const totalRevenue = transactions.reduce((sum: number, t: any) => sum + t.amount, 0)
       const totalTransactions = transactions.length

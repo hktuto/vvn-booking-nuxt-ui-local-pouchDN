@@ -58,6 +58,7 @@ export const cleanupCurrentUserDatabases = async () => {
       { name: 'student_packages', getDB: getStudentPackageDB, isShared: false },
       { name: 'class_types', getDB: getClassTypeDB, isShared: false },
       { name: 'classes', getDB: getClassDB, isShared: false },
+      // bookings and transactions now sharded by year; we will delete via IndexedDB sweep below as well
       { name: 'bookings', getDB: getBookingDB, isShared: false },
       { name: 'transactions', getDB: getTransactionDB, isShared: false },
       { name: 'locations', getDB: getLocationDB, isShared: false }
@@ -82,6 +83,25 @@ export const cleanupCurrentUserDatabases = async () => {
       }
     }
     
+    // Additionally, delete year-sharded DBs that match user-specific prefixes
+    try {
+      if (process.client && (window.indexedDB as any)?.databases) {
+        const dbs: Array<{ name?: string }> = await (window.indexedDB as any).databases()
+        const prefixes = [`${userId}_bookings_`, `${userId}_transactions_`]
+        for (const dbInfo of dbs) {
+          const name = dbInfo.name || ''
+          if (prefixes.some(p => name.startsWith(p))) {
+            const delReq = window.indexedDB.deleteDatabase(name)
+            delReq.onsuccess = () => { console.log(`✅ Deleted shard database: ${name}`); deletedCount++ }
+            delReq.onerror = () => { console.warn(`⚠️  Failed to delete shard database: ${name}`) }
+            await new Promise(resolve => setTimeout(resolve, 50))
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to sweep shard databases:', e)
+    }
+
     console.log(`🎉 Current user cleanup completed! Deleted ${deletedCount} databases`)
     
     if (errors.length > 0) {
@@ -312,8 +332,6 @@ export const cleanupUserSpecificDatabases = async (userId?: string) => {
       `${userId}_student_packages`,
       `${userId}_class_types`,
       `${userId}_classes`,
-      `${userId}_bookings`,
-      `${userId}_transactions`,
       `${userId}_locations`
     ]
     
@@ -322,9 +340,7 @@ export const cleanupUserSpecificDatabases = async (userId?: string) => {
     // Clean up all user-specific databases (any database with underscore)
     try {
       const databases = await window.indexedDB.databases()
-      const userDatabases = databases.filter(db => 
-        db.name.includes('_') && !db.name.startsWith('_')
-      )
+      const userDatabases = databases.filter(db => db.name.includes('_') && !db.name.startsWith('_'))
       
       if (userDatabases.length === 0) {
         console.log('✅ No user-specific databases found')
