@@ -1,9 +1,9 @@
 import type { BookingDocument } from '~/composables/usePouchDB'
 import { usePouchCRUD } from './usePouchDB'
-import { useBookingDB, useClassDB } from '~/utils/dbStateHelper'
+import { useBookingDBByYear, useClassDB } from '~/utils/dbStateHelper'
 
 export const useBookings = () => {
-  const { getDB: getBookingsDB } = useBookingDB()
+  const { getDBForDate: getBookingsDBForDate, getDBForYear: getBookingsDBForYear, listShardYears: listBookingShardYears } = useBookingDBByYear()
   const { getDB: getClassesDB } = useClassDB()
   const { classes, loadClasses } = useClasses()
   const { students, loadStudents } = useStudents()
@@ -24,6 +24,22 @@ export const useBookings = () => {
     updated_at: doc.updated_at
   })
 
+  // Cross-year lookup helpers
+  const findBookingDocAndDBById = async (id: string): Promise<{ doc: BookingDocument | null, db: PouchDB.Database | null, year: number | null }> => {
+    const years = await listBookingShardYears()
+    for (const year of years) {
+      const db = await getBookingsDBForYear(year)
+      try {
+        const doc = await db.get(id) as BookingDocument
+        return { doc, db, year }
+      } catch (e: any) {
+        if (e?.status === 404) continue
+        throw e
+      }
+    }
+    return { doc: null, db: null, year: null }
+  }
+
   const addBooking = async (bookingData: {
     class_id: string
     class_date: string
@@ -42,7 +58,7 @@ export const useBookings = () => {
     is_virtual: boolean
   }) => {
     try {
-      const bookingsDB = await getBookingsDB()
+      const bookingsDB = await getBookingsDBForDate(bookingData.class_date)
       const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
       
       const newBooking = await bookingsCRUD.create({
@@ -59,11 +75,11 @@ export const useBookings = () => {
 
   const updateBooking = async (id: string, updates: Partial<Omit<BookingDocument, '_id' | 'type' | 'created_at'>>) => {
     try {
-      const bookingsDB = await getBookingsDB()
-      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-      
-      const updatedBooking = await bookingsCRUD.update(id, updates)
-      return updatedBooking
+      const { db } = await findBookingDocAndDBById(id)
+      if (!db) throw new Error('Booking not found')
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(db)
+      const updated = await bookingsCRUD.update(id, updates)
+      return updated
     } catch (err) {
       console.error('Error updating booking:', err)
       throw new Error('Failed to update booking')
@@ -72,9 +88,9 @@ export const useBookings = () => {
 
   const deleteBooking = async (id: string) => {
     try {
-      const bookingsDB = await getBookingsDB()
-      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-      
+      const { db } = await findBookingDocAndDBById(id)
+      if (!db) return
+      const bookingsCRUD = usePouchCRUD<BookingDocument>(db)
       await bookingsCRUD.remove(id)
     } catch (err) {
       console.error('Error deleting booking:', err)
@@ -89,10 +105,7 @@ export const useBookings = () => {
         return await getVirtualBookingById(id)
       }
       
-      const bookingsDB = await getBookingsDB()
-      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-      
-      const doc = await bookingsCRUD.findById(id)
+      const { doc } = await findBookingDocAndDBById(id)
       return doc ? transformBookingDoc(doc) : null
     } catch (err) {
       console.error('Error getting booking by ID:', err)
@@ -173,7 +186,7 @@ export const useBookings = () => {
       
       if (isScheduledForDate) {
         // Check if there's already a real booking for this class on this date
-        const bookingsDB = await getBookingsDB()
+        const bookingsDB = await getBookingsDBForDate(date)
         const findExistingBooking = await bookingsDB.find({
           selector: {
             class_id: class_.id,
@@ -208,7 +221,7 @@ export const useBookings = () => {
       await Promise.all([loadClasses(), loadStudents()])
       
       // Only load bookings for the specific date
-      const bookingsDB = await getBookingsDB()
+      const bookingsDB = await getBookingsDBForDate(date)
       const realBookings = await bookingsDB.find({
         selector: { 
           class_date: {
@@ -234,23 +247,19 @@ export const useBookings = () => {
     try {
       await Promise.all([loadClasses(), loadStudents()])
       
-      const bookingsDB = await getBookingsDB()
-      const result = await bookingsDB.find({
-        selector: { 
-          type: 'booking'
-        },
-        limit: limit || 50
-      })
-      
-      // Filter bookings that contain the student
-      const bookingsWithStudent = result.docs
+      const years = await listBookingShardYears()
+      const allDocs: BookingDocument[] = []
+      for (const year of years) {
+        const db = await getBookingsDBForYear(year)
+        const result = await db.find({ selector: { type: 'booking' } })
+        allDocs.push(...(result.docs as BookingDocument[]))
+      }
+      const bookingsWithStudent = allDocs
         .map((doc: any) => transformBookingDoc(doc as BookingDocument))
-        .filter((booking: any) => 
-          booking.bookings.some((studentBooking: any) => studentBooking.student_id === studentId)
-        )
+        .filter((booking: any) => booking.bookings.some((sb: any) => sb.student_id === studentId))
         .map((booking: any) => ({
           ...booking,
-          studentBooking: booking.bookings.find((studentBooking: any) => studentBooking.student_id === studentId)
+          studentBooking: booking.bookings.find((sb: any) => sb.student_id === studentId)
         }))
         .sort((a: any, b: any) => new Date(b.class_date).getTime() - new Date(a.class_date).getTime())
         .slice(0, limit || 50)
@@ -312,10 +321,7 @@ export const useBookings = () => {
       } else {
         // Add to existing real booking
         const updatedBookings = [...booking.bookings, newBookingData]
-        await updateBooking(bookingId, {
-          bookings: updatedBookings,
-          total_booked: updatedBookings.length
-        })
+        await updateBooking(bookingId, { bookings: updatedBookings, total_booked: updatedBookings.length })
         
         return {
           success: true,
@@ -333,9 +339,7 @@ export const useBookings = () => {
   // Remove student from booking
   const removeStudentFromBooking = async (bookingId: string, studentId: string) => {
     try {
-      const bookingsDB = await getBookingsDB()
-      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-      const existingBooking = await bookingsCRUD.findById(bookingId)
+      const { doc: existingBooking } = await findBookingDocAndDBById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
         
         const updatedBookings = existingBooking.bookings.filter((b: any) => b.student_id !== studentId)
@@ -343,10 +347,7 @@ export const useBookings = () => {
       
         console.log('updateBooking', bookingId, updatedBookings)
         // Update the booking
-        await updateBooking(bookingId, {
-          bookings: updatedBookings,
-          total_booked: updatedBookings.length
-        })
+        await updateBooking(bookingId, { bookings: updatedBookings, total_booked: updatedBookings.length })
       
     } catch (err) {
       console.error('Error removing student from booking:', err)
@@ -403,9 +404,7 @@ export const useBookings = () => {
   // Update student booking status and credits used
   const updateStudentBookingStatus = async (bookingId: string, studentId: string, status: 'confirmed' | 'cancelled' | 'completed' | 'no_show', creditsUsed: number) => {
     try {
-      const bookingsDB = await getBookingsDB()
-      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-      const existingBooking = await bookingsCRUD.findById(bookingId)
+      const { doc: existingBooking } = await findBookingDocAndDBById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
       
       // Find and update the specific student's booking
@@ -428,9 +427,7 @@ export const useBookings = () => {
       }
       
       // Update the booking
-      await updateBooking(bookingId, {
-        bookings: updatedBookings
-      })
+      await updateBooking(bookingId, { bookings: updatedBookings })
       
       return {
         success: true,
@@ -445,9 +442,7 @@ export const useBookings = () => {
   // Update student payment status
   const updateStudentPaymentStatus = async (bookingId: string, studentId: string, paymentStatus: 'unpaid' | 'paid' | 'refunded') => {
     try {
-      const bookingsDB = await getBookingsDB()
-      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-      const existingBooking = await bookingsCRUD.findById(bookingId)
+      const { doc: existingBooking } = await findBookingDocAndDBById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
       
       // Find and update the specific student's booking
@@ -469,9 +464,7 @@ export const useBookings = () => {
       }
       
       // Update the booking
-      await updateBooking(bookingId, {
-        bookings: updatedBookings
-      })
+      await updateBooking(bookingId, { bookings: updatedBookings })
       
       return {
         success: true,
@@ -492,9 +485,7 @@ export const useBookings = () => {
     creditsUsed: number
   ) => {
     try {
-      const bookingsDB = await getBookingsDB()
-      const bookingsCRUD = usePouchCRUD<BookingDocument>(bookingsDB)
-      const existingBooking = await bookingsCRUD.findById(bookingId)
+      const { doc: existingBooking } = await findBookingDocAndDBById(bookingId)
       if (!existingBooking) throw new Error('Booking not found')
       
       // Find and update the specific student's booking
@@ -518,9 +509,7 @@ export const useBookings = () => {
       }
       
       // Update the booking
-      await updateBooking(bookingId, {
-        bookings: updatedBookings
-      })
+      await updateBooking(bookingId, { bookings: updatedBookings })
       
       return {
         success: true,

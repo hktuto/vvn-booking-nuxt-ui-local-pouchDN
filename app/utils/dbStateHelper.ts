@@ -103,6 +103,73 @@ export const useDatabase = (dbName: keyof typeof DB_INDEXES, requireAuth: boolea
   return { getDB, dbState }
 }
 
+// Year-sharded database helper for large collections (bookings, transactions)
+export const useYearShardedDatabase = (dbName: 'bookings' | 'transactions', requireAuth: boolean = true) => {
+  const { auth } = useAuth()
+  const dbMapState = useState<Record<number, PouchDB.Database>>(`${dbName}DBByYear`, () => ({} as Record<number, PouchDB.Database>))
+  const indexesCreatedMap = useState<Record<number, boolean>>(`${dbName}IndexesCreatedByYear`, () => ({} as Record<number, boolean>))
+
+  const getDBForYear = async (year: number) => {
+    if (requireAuth && (!auth.value.isAuthenticated || !auth.value.user)) {
+      throw new Error('Authentication required')
+    }
+
+    const dbNameToUse = `${auth.value.user?.id || 'anonymous'}_${dbName}_${year}`
+
+    if (!dbMapState.value[year]) {
+      dbMapState.value[year] = new PouchDB(dbNameToUse)
+    }
+
+    if (!indexesCreatedMap.value[year]) {
+      try {
+        const indexes = DB_INDEXES[dbName]
+        for (const index of indexes) {
+          await dbMapState.value[year].createIndex({ index })
+        }
+        indexesCreatedMap.value[year] = true
+      } catch (error) {
+        console.warn(`Some indexes for ${dbName} in ${year} might already exist:`, error)
+        indexesCreatedMap.value[year] = true
+      }
+    }
+
+    return dbMapState.value[year]
+  }
+
+  const getDBForDate = async (dateString: string) => {
+    const parsed = new Date(dateString)
+    const year = Number.isFinite(parsed.getTime()) ? parsed.getFullYear() : new Date().getFullYear()
+    return await getDBForYear(year)
+  }
+
+  const listShardYears = async (): Promise<number[]> => {
+    try {
+      if (process.client && (window.indexedDB as any)?.databases) {
+        const userId = auth.value.user?.id || ''
+        const prefix = `${userId}_${dbName}_`
+        const dbs: Array<{ name?: string }> = await (window.indexedDB as any).databases()
+        const years = dbs
+          .map(d => d.name || '')
+          .filter(name => name.startsWith(prefix))
+          .map(name => {
+            const parts = name.split('_')
+            const y = parseInt(parts[parts.length - 1], 10)
+            return Number.isFinite(y) ? y : undefined
+          })
+          .filter((y): y is number => typeof y === 'number')
+        if (years.length > 0) {
+          return Array.from(new Set(years)).sort((a, b) => b - a)
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to list shard years:', e)
+    }
+    return [new Date().getFullYear()]
+  }
+
+  return { getDBForYear, getDBForDate, listShardYears }
+}
+
 // Specific database helpers
 export const useUserDB = () => useDatabase('users', false) // No auth required for user registration
 export const useStudentDB = () => useDatabase('students')
@@ -112,4 +179,8 @@ export const useClassTypeDB = () => useDatabase('class_types')
 export const useClassDB = () => useDatabase('classes')
 export const useBookingDB = () => useDatabase('bookings')
 export const useTransactionDB = () => useDatabase('transactions')
-export const useLocationDB = () => useDatabase('locations') 
+export const useLocationDB = () => useDatabase('locations')
+
+// Year-sharded accessors for heavy collections
+export const useBookingDBByYear = () => useYearShardedDatabase('bookings')
+export const useTransactionDBByYear = () => useYearShardedDatabase('transactions') 

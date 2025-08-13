@@ -41,6 +41,25 @@ export const clearAllData = async () => {
         console.warn(`⚠️  Could not destroy database ${name}:`, error)
       }
     }
+    // Sweep year-sharded DBs for bookings and transactions
+    try {
+      if (process.client && (window.indexedDB as any)?.databases) {
+        const dbs: Array<{ name?: string }> = await (window.indexedDB as any).databases()
+        const prefixes = [`${userId}_bookings_`, `${userId}_transactions_`]
+        for (const dbInfo of dbs) {
+          const name = dbInfo.name || ''
+          if (prefixes.some(p => name.startsWith(p))) {
+            console.log(`🗑️  Deleting shard database: ${name}`)
+            const delReq = window.indexedDB.deleteDatabase(name)
+            delReq.onsuccess = () => console.log(`✅ Deleted shard database: ${name}`)
+            delReq.onerror = () => console.warn(`⚠️  Failed to delete shard database: ${name}`)
+            await new Promise(resolve => setTimeout(resolve, 50))
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to sweep shard databases:', e)
+    }
     
     console.log('All data cleared successfully')
     // Reload the page to reinitialize databases
