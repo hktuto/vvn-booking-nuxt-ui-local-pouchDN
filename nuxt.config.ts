@@ -44,6 +44,13 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt'
   ],
   
+  runtimeConfig: {
+    couchdbUrl: process.env.COUCHDB_URL || 'http://localhost:5984',
+    public: {
+      couchdbBaseUrl: process.env.NUXT_PUBLIC_COUCHDB_BASE_URL || 'http://localhost:5984'
+    }
+  },
+  
   // Color mode configuration
   colorMode: {
     preference: 'system', // default value of $colorMode.preference

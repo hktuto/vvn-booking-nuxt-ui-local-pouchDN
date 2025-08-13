@@ -19,6 +19,18 @@ export const useAuth = () => {
       if (storedUser && storedToken) {
         auth.value.user = JSON.parse(storedUser)
         auth.value.isAuthenticated = true
+
+        // Attempt to resume sync if remote credentials are available
+        try {
+          const remoteRaw = localStorage.getItem('remote_auth')
+          if (remoteRaw) {
+            const remote = JSON.parse(remoteRaw) as { username: string; password: string; baseUrl: string }
+            const { initializeLocalDatabases, startCouchSync } = useSync()
+            initializeLocalDatabases().then(() => startCouchSync(remote))
+          }
+        } catch (e) {
+          console.warn('Failed to resume sync:', e)
+        }
       }
     } catch (error) {
       console.error('Error loading auth state:', error)
@@ -47,20 +59,27 @@ export const useAuth = () => {
   // Login function
   const login = async (username: string, password: string) => {
     try {
-      const { authenticateUser } = useUsers()
-      const user = await authenticateUser(username, password)
-      
-      if (user) {
+      const runtimeConfig = useRuntimeConfig()
+      const resp = await $fetch<{ success: boolean; user?: any; baseUrl?: string }>('/api/auth/login', {
+        method: 'POST',
+        body: { username, password }
+      })
+
+      if (resp?.success) {
         const authUser = {
-          id: user._id,
-          username: user.username,
-          role: user.role,
-          display_name: user.display_name,
-          email: user.email,
-          phone: user.phone,
-          country_code: user.country_code,
-          settings: user.settings,
-          created_at: user.created_at
+          id: username, // use username as stable identifier
+          username,
+          role: resp.user?.role || 'teacher',
+          display_name: username,
+          email: '',
+          phone: '',
+          country_code: '',
+          settings: {
+            language: 'en',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            currency: 'USD'
+          },
+          created_at: new Date().toISOString()
         }
         
         const token = 'auth-token-' + Date.now()
@@ -68,10 +87,24 @@ export const useAuth = () => {
         // Store in localStorage
         localStorage.setItem('auth_user', JSON.stringify(authUser))
         localStorage.setItem('auth_token', token)
+        localStorage.setItem('remote_auth', JSON.stringify({
+          username,
+          password,
+          baseUrl: resp.baseUrl || (runtimeConfig.public as any).couchdbBaseUrl
+        }))
         
         // Update reactive state
         auth.value.user = authUser
         auth.value.isAuthenticated = true
+        
+        // Initialize local databases and start sync
+        const { initializeLocalDatabases, startCouchSync } = useSync()
+        await initializeLocalDatabases()
+        await startCouchSync({
+          username,
+          password,
+          baseUrl: resp.baseUrl || (runtimeConfig.public as any).couchdbBaseUrl
+        })
         
         // Redirect to dashboard
         await navigateTo('/')
@@ -93,6 +126,7 @@ export const useAuth = () => {
     // Clear localStorage
     localStorage.removeItem('auth_user')
     localStorage.removeItem('auth_token')
+    localStorage.removeItem('remote_auth')
     
     // Update reactive state
     auth.value.user = null
