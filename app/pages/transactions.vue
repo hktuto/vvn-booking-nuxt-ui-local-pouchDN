@@ -195,18 +195,6 @@
           :loading="loading"
           class="flex-1"
         >
-          <template #cell-actions="{ row }">
-            <div class="flex items-center gap-2">
-              <UButton
-                size="xs"
-                variant="soft"
-                color="success"
-                icon="i-simple-icons-whatsapp"
-                @click="openTransactionWhatsApp(row.original)"
-                :title="t('transaction.sendWhatsApp')"
-              />
-            </div>
-          </template>
         </UTable>
         </div>
         <!-- Empty State -->
@@ -225,6 +213,7 @@
 </template>
 
 <script setup lang="ts">
+import { UButton } from '#components'
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 const { t, locale } = useI18n()
 const { getRecentTransactions, getTransactionStats, getTransactionsByStudent, getTransactionsByDateRange } = useTransactions()
@@ -322,14 +311,18 @@ const columns = [
   {
     accessorKey: 'actions',
     header: t('transactions.actions'),
-    sortable: false
-  }
-  // TODO : add action later
-  // {
-  //   accessorKey: 'actions',
-  //   header: t('transactions.actions'),
-  //   sortable: false
-  // }
+    sortable: false,
+    cell: ({row}:any) => {
+      return h(UButton, {
+        size: 'xs',
+        variant: 'soft',
+        color: 'success',
+        icon: 'i-simple-icons-whatsapp',
+        onClick: () =>openTransactionWhatsApp(row.original)
+      })
+    }
+  },
+
 ]
 
 // Methods
