@@ -195,7 +195,6 @@
           :loading="loading"
           class="flex-1"
         >
-          
         </UTable>
         </div>
         <!-- Empty State -->
@@ -214,10 +213,15 @@
 </template>
 
 <script setup lang="ts">
+import { UButton } from '#components'
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 const { t, locale } = useI18n()
 const { getRecentTransactions, getTransactionStats, getTransactionsByStudent, getTransactionsByDateRange } = useTransactions()
-const { students, loadStudents } = useStudents()
+const { students, loadStudents, getStudentById } = useStudents()
+const { getPackageById } = usePackages()
+const { getClassById } = useClasses()
+const { getBookingById } = useBookings()
+const { showTransactionDetailsDialog } = useTransactionDetailsDialog()
 const { filters, hasActiveFilters, clearFilters: clearFiltersComposable } = useTransactionFilters()
 
 const df = new DateFormatter(locale.value === 'zh-Hant' ? 'zh-HK' : 'en-US', {
@@ -304,12 +308,21 @@ const columns = [
     header: t('transactions.status'),
     sortable: true
   },
-  // TODO : add action later
-  // {
-  //   accessorKey: 'actions',
-  //   header: t('transactions.actions'),
-  //   sortable: false
-  // }
+  {
+    accessorKey: 'actions',
+    header: t('transactions.actions'),
+    sortable: false,
+    cell: ({row}:any) => {
+      return h(UButton, {
+        size: 'xs',
+        variant: 'soft',
+        color: 'success',
+        icon: 'i-simple-icons-whatsapp',
+        onClick: () =>openTransactionWhatsApp(row.original)
+      })
+    }
+  },
+
 ]
 
 // Methods
@@ -372,6 +385,21 @@ const clearFilters = () => {
 
 const refreshTransactions = () => {
   loadTransactions()
+}
+
+const openTransactionWhatsApp = async (transaction: any) => {
+  try {
+    const [student, packageInfo, classInfo, bookingInfo] = await Promise.all([
+      getStudentById(transaction.student_id),
+      transaction.package_id ? getPackageById(transaction.package_id) : Promise.resolve(null),
+      transaction.class_id ? getClassById(transaction.class_id) : Promise.resolve(null),
+      transaction.booking_id ? getBookingById(transaction.booking_id) : Promise.resolve(null)
+    ])
+
+    await showTransactionDetailsDialog(transaction, student, packageInfo, classInfo, bookingInfo)
+  } catch (err) {
+    console.error('Failed to open WhatsApp dialog for transaction:', err)
+  }
 }
 
 const exportTransactions = async () => {
