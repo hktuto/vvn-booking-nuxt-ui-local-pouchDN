@@ -132,6 +132,7 @@ const navigation = [
   { to: '/bookings', label: 'navigation.bookings', icon: 'i-heroicons-calendar' },
   { to: '/locations', label: 'navigation.locations', icon: 'i-heroicons-map-pin' },
   { to: '/transactions', label: 'navigation.transactions', icon: 'i-heroicons-banknotes' },
+  { to: '/invite-codes', label: 'navigation.inviteCodes', icon: 'i-heroicons-ticket' },
   { to: '/settings', label: 'navigation.settings', icon: 'i-heroicons-cog-6-tooth' }
 ]
 

@@ -8,6 +8,16 @@
       </div>
       
       <UCard>
+        <UAlert
+          v-if="showRegistrationSuccess"
+          color="success"
+          variant="soft"
+          :title="$t('auth.registrationSuccess')"
+          :description="$t('auth.registrationSuccessDescription')"
+          icon="i-heroicons-check-circle"
+          class="mb-4"
+        />
+
         <UForm :state="form" :schema="loginSchema" class="space-y-4" @submit="handleLogin">
           <UFormField
             name="username"
@@ -77,17 +87,29 @@
       </div>
 
       <!-- Development Tools -->
-      <div class="text-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="text-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
         <UButton
-          @click="handleRemoveAllData"
+          @click="handleGenerateFirstInviteCode"
           variant="outline"
-          color="error"
+          color="primary"
           size="sm"
-          icon="i-heroicons-trash"
-          :loading="removingData"
+          icon="i-heroicons-ticket"
+          :loading="generatingInviteCode"
         >
-          {{ $t('common.removeAllData') }}
+          Generate First Invite Code
         </UButton>
+        <div class="block">
+          <UButton
+            @click="handleRemoveAllData"
+            variant="outline"
+            color="error"
+            size="sm"
+            icon="i-heroicons-trash"
+            :loading="removingData"
+          >
+            {{ $t('common.removeAllData') }}
+          </UButton>
+        </div>
       </div>
     </div>
   </div>
@@ -115,9 +137,14 @@ if (auth.value.isAuthenticated) {
 }
 
 const { t, locale } = useI18n()
+const route = useRoute()
 const loading = ref(false)
 const error = ref('')
 const removingData = ref(false)
+const generatingInviteCode = ref(false)
+
+// Check if user just registered successfully
+const showRegistrationSuccess = computed(() => route.query.registered === 'true')
 
 const form = reactive<LoginForm>({
   username: '',
@@ -141,6 +168,34 @@ const handleLogin = async (event: FormSubmitEvent<LoginForm>) => {
     console.error('Login error:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const handleGenerateFirstInviteCode = async () => {
+  generatingInviteCode.value = true
+  try {
+    const response = await fetch('/api/auth/invite-codes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        count: 1,
+        created_by: 'admin'
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const result = await response.json()
+    alert(`✅ First invite code generated: ${result.inviteCodes[0].code}`)
+  } catch (err: any) {
+    console.error('Error generating invite code:', err)
+    alert(`❌ Error: ${err.message}`)
+  } finally {
+    generatingInviteCode.value = false
   }
 }
 

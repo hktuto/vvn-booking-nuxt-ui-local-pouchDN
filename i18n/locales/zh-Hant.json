@@ -19,6 +19,7 @@
     "packages": "套餐管理",
     "transactions": "交易記錄",
     "reports": "報表",
+    "inviteCodes": "邀請碼管理",
     "settings": "設定"
   },
   "auth": {
@@ -49,7 +50,48 @@
     "phonePlaceholder": "請輸入您的電話號碼",
     "phoneRequired": "電話號碼為必填項",
     "countryCode": "國家代碼",
-    "countryCodePlaceholder": "選擇國家代碼"
+    "countryCodePlaceholder": "選擇國家代碼",
+    "inviteCode": "邀請碼",
+    "inviteCodePlaceholder": "請輸入您的邀請碼",
+    "inviteCodeRequired": "邀請碼為必填項",
+    "invalidInviteCode": "無效的邀請碼",
+    "inviteCodeUsed": "邀請碼已被使用",
+    "inviteCodeValidationError": "驗證邀請碼失敗",
+    "registrationSuccess": "帳戶創建成功",
+    "registrationSuccessDescription": "您的帳戶已成功創建。現在可以使用您的用戶名和密碼登入。"
+  },
+  "inviteCodes": {
+    "title": "邀請碼管理",
+    "description": "生成和管理新用戶註冊的邀請碼",
+    "generateNew": "生成新碼",
+    "generateFirst": "生成第一個碼",
+    "addMore": "新增更多",
+    "noCodes": "尚無邀請碼",
+    "noCodesDescription": "生成您的第一個邀請碼以開始使用",
+    "listTitle": "所有邀請碼",
+    "generateForm": {
+      "title": "生成新邀請碼",
+      "count": "碼數量",
+      "generate": "生成"
+    },
+    "columns": {
+      "code": "邀請碼",
+      "status": "狀態",
+      "createdAt": "創建時間",
+      "usedAt": "使用時間",
+      "usedBy": "使用者",
+      "actions": "操作"
+    },
+    "status": {
+      "active": "有效",
+      "used": "已使用"
+    },
+    "copyCode": "複製碼",
+    "copied": "碼已複製",
+    "copiedDescription": "邀請碼已複製到剪貼板",
+    "generatedSuccess": "碼已生成",
+    "generatedCount": "成功生成 {count} 個邀請碼",
+    "generationError": "生成失敗"
   },
   "student": {
     "students": "學生",
@@ -400,6 +442,9 @@
     "phone": {
       "required": "電話號碼為必填項",
       "invalid": "請輸入有效的電話號碼"
+    },
+    "inviteCode": {
+      "maxLength": "邀請碼不能超過20個字符"
     },
     "language": {
       "invalid": "請選擇有效的語言"

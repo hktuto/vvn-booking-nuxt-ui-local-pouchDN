@@ -46,8 +46,10 @@ export default defineNuxtConfig({
   
   runtimeConfig: {
     couchdbUrl: process.env.COUCHDB_URL || 'http://localhost:5984',
+    couchdbAdminUsername: process.env.COUCHDB_ADMIN_USERNAME || 'admin',
+    couchdbAdminPassword: process.env.COUCHDB_ADMIN_PASSWORD || 'admin',
     public: {
-      couchdbBaseUrl: process.env.NUXT_PUBLIC_COUCHDB_BASE_URL || 'http://localhost:5984'
+      couchdbBaseUrl: process.env.COUCHDB_URL || 'http://localhost:5984'
     }
   },
   

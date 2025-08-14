@@ -19,6 +19,7 @@
     "packages": "Packages",
     "transactions": "Transactions",
     "reports": "Reports",
+    "inviteCodes": "Invite Codes",
     "settings": "Settings"
   },
   "auth": {
@@ -49,7 +50,48 @@
     "phonePlaceholder": "Enter your phone number",
     "phoneRequired": "Phone number is required",
     "countryCode": "Country Code",
-    "countryCodePlaceholder": "Select country code"
+    "countryCodePlaceholder": "Select country code",
+    "inviteCode": "Invite Code",
+    "inviteCodePlaceholder": "Enter your invite code",
+    "inviteCodeRequired": "Invite code is required",
+    "invalidInviteCode": "Invalid invite code",
+    "inviteCodeUsed": "Invite code has already been used",
+    "inviteCodeValidationError": "Failed to validate invite code",
+    "registrationSuccess": "Account Created Successfully",
+    "registrationSuccessDescription": "Your account has been created. You can now log in with your username and password."
+  },
+  "inviteCodes": {
+    "title": "Invite Codes",
+    "description": "Generate and manage invite codes for new user registration",
+    "generateNew": "Generate New",
+    "generateFirst": "Generate First Code",
+    "addMore": "Add More",
+    "noCodes": "No invite codes",
+    "noCodesDescription": "Get started by generating your first invite code",
+    "listTitle": "All Invite Codes",
+    "generateForm": {
+      "title": "Generate New Invite Codes",
+      "count": "Number of codes",
+      "generate": "Generate"
+    },
+    "columns": {
+      "code": "Code",
+      "status": "Status",
+      "createdAt": "Created",
+      "usedAt": "Used At",
+      "usedBy": "Used By",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "used": "Used"
+    },
+    "copyCode": "Copy Code",
+    "copied": "Code Copied",
+    "copiedDescription": "Invite code has been copied to clipboard",
+    "generatedSuccess": "Codes Generated",
+    "generatedCount": "{count} invite codes generated successfully",
+    "generationError": "Generation Failed"
   },
   "student": {
     "students": "Students",
@@ -402,6 +444,9 @@
     "phone": {
       "required": "Phone number is required",
       "invalid": "Please enter a valid phone number"
+    },
+    "inviteCode": {
+      "maxLength": "Invite code must be less than 20 characters"
     },
     "language": {
       "invalid": "Please select a valid language"

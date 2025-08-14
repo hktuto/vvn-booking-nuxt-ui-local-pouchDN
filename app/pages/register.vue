@@ -39,6 +39,19 @@
           </UFormField>
 
           <UFormField
+            name="invite_code"
+            :label="$t('auth.inviteCode')"
+            required
+          >
+            <UInput
+              v-model="form.invite_code"
+              class="w-full"
+              :placeholder="$t('auth.inviteCodePlaceholder')"
+              autocomplete="off"
+            />
+          </UFormField>
+
+          <UFormField
             name="email"
             :label="$t('auth.email')"
           >
@@ -177,6 +190,7 @@ const error = ref('')
 const form = reactive<RegisterForm>({
   display_name: '',
   username: '',
+  invite_code: '',
   email: '',
   country_code: '+852', // Default to Hong Kong
   phone: '',
@@ -216,18 +230,22 @@ const handleRegister = async (event: FormSubmitEvent<RegisterForm>) => {
   error.value = ''
   
   try {
-    // Create user
-    await createUser({
-      username: event.data.username,
-      password: event.data.password,
-      email: event.data.email || undefined,
-      phone: event.data.phone,
-      country_code: event.data.country_code,
-      display_name: event.data.display_name,
-      settings: {
-        language: event.data.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        currency: 'USD'
+    // Register user with invite code validation
+    const response = await $fetch('/api/auth/register', {
+      method: 'POST',
+      body: {
+        username: event.data.username,
+        password: event.data.password,
+        email: event.data.email || undefined,
+        phone: event.data.phone,
+        country_code: event.data.country_code,
+        display_name: event.data.display_name,
+        invite_code: event.data.invite_code,
+        settings: {
+          language: event.data.language,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          currency: 'USD'
+        }
       }
     })
     

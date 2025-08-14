@@ -23,6 +23,9 @@ export const useAuthValidation = () => {
       .min(3, t('validation.username.minLength'))
       .max(50, t('validation.username.maxLength'))
       .regex(/^[a-zA-Z0-9_]+$/, t('validation.username.format')),
+    invite_code: z.string()
+      .min(1, t('auth.inviteCodeRequired'))
+      .max(20, t('validation.inviteCode.maxLength')),
     email: z.string()
       .email(t('validation.email.invalid'))
       .optional()
